@@ -1,0 +1,1329 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mich Cotizador ✨</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            coral: { 50: '#FFF1F0', 100: '#FFE0DE', 200: '#FFC2BD', 300: '#FF9D96', 400: '#E8716D', 500: '#D4605C', 600: '#B5423E', 700: '#8C302D' },
+            navy: { 50: '#E8EDF5', 100: '#C5D0E6', 400: '#4A6291', 500: '#2C4570', 600: '#1B2A4A', 700: '#111D33' },
+            cream: { 50: '#FFFDF9', 100: '#FFF8F0', 200: '#FFF0E0' }
+          },
+          fontFamily: { poppins: ['Poppins', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+  <style>
+    * { font-family: 'Poppins', sans-serif; }
+    .field-label { @apply block text-sm font-semibold text-navy-600 mb-1; }
+    .field-input { @apply w-full p-3 border-2 border-gray-200 rounded-xl text-sm focus:border-coral-400 focus:outline-none transition-colors bg-white; }
+    .field-select { @apply w-full p-3 border-2 border-gray-200 rounded-xl text-sm focus:border-coral-400 focus:outline-none transition-colors bg-white appearance-none; }
+    .field-check { @apply w-5 h-5 rounded accent-coral-400 cursor-pointer; }
+    .section-card { @apply bg-white rounded-2xl p-5 shadow-sm border border-gray-100 mb-4; }
+    .dest-section { display: none; }
+    .dest-section.active { display: block; }
+    .btn-primary { @apply w-full py-4 rounded-2xl font-bold text-white text-lg transition-all active:scale-[0.98]; background: linear-gradient(135deg, #E8716D 0%, #D4605C 100%); }
+    .btn-primary:hover { box-shadow: 0 8px 25px rgba(232,113,109,0.4); }
+    .btn-secondary { @apply w-full py-3 rounded-xl font-semibold text-sm transition-all active:scale-[0.98] border-2; }
+    .tab-btn { @apply px-5 py-2.5 rounded-xl text-sm font-semibold transition-all; }
+    .tab-btn.active { @apply bg-navy-600 text-white shadow-md; }
+    .tab-btn:not(.active) { @apply bg-gray-100 text-gray-500 hover:bg-gray-200; }
+    select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E"); background-position: right 0.75rem center; background-repeat: no-repeat; background-size: 1.25em 1.25em; padding-right: 2.5rem; }
+    textarea { @apply w-full p-4 border-2 border-gray-200 rounded-xl text-sm focus:border-coral-400 focus:outline-none transition-colors resize-y; font-family: 'Poppins', sans-serif; }
+    .itinerary-row { @apply flex items-center gap-2 mb-2; }
+    .price-group-card { @apply bg-gray-50 rounded-xl p-4 mb-3 border border-gray-200; }
+    #card-render { width: 420px; font-family: 'Poppins', sans-serif; }
+    .toast { @apply fixed top-4 left-1/2 -translate-x-1/2 bg-navy-600 text-white px-6 py-3 rounded-2xl shadow-lg text-sm font-semibold z-50 transition-all; }
+    .hotel-preview { @apply mt-2 rounded-xl overflow-hidden transition-all; }
+    .hotel-preview img { width: 100%; height: 140px; object-fit: cover; display: block; }
+    .hotel-preview .hotel-info { @apply p-3 text-xs; }
+    .hotel-preview .hotel-category { @apply inline-block px-2 py-0.5 rounded-full text-white text-xs font-semibold mr-2; }
+    .cat-value { background: #22c55e; }
+    .cat-moderate { background: #3b82f6; }
+    .cat-deluxe { background: #a855f7; }
+    .cat-premier { background: #f59e0b; }
+    .cat-preferred { background: #6366f1; }
+    .cat-prime { background: #14b8a6; }
+    .cat-disney { background: #e11d48; }
+    .cat-onsite { background: #0ea5e9; }
+    @media (max-width: 640px) {
+      #card-render { width: 360px; }
+    }
+  </style>
+</head>
+<body class="bg-cream-100 min-h-screen">
+
+<!-- Header -->
+<header class="bg-gradient-to-r from-coral-400 to-coral-500 text-white py-4 px-5 shadow-lg sticky top-0 z-40">
+  <div class="max-w-2xl mx-auto flex items-center justify-between">
+    <div>
+      <h1 class="text-xl font-extrabold tracking-tight">Mich Cotizador ✨</h1>
+      <p class="text-xs opacity-90 font-light">Generador de cotizaciones</p>
+    </div>
+    <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-lg">🏰</div>
+  </div>
+</header>
+
+<!-- Main -->
+<main class="max-w-2xl mx-auto px-4 py-6 pb-32">
+
+  <!-- Destination Selector -->
+  <div class="section-card">
+    <label class="field-label">✈️ Destino</label>
+    <select id="destino" class="field-select text-base font-semibold" onchange="onDestinoChange()">
+      <option value="">— Selecciona un destino —</option>
+      <option value="orlando">🏰 Disney World · Orlando</option>
+      <option value="universal">🎢 Universal Studios · Orlando</option>
+      <option value="california">🎡 Disneyland · California</option>
+      <option value="paris">🗼 Disneyland · Paris</option>
+      <option value="crucero-disney">🚢 Crucero Disney</option>
+      <option value="crucero-otros">🛳 Crucero Otras Navieras</option>
+      <option value="nickelodeon">🧽 Nickelodeon Resort</option>
+      <option value="xcaret">🌴 Xcaret</option>
+    </select>
+    <!-- Destination image preview -->
+    <div id="dest-image-preview" class="mt-3 rounded-xl overflow-hidden" style="display:none;">
+      <img id="dest-image" src="" alt="" style="width:100%;height:160px;object-fit:cover;display:block;" onerror="this.parentElement.style.display='none'">
+    </div>
+  </div>
+
+  <!-- Form (hidden until destination selected) -->
+  <div id="form-container" style="display:none;">
+
+    <!-- Common Fields: Client -->
+    <div class="section-card">
+      <h2 class="text-sm font-bold text-navy-600 mb-3 flex items-center gap-2">👤 Datos del cliente</h2>
+      <input id="nombre" type="text" placeholder="Nombre del cliente" class="field-input mb-3">
+    </div>
+
+    <!-- Common Fields: Travelers -->
+    <div class="section-card">
+      <h2 class="text-sm font-bold text-navy-600 mb-3 flex items-center gap-2">👥 Viajeros</h2>
+      <div class="grid grid-cols-2 gap-3 mb-3">
+        <div>
+          <label class="field-label">Adultos</label>
+          <input id="adultos" type="number" min="1" value="2" class="field-input">
+        </div>
+        <div>
+          <label class="field-label" id="label-habitaciones">Habitaciones</label>
+          <input id="habitaciones" type="number" min="1" value="1" class="field-input">
+        </div>
+      </div>
+      <p class="text-xs font-semibold text-gray-500 mb-2 mt-3">Menores de edad</p>
+      <div class="grid grid-cols-3 gap-3">
+        <div>
+          <label class="text-xs text-gray-500">0-2 años</label>
+          <input id="menores02" type="number" min="0" value="0" class="field-input">
+        </div>
+        <div>
+          <label class="text-xs text-gray-500">3-9 años</label>
+          <input id="menores39" type="number" min="0" value="0" class="field-input">
+        </div>
+        <div>
+          <label class="text-xs text-gray-500">10-17 años</label>
+          <input id="menores1017" type="number" min="0" value="0" class="field-input">
+        </div>
+      </div>
+    </div>
+
+    <!-- Common Fields: Dates -->
+    <div class="section-card">
+      <h2 class="text-sm font-bold text-navy-600 mb-3 flex items-center gap-2">📅 Fechas</h2>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="field-label" id="label-checkin">Check in</label>
+          <input id="checkin" type="date" class="field-input">
+        </div>
+        <div>
+          <label class="field-label" id="label-checkout">Check out</label>
+          <input id="checkout" type="date" class="field-input">
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== DESTINATION-SPECIFIC SECTIONS ==================== -->
+
+    <!-- DISNEY WORLD ORLANDO -->
+    <div id="campos-orlando" class="dest-section">
+      <div class="section-card">
+        <h2 class="text-sm font-bold text-navy-600 mb-3">🏰 Detalles Disney World</h2>
+        <label class="field-label">Hotel / Hospedaje</label>
+        <select id="orl-hotel" class="field-select mb-1" onchange="showHotelPreview('orl')">
+          <option value="">— Selecciona un hotel —</option>
+          <optgroup label="⭐ Value Resorts">
+            <option>Disney's All-Star Movies Resort</option>
+            <option>Disney's All-Star Music Resort</option>
+            <option>Disney's All-Star Sports Resort</option>
+            <option>Disney's Art of Animation Resort</option>
+            <option>Disney's Pop Century Resort</option>
+          </optgroup>
+          <optgroup label="⭐⭐ Moderate Resorts">
+            <option>Disney's Caribbean Beach Resort</option>
+            <option>Disney's Coronado Springs Resort</option>
+            <option>Disney's Port Orleans - French Quarter</option>
+            <option>Disney's Port Orleans - Riverside</option>
+            <option>Disney's Fort Wilderness Cabins</option>
+          </optgroup>
+          <optgroup label="⭐⭐⭐ Deluxe Resorts">
+            <option>Disney's Grand Floridian Resort &amp; Spa</option>
+            <option>Disney's Contemporary Resort</option>
+            <option>Disney's Polynesian Village Resort</option>
+            <option>Disney's Animal Kingdom Lodge</option>
+            <option>Disney's Wilderness Lodge</option>
+            <option>Disney's BoardWalk Inn</option>
+            <option>Disney's Beach Club Resort</option>
+            <option>Disney's Yacht Club Resort</option>
+            <option>Disney's Riviera Resort</option>
+          </optgroup>
+          <optgroup label="🏨 Otros hoteles en propiedad">
+            <option>Walt Disney World Swan</option>
+            <option>Walt Disney World Dolphin</option>
+            <option>Walt Disney World Swan Reserve</option>
+            <option>Four Seasons Resort Orlando</option>
+          </optgroup>
+        </select>
+        <div id="orl-hotel-preview" class="hotel-preview"></div>
+        <div class="grid grid-cols-2 gap-3 mb-3 mt-3">
+          <div>
+            <label class="field-label">Modalidad entradas</label>
+            <select id="orl-modalidad" class="field-select">
+              <option>1 parque x día</option>
+              <option>Park Hopper</option>
+              <option>Park Hopper Plus</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label">Días de entradas</label>
+            <input id="orl-dias" type="number" min="1" value="4" class="field-input">
+          </div>
+        </div>
+        <div class="flex items-center gap-3 mb-3">
+          <input id="orl-comidas" type="checkbox" class="field-check">
+          <label for="orl-comidas" class="text-sm cursor-pointer">🍔 Incluir plan de comidas rápidas</label>
+        </div>
+        <div id="orl-comidas-detail" style="display:none;" class="ml-8 mb-3">
+          <input id="orl-comidas-desc" type="text" value="2 comidas + 1 snack x persona x noche" placeholder="Detalle del plan" class="field-input text-xs">
+        </div>
+        <div class="flex items-center gap-3">
+          <input id="orl-memory" type="checkbox" class="field-check">
+          <label for="orl-memory" class="text-sm cursor-pointer">📸 Ofrecer Memory Maker ($185 USD)</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- UNIVERSAL STUDIOS ORLANDO -->
+    <div id="campos-universal" class="dest-section">
+      <div class="section-card">
+        <h2 class="text-sm font-bold text-navy-600 mb-3">🎢 Detalles Universal Studios</h2>
+        <label class="field-label">Hotel / Hospedaje</label>
+        <select id="uni-hotel" class="field-select mb-1" onchange="showHotelPreview('uni')">
+          <option value="">— Selecciona un hotel —</option>
+          <optgroup label="⭐ Value Resorts">
+            <option>Universal's Endless Summer - Surfside Inn</option>
+            <option>Universal's Endless Summer - Dockside Inn</option>
+          </optgroup>
+          <optgroup label="⭐⭐ Prime Value Resorts">
+            <option>Universal's Cabana Bay Beach Resort</option>
+            <option>Universal's Aventura Hotel</option>
+            <option>Universal Stella Nova Resort</option>
+            <option>Universal Terra Luna Resort</option>
+          </optgroup>
+          <optgroup label="⭐⭐⭐ Preferred Resorts">
+            <option>Loews Sapphire Falls Resort</option>
+            <option>Loews Royal Pacific Resort</option>
+            <option>Hard Rock Hotel Orlando</option>
+            <option>Loews Portofino Bay Hotel</option>
+            <option>Universal's Grand Helios Hotel</option>
+          </optgroup>
+        </select>
+        <div id="uni-hotel-preview" class="hotel-preview"></div>
+        <div class="grid grid-cols-2 gap-3 mb-3 mt-3">
+          <div>
+            <label class="field-label">Modalidad entradas</label>
+            <select id="uni-modalidad" class="field-select">
+              <option>Park-to-Park</option>
+              <option>1 parque x día</option>
+              <option>3-Park Explorer</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label">Días de entradas</label>
+            <input id="uni-dias" type="number" min="1" value="2" class="field-input">
+          </div>
+        </div>
+        <p class="text-xs font-semibold text-gray-500 mb-2">Parques incluidos</p>
+        <div class="space-y-2 mb-3">
+          <label class="flex items-center gap-2 text-sm"><input type="checkbox" id="uni-isla" class="field-check" checked> Isla de la Aventura</label>
+          <label class="flex items-center gap-2 text-sm"><input type="checkbox" id="uni-studios" class="field-check" checked> Universal Studios</label>
+          <label class="flex items-center gap-2 text-sm"><input type="checkbox" id="uni-epic" class="field-check"> + 1 día de EPIC Universe</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- DISNEYLAND CALIFORNIA -->
+    <div id="campos-california" class="dest-section">
+      <div class="section-card">
+        <h2 class="text-sm font-bold text-navy-600 mb-3">🎡 Detalles Disneyland California</h2>
+        <label class="field-label">Hotel / Hospedaje</label>
+        <select id="cal-hotel" class="field-select mb-1" onchange="showHotelPreview('cal')">
+          <option value="">— Selecciona un hotel —</option>
+          <optgroup label="🏰 Hoteles Disney en propiedad">
+            <option>Disneyland Hotel</option>
+            <option>Disney's Grand Californian Hotel &amp; Spa</option>
+            <option>Pixar Place Hotel</option>
+          </optgroup>
+          <optgroup label="🏨 Good Neighbor Hotels">
+            <option>JW Marriott Anaheim Resort</option>
+            <option>Hyatt Regency Orange County</option>
+            <option>Courtyard by Marriott Anaheim</option>
+            <option>Howard Johnson by Wyndham Anaheim</option>
+            <option>Fairfield Inn Anaheim Resort</option>
+            <option>Best Western Plus Park Place Inn</option>
+            <option>Desert Palms Hotel &amp; Suites</option>
+          </optgroup>
+        </select>
+        <div id="cal-hotel-preview" class="hotel-preview"></div>
+        <div class="grid grid-cols-2 gap-3 mb-3 mt-3">
+          <div>
+            <label class="field-label">Modalidad entradas</label>
+            <input id="cal-modalidad" type="text" value="1 parque x día + Lightning Lane" class="field-input">
+          </div>
+          <div>
+            <label class="field-label">Días de entradas</label>
+            <input id="cal-dias" type="number" min="1" value="2" class="field-input">
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <input id="cal-starwars" type="checkbox" class="field-check">
+          <label for="cal-starwars" class="text-sm cursor-pointer">🪐 Incluir nota Star Wars Nite</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- DISNEYLAND PARIS -->
+    <div id="campos-paris" class="dest-section">
+      <div class="section-card">
+        <h2 class="text-sm font-bold text-navy-600 mb-3">🗼 Detalles Disneyland Paris</h2>
+        <label class="field-label">Hotel / Hospedaje</label>
+        <select id="par-hotel" class="field-select mb-1" onchange="showHotelPreview('par')">
+          <option value="">— Selecciona un hotel —</option>
+          <optgroup label="⭐⭐⭐ Hoteles Deluxe">
+            <option>Disneyland Hotel</option>
+            <option>Disney's Hotel New York – The Art of Marvel</option>
+          </optgroup>
+          <optgroup label="⭐⭐ Hoteles Premium">
+            <option>Disney Newport Bay Club</option>
+            <option>Disney Sequoia Lodge</option>
+          </optgroup>
+          <optgroup label="⭐ Hoteles Estándar">
+            <option>Disney Hotel Cheyenne</option>
+            <option>Disney Hotel Santa Fe</option>
+          </optgroup>
+          <optgroup label="🏕 Otros">
+            <option>Disney's Davy Crockett Ranch</option>
+            <option>Villages Nature Paris</option>
+            <option>Explorers Hotel</option>
+          </optgroup>
+        </select>
+        <div id="par-hotel-preview" class="hotel-preview"></div>
+        <p class="text-xs text-gray-400 italic mt-2">* Entradas válidas por toda la estancia y desayuno incluido se agregan automáticamente</p>
+      </div>
+    </div>
+
+    <!-- CRUCERO DISNEY -->
+    <div id="campos-crucero-disney" class="dest-section">
+      <div class="section-card">
+        <h2 class="text-sm font-bold text-navy-600 mb-3">🚢 Detalles Crucero Disney</h2>
+        <label class="field-label">Barco</label>
+        <select id="crd-barco" class="field-select mb-2" onchange="showShipPreview()">
+          <option>Disney Magic</option>
+          <option>Disney Wonder</option>
+          <option>Disney Dream</option>
+          <option>Disney Fantasy</option>
+          <option>Disney Wish</option>
+          <option>Disney Treasure</option>
+        </select>
+        <div id="crd-ship-preview" class="hotel-preview mb-3"></div>
+        <label class="field-label">Itinerario</label>
+        <div id="crd-itinerario-container" class="mb-3"></div>
+        <button type="button" onclick="addItineraryDay('crd')" class="text-coral-400 text-sm font-semibold mb-3 flex items-center gap-1">
+          <span class="text-lg">+</span> Agregar día
+        </button>
+        <div class="grid grid-cols-2 gap-3 mb-3">
+          <div>
+            <label class="field-label">Tipo de camarote</label>
+            <select id="crd-camarote" class="field-select">
+              <option>Interior</option>
+              <option>Vista al mar</option>
+              <option>Balcón</option>
+              <option>Suite</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label">Camarotes</label>
+            <input id="crd-camarotes" type="number" min="1" value="1" class="field-input">
+          </div>
+        </div>
+        <label class="field-label">Promoción (opcional)</label>
+        <input id="crd-promo" type="text" placeholder="Ej: 20% DE DESCUENTO + $250 USD DE CRÉDITO" class="field-input mb-3">
+      </div>
+    </div>
+
+    <!-- CRUCERO OTRAS NAVIERAS -->
+    <div id="campos-crucero-otros" class="dest-section">
+      <div class="section-card">
+        <h2 class="text-sm font-bold text-navy-600 mb-3">🛳 Detalles Crucero</h2>
+        <label class="field-label">Naviera / Barco</label>
+        <input id="cro-barco" type="text" placeholder="Ej: Royal Caribbean - Icon of the Seas" class="field-input mb-3">
+        <label class="field-label">Itinerario</label>
+        <div id="cro-itinerario-container" class="mb-3"></div>
+        <button type="button" onclick="addItineraryDay('cro')" class="text-coral-400 text-sm font-semibold mb-3 flex items-center gap-1">
+          <span class="text-lg">+</span> Agregar día
+        </button>
+        <label class="field-label mt-2">Grupos de precios</label>
+        <div id="cro-precios-container" class="mb-3"></div>
+        <button type="button" onclick="addPriceGroup()" class="text-coral-400 text-sm font-semibold mb-3 flex items-center gap-1">
+          <span class="text-lg">+</span> Agregar grupo de precios
+        </button>
+      </div>
+    </div>
+
+    <!-- NICKELODEON -->
+    <div id="campos-nickelodeon" class="dest-section">
+      <div class="section-card">
+        <h2 class="text-sm font-bold text-navy-600 mb-3">🧽 Detalles Nickelodeon</h2>
+        <div id="nick-dest-preview" class="hotel-preview mb-3"></div>
+        <p class="text-xs text-gray-400 italic">* Hospedaje: Nickelodeon Resort · Riviera Maya · TODO INCLUIDO</p>
+        <p class="text-xs text-gray-400 italic mt-1">* Las inclusiones se agregan automáticamente al mensaje</p>
+      </div>
+    </div>
+
+    <!-- XCARET -->
+    <div id="campos-xcaret" class="dest-section">
+      <div class="section-card">
+        <h2 class="text-sm font-bold text-navy-600 mb-3">🌴 Detalles Xcaret</h2>
+        <label class="field-label">Hotel</label>
+        <select id="xca-hotel" class="field-select mb-1" onchange="showHotelPreview('xca')">
+          <option>Hotel Xcaret México</option>
+          <option>Hotel Xcaret Arte</option>
+          <option>La Casa de la Playa</option>
+        </select>
+        <div id="xca-hotel-preview" class="hotel-preview"></div>
+      </div>
+    </div>
+
+    <!-- ==================== PRICE SECTION ==================== -->
+    <div id="price-section" class="section-card">
+      <h2 class="text-sm font-bold text-navy-600 mb-3 flex items-center gap-2">💰 Precio</h2>
+      <label class="field-label">Precio total USD</label>
+      <div class="relative mb-3">
+        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-semibold">$</span>
+        <input id="precio" type="text" placeholder="2,717.38" class="field-input pl-8">
+        <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-semibold">USD</span>
+      </div>
+      <label class="field-label">Notas adicionales (opcional)</label>
+      <textarea id="notas" rows="2" placeholder="Cualquier información extra que quieras agregar..." class="field-input"></textarea>
+    </div>
+
+    <!-- Generate Button -->
+    <button onclick="generarMensaje()" class="btn-primary mb-6">
+      ✨ Generar Cotización
+    </button>
+
+    <!-- ==================== PREVIEW SECTION ==================== -->
+    <div id="preview-section" style="display:none;">
+      <div class="flex gap-2 mb-4">
+        <button onclick="switchTab('texto')" id="tab-texto" class="tab-btn active">📋 Texto</button>
+        <button onclick="switchTab('tarjeta')" id="tab-tarjeta" class="tab-btn">🎨 Tarjeta</button>
+      </div>
+
+      <!-- Text Preview -->
+      <div id="panel-texto">
+        <div class="section-card !p-0 overflow-hidden">
+          <div class="bg-[#ECE5DD] p-3 rounded-t-2xl">
+            <p class="text-xs text-center text-gray-500 font-medium">Vista previa del mensaje</p>
+          </div>
+          <div class="bg-[#ECE5DD] px-3 pb-4">
+            <div class="bg-white rounded-xl p-4 shadow-sm max-w-[85%]">
+              <textarea id="mensaje-preview" rows="20" class="w-full border-0 outline-none text-sm resize-y bg-transparent leading-relaxed" style="font-family: 'Poppins', sans-serif;"></textarea>
+            </div>
+          </div>
+        </div>
+        <button onclick="copiarTexto()" class="btn-secondary border-coral-400 text-coral-500 hover:bg-coral-50 mt-3 flex items-center justify-center gap-2">
+          📋 Copiar texto para WhatsApp
+        </button>
+      </div>
+
+      <!-- Card Preview -->
+      <div id="panel-tarjeta" style="display:none;">
+        <div class="flex justify-center mb-4">
+          <div id="card-wrapper" class="inline-block">
+            <div id="card-render"></div>
+          </div>
+        </div>
+        <button onclick="descargarImagen()" class="btn-secondary border-coral-400 text-coral-500 hover:bg-coral-50 flex items-center justify-center gap-2">
+          📷 Descargar como imagen
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /form-container -->
+</main>
+
+<!-- Toast notification -->
+<div id="toast" class="toast opacity-0 pointer-events-none">Copiado ✅</div>
+
+<script>
+// ========================================================
+// CONFIGURATION
+// ========================================================
+const AGENT_TITLES = {
+  'orlando': 'Agente Disney✨',
+  'universal': 'Agente Universal✨',
+  'california': 'Agente Disney✨',
+  'paris': 'Agente Disney✨',
+  'crucero-disney': 'Agente Disney✨',
+  'crucero-otros': 'Agente de viajes',
+  'nickelodeon': 'Agente de viajes',
+  'xcaret': 'Agente de viajes'
+};
+
+const CONDITIONS = {
+  'orlando': '✅ El paquete se aparta con $200 USD y el resto se puede ir pagando poco a poco hasta liquidarlo 1 mes antes de la fecha del check in. Cualquier modificación o cancelación al paquete se puede realizar antes de la fecha límite de pago.',
+  'universal': '✅ El paquete se aparta con $50 USD x persona y el resto se puede ir pagando poco a poco hasta liquidarlo 45 días antes de la fecha del check in. Cualquier modificación o cancelación al paquete se puede realizar antes de la fecha límite de pago.',
+  'california': '✅ El paquete se aparta con $200 USD y el resto se puede ir pagando poco a poco hasta liquidarlo 1 mes antes de la fecha del check in. Cualquier modificación o cancelación al paquete se puede realizar antes de la fecha límite de pago.',
+  'paris': '',
+  'crucero-disney': '✅ El apartado de cada camarote se hace realizando un pago por el 10% del total y el resto se puede ir pagando poco a poco hasta liquidarlo 3 meses antes de la fecha de embarque.\n🛂 El cliente se debe de hacer responsable de tener todos sus papeles en tiempo y forma para poder viajar. Favor de verificar que tengan su visa americana vigente y si es el caso, cualquier otro documento necesario para entrar al país destino.',
+  'crucero-otros': '✅ El apartado de cada camarote se hace realizando un pago por el 20% del total y el resto se puede ir pagando poco a poco hasta liquidarlo 3 meses antes de la fecha de embarque.\n🛂 El cliente se debe de hacer responsable de tener todos sus papeles en tiempo y forma para poder viajar. Favor de verificar que tengan su visa americana vigente y si es el caso, cualquier otro documento necesario para entrar al país destino.',
+  'nickelodeon': 'Se puede apartar con $200 USD e irlo pagando poco a poco.',
+  'xcaret': 'Se puede apartar con $200 USD e irlo pagando poco a poco.'
+};
+
+const INCLUSIONS_NICK = `*Tu tarifa incluye*
+🍔 Alimentos
+🍹 Bebidas
+🍽 Restaurantes temáticos
+📸 Encuentros con personajes
+🎤 Entretenimiento todas las noches
+🎟 Entradas ilimitadas al parque acuático "AquaNick"
+🚗 Transporte redondo del aeropuerto de Cancún al hotel`;
+
+const INCLUSIONS_XCARET = `*Tu tarifa incluye*
+🍔 Alimentos
+🍹 Bebidas
+🍽 Restaurantes
+🎤 Entretenimiento
+🎟 Entradas a todos los parques de Xcaret
+🏝 Actividades
+🚗 Transporte redondo del aeropuerto de Cancún al hotel`;
+
+const INCLUSIONS_CRUISE_DISNEY = `*🌊 Tu tarifa incluye:*
+
+🍽️ Comidas ilimitadas
+Restaurantes temáticos y servicio a la habitación
+Snacks, cafeterías y helado 24/7
+
+🥤Bebidas básicas
+Sodas, Café, Jugo, Té
+
+🎭 Entretenimiento diario
+Shows estilo Broadway
+Cine a bordo (películas Disney, Marvel, Pixar, Star Wars)
+Fiestas en cubierta y fuegos artificiales
+
+👸 Encuentros con personajes
+Princesas, Mickey y sus amigos, Marvel y más
+
+🏊 Diversión en el agua
+Toboganes, piscinas para niños, familias y adultos
+Splash zones y AquaDuck (en barcos selectos)
+
+🎨 Clubes infantiles y juveniles
+Actividades guiadas por edades (niños, tweens y teens)
+Personal capacitado y espacios mágicos
+
+🥂 Zonas solo para adultos
+Piscina, jacuzzis, bares, discoteca, spa y restaurantes exclusivos
+
+🏝️ Paradas en islas privadas
+Castaway Cay o Lookout Cay at Lighthouse Point
+Todo incluido en la isla: comida, actividades y playa
+
+💫 Magia y servicio Disney en todo momento
+Atención de lujo, limpieza impecable y detalles encantadores`;
+
+// ========================================================
+// HOTEL DATA WITH IMAGES
+// ========================================================
+const HOTEL_IMAGES = {
+  // Disney World Orlando
+  "Disney's All-Star Movies Resort": { cat: 'Value', color: 'cat-value', img: 'https://cdn1.parksmedia.wdprapps.disney.com/resize/mwImage/1/630/354/75/dam/wdpro-assets/gallery/resorts/all-star-movies-resort/all-star-movies-702702702702702-702702702-702-702-702-702-702-702-702-702-702-702-702-702.jpg' },
+  "Disney's All-Star Music Resort": { cat: 'Value', color: 'cat-value', img: 'https://cdn1.parksmedia.wdprapps.disney.com/resize/mwImage/1/630/354/75/dam/wdpro-assets/gallery/resorts/all-star-music-resort/all-star-music-702-702-702-702.jpg' },
+  "Disney's All-Star Sports Resort": { cat: 'Value', color: 'cat-value', img: 'https://cdn1.parksmedia.wdprapps.disney.com/resize/mwImage/1/630/354/75/dam/wdpro-assets/gallery/resorts/all-star-sports-702-702-702-702.jpg' },
+  "Disney's Art of Animation Resort": { cat: 'Value', color: 'cat-value', img: 'https://cdn1.parksmedia.wdprapps.disney.com/resize/mwImage/1/630/354/75/dam/wdpro-assets/gallery/resorts/art-of-animation-702-702-702-702.jpg' },
+  "Disney's Pop Century Resort": { cat: 'Value', color: 'cat-value', img: 'https://cdn1.parksmedia.wdprapps.disney.com/resize/mwImage/1/630/354/75/dam/wdpro-assets/gallery/resorts/pop-century-702-702-702-702.jpg' },
+  "Disney's Caribbean Beach Resort": { cat: 'Moderate', color: 'cat-moderate', img: 'https://cdn1.parksmedia.wdprapps.disney.com/resize/mwImage/1/630/354/75/dam/wdpro-assets/gallery/resorts/caribbean-beach-702-702-702-702.jpg' },
+  "Disney's Coronado Springs Resort": { cat: 'Moderate', color: 'cat-moderate' },
+  "Disney's Port Orleans - French Quarter": { cat: 'Moderate', color: 'cat-moderate' },
+  "Disney's Port Orleans - Riverside": { cat: 'Moderate', color: 'cat-moderate' },
+  "Disney's Fort Wilderness Cabins": { cat: 'Moderate', color: 'cat-moderate' },
+  "Disney's Grand Floridian Resort & Spa": { cat: 'Deluxe', color: 'cat-deluxe' },
+  "Disney's Contemporary Resort": { cat: 'Deluxe', color: 'cat-deluxe' },
+  "Disney's Polynesian Village Resort": { cat: 'Deluxe', color: 'cat-deluxe' },
+  "Disney's Animal Kingdom Lodge": { cat: 'Deluxe', color: 'cat-deluxe' },
+  "Disney's Wilderness Lodge": { cat: 'Deluxe', color: 'cat-deluxe' },
+  "Disney's BoardWalk Inn": { cat: 'Deluxe', color: 'cat-deluxe' },
+  "Disney's Beach Club Resort": { cat: 'Deluxe', color: 'cat-deluxe' },
+  "Disney's Yacht Club Resort": { cat: 'Deluxe', color: 'cat-deluxe' },
+  "Disney's Riviera Resort": { cat: 'Deluxe', color: 'cat-deluxe' },
+  "Walt Disney World Swan": { cat: 'On-site', color: 'cat-onsite' },
+  "Walt Disney World Dolphin": { cat: 'On-site', color: 'cat-onsite' },
+  "Walt Disney World Swan Reserve": { cat: 'On-site', color: 'cat-onsite' },
+  "Four Seasons Resort Orlando": { cat: 'Premier', color: 'cat-premier' },
+  // Universal Orlando
+  "Universal's Endless Summer - Surfside Inn": { cat: 'Value', color: 'cat-value' },
+  "Universal's Endless Summer - Dockside Inn": { cat: 'Value', color: 'cat-value' },
+  "Universal's Cabana Bay Beach Resort": { cat: 'Prime Value', color: 'cat-prime' },
+  "Universal's Aventura Hotel": { cat: 'Prime Value', color: 'cat-prime' },
+  "Universal Stella Nova Resort": { cat: 'Prime Value', color: 'cat-prime' },
+  "Universal Terra Luna Resort": { cat: 'Prime Value', color: 'cat-prime' },
+  "Loews Sapphire Falls Resort": { cat: 'Preferred', color: 'cat-preferred' },
+  "Loews Royal Pacific Resort": { cat: 'Preferred', color: 'cat-preferred' },
+  "Hard Rock Hotel Orlando": { cat: 'Preferred', color: 'cat-preferred' },
+  "Loews Portofino Bay Hotel": { cat: 'Preferred', color: 'cat-preferred' },
+  "Universal's Grand Helios Hotel": { cat: 'Preferred', color: 'cat-preferred' },
+  // Disneyland California
+  "Disneyland Hotel": { cat: 'Disney', color: 'cat-disney' },
+  "Disney's Grand Californian Hotel & Spa": { cat: 'Disney', color: 'cat-disney' },
+  "Pixar Place Hotel": { cat: 'Disney', color: 'cat-disney' },
+  "JW Marriott Anaheim Resort": { cat: 'Good Neighbor', color: 'cat-onsite' },
+  "Hyatt Regency Orange County": { cat: 'Good Neighbor', color: 'cat-onsite' },
+  "Courtyard by Marriott Anaheim": { cat: 'Good Neighbor', color: 'cat-onsite' },
+  "Howard Johnson by Wyndham Anaheim": { cat: 'Good Neighbor', color: 'cat-onsite' },
+  "Fairfield Inn Anaheim Resort": { cat: 'Good Neighbor', color: 'cat-onsite' },
+  "Best Western Plus Park Place Inn": { cat: 'Good Neighbor', color: 'cat-onsite' },
+  "Desert Palms Hotel & Suites": { cat: 'Good Neighbor', color: 'cat-onsite' },
+  // Disneyland Paris
+  "Disney's Hotel New York – The Art of Marvel": { cat: 'Deluxe', color: 'cat-deluxe' },
+  "Disney Newport Bay Club": { cat: 'Premium', color: 'cat-moderate' },
+  "Disney Sequoia Lodge": { cat: 'Premium', color: 'cat-moderate' },
+  "Disney Hotel Cheyenne": { cat: 'Estándar', color: 'cat-value' },
+  "Disney Hotel Santa Fe": { cat: 'Estándar', color: 'cat-value' },
+  "Disney's Davy Crockett Ranch": { cat: 'Otro', color: 'cat-onsite' },
+  "Villages Nature Paris": { cat: 'Otro', color: 'cat-onsite' },
+  "Explorers Hotel": { cat: 'Otro', color: 'cat-onsite' },
+  // Xcaret
+  "Hotel Xcaret México": { cat: '5 Diamantes', color: 'cat-deluxe' },
+  "Hotel Xcaret Arte": { cat: '5 Diamantes', color: 'cat-premier' },
+  "La Casa de la Playa": { cat: 'Adults Only', color: 'cat-preferred' },
+};
+
+const DEST_IMAGES = {
+  'orlando': 'https://images.unsplash.com/photo-1597466599360-3b9775841aec?w=800&h=400&fit=crop&q=80',
+  'universal': 'https://images.unsplash.com/photo-1581084324659-bc65fa92df5c?w=800&h=400&fit=crop&q=80',
+  'california': 'https://images.unsplash.com/photo-1587162146766-e06b1189b907?w=800&h=400&fit=crop&q=80',
+  'paris': 'https://images.unsplash.com/photo-1595577248023-3ecf7637d6bb?w=800&h=400&fit=crop&q=80',
+  'crucero-disney': 'https://images.unsplash.com/photo-1548574505-5e239809ee19?w=800&h=400&fit=crop&q=80',
+  'crucero-otros': 'https://images.unsplash.com/photo-1599640842225-85d111c60e6b?w=800&h=400&fit=crop&q=80',
+  'nickelodeon': 'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=800&h=400&fit=crop&q=80',
+  'xcaret': 'https://images.unsplash.com/photo-1552074284-5e88ef1aef18?w=800&h=400&fit=crop&q=80'
+};
+
+const DEST_GRADIENTS = {
+  'orlando': 'linear-gradient(135deg, #1a1a6e 0%, #4b2583 50%, #c33f91 100%)',
+  'universal': 'linear-gradient(135deg, #003366 0%, #0066cc 50%, #00ccff 100%)',
+  'california': 'linear-gradient(135deg, #ff6b35 0%, #ff9a56 50%, #ffd700 100%)',
+  'paris': 'linear-gradient(135deg, #2d1b69 0%, #5b3a8c 50%, #e8716d 100%)',
+  'crucero-disney': 'linear-gradient(135deg, #001a33 0%, #003d66 50%, #0099cc 100%)',
+  'crucero-otros': 'linear-gradient(135deg, #1a3a4a 0%, #2d6b7a 50%, #4fc3c3 100%)',
+  'nickelodeon': 'linear-gradient(135deg, #ff6600 0%, #ff9900 50%, #33cc33 100%)',
+  'xcaret': 'linear-gradient(135deg, #004d40 0%, #00897b 50%, #4dd0e1 100%)'
+};
+
+const SHIP_DATA = {
+  'Disney Magic': { year: '1998', tons: '83,000', guests: '2,713', desc: 'El barco original · Rutas clásicas' },
+  'Disney Wonder': { year: '1999', tons: '83,000', guests: '2,713', desc: 'Hermano gemelo del Magic · Alaska y Caribe' },
+  'Disney Dream': { year: '2011', tons: '130,000', guests: '4,000', desc: 'Innovación y elegancia · AquaDuck' },
+  'Disney Fantasy': { year: '2012', tons: '130,000', guests: '4,000', desc: 'Magia y aventura · AquaDuck' },
+  'Disney Wish': { year: '2022', tons: '144,000', guests: '4,000', desc: 'El más nuevo · AquaMouse · Gran Hall' },
+  'Disney Treasure': { year: '2024', tons: '144,000', guests: '4,000', desc: 'Aventura y exploración · Lo último de Disney' }
+};
+
+let itineraryCounters = { crd: 0, cro: 0 };
+let priceGroupCounter = 0;
+
+// ========================================================
+// UTILITY FUNCTIONS
+// ========================================================
+function formatDate(dateStr) {
+  if (!dateStr) return '';
+  const months = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const [y, m, d] = dateStr.split('-');
+  return `${parseInt(d)} de ${months[parseInt(m)-1]} ${y}`;
+}
+
+function formatDateShort(dateStr) {
+  if (!dateStr) return '';
+  const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const [y, m, d] = dateStr.split('-');
+  return `${parseInt(d)} ${months[parseInt(m)-1]} ${y}`;
+}
+
+function getMinorsText() {
+  const m02 = parseInt(document.getElementById('menores02').value) || 0;
+  const m39 = parseInt(document.getElementById('menores39').value) || 0;
+  const m1017 = parseInt(document.getElementById('menores1017').value) || 0;
+  const total = m02 + m39 + m1017;
+  if (total === 0) return '';
+  let parts = [];
+  if (m02 > 0) parts.push(`(0-2 años)`);
+  if (m39 > 0) parts.push(`(3-9 años)`);
+  if (m1017 > 0) parts.push(`(10-17 años)`);
+  return `${total} ${parts.join(' ')}`;
+}
+
+function getMinorsTotal() {
+  return (parseInt(document.getElementById('menores02').value) || 0) +
+         (parseInt(document.getElementById('menores39').value) || 0) +
+         (parseInt(document.getElementById('menores1017').value) || 0);
+}
+
+function getMinorsCardText() {
+  const m02 = parseInt(document.getElementById('menores02').value) || 0;
+  const m39 = parseInt(document.getElementById('menores39').value) || 0;
+  const m1017 = parseInt(document.getElementById('menores1017').value) || 0;
+  const total = m02 + m39 + m1017;
+  if (total === 0) return '';
+  let details = [];
+  if (m02 > 0) details.push(`${m02} de 0-2`);
+  if (m39 > 0) details.push(`${m39} de 3-9`);
+  if (m1017 > 0) details.push(`${m1017} de 10-17`);
+  return `${total} Menor${total > 1 ? 'es' : ''} (${details.join(', ')})`;
+}
+
+function val(id) { return document.getElementById(id)?.value?.trim() || ''; }
+function checked(id) { return document.getElementById(id)?.checked || false; }
+function show(id) { document.getElementById(id).style.display = ''; }
+function hide(id) { document.getElementById(id).style.display = 'none'; }
+
+function showToast(text) {
+  const t = document.getElementById('toast');
+  t.textContent = text;
+  t.classList.remove('opacity-0','pointer-events-none');
+  setTimeout(() => t.classList.add('opacity-0','pointer-events-none'), 2000);
+}
+
+// ========================================================
+// HOTEL / SHIP PREVIEW
+// ========================================================
+function showHotelPreview(prefix) {
+  const select = document.getElementById(`${prefix}-hotel`);
+  const preview = document.getElementById(`${prefix}-hotel-preview`);
+  const hotel = select.value;
+  if (!hotel) { preview.innerHTML = ''; return; }
+  const data = HOTEL_IMAGES[hotel];
+  if (!data) { preview.innerHTML = ''; return; }
+  const hasImg = data.img;
+  preview.innerHTML = `
+    <div class="border border-gray-200 rounded-xl overflow-hidden bg-white">
+      ${hasImg ? `<img src="${data.img}" alt="${hotel}" style="width:100%;height:130px;object-fit:cover;" onerror="this.style.display='none'">` : ''}
+      <div class="p-3 flex items-center gap-2">
+        <span class="hotel-category ${data.color}">${data.cat}</span>
+        <span class="text-xs font-medium text-gray-700">${hotel}</span>
+      </div>
+    </div>
+  `;
+}
+
+function showShipPreview() {
+  const barco = val('crd-barco');
+  const preview = document.getElementById('crd-ship-preview');
+  const data = SHIP_DATA[barco];
+  if (!data) { preview.innerHTML = ''; return; }
+  preview.innerHTML = `
+    <div class="border border-gray-200 rounded-xl overflow-hidden bg-gradient-to-r from-navy-600 to-navy-500 text-white p-4">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-lg font-bold">🚢 ${barco}</span>
+        <span class="text-xs opacity-70">${data.year}</span>
+      </div>
+      <div class="text-xs opacity-80">${data.desc}</div>
+      <div class="flex gap-4 mt-2 text-xs opacity-70">
+        <span>⚓ ${data.tons} tons</span>
+        <span>👥 ${data.guests} huéspedes</span>
+      </div>
+    </div>
+  `;
+}
+
+// ========================================================
+// FORM MANAGEMENT
+// ========================================================
+function onDestinoChange() {
+  const dest = val('destino');
+  const container = document.getElementById('form-container');
+
+  if (!dest) {
+    container.style.display = 'none';
+    hide('dest-image-preview');
+    return;
+  }
+  container.style.display = '';
+
+  // Show destination image
+  const destImg = document.getElementById('dest-image');
+  const destImgContainer = document.getElementById('dest-image-preview');
+  if (DEST_IMAGES[dest]) {
+    destImg.src = DEST_IMAGES[dest];
+    destImg.alt = dest;
+    destImgContainer.style.display = '';
+  } else {
+    destImgContainer.style.display = 'none';
+  }
+
+  // Hide all destination sections
+  document.querySelectorAll('.dest-section').forEach(el => el.classList.remove('active'));
+
+  // Show selected destination section
+  const sectionMap = {
+    'orlando': 'campos-orlando',
+    'universal': 'campos-universal',
+    'california': 'campos-california',
+    'paris': 'campos-paris',
+    'crucero-disney': 'campos-crucero-disney',
+    'crucero-otros': 'campos-crucero-otros',
+    'nickelodeon': 'campos-nickelodeon',
+    'xcaret': 'campos-xcaret'
+  };
+  if (sectionMap[dest]) {
+    document.getElementById(sectionMap[dest]).classList.add('active');
+  }
+
+  // Update labels for cruises
+  const isCruise = dest.startsWith('crucero');
+  document.getElementById('label-habitaciones').textContent = isCruise ? 'Camarotes' : 'Habitaciones';
+  document.getElementById('label-checkin').textContent = isCruise ? 'Fecha de embarque' : 'Check in';
+  document.getElementById('label-checkout').textContent = isCruise ? 'Fecha de desembarque' : 'Check out';
+
+  // Show/hide price section for crucero-otros
+  document.getElementById('price-section').style.display = dest === 'crucero-otros' ? 'none' : '';
+
+  // Initialize itinerary days if needed
+  if (dest === 'crucero-disney' && itineraryCounters.crd === 0) {
+    for (let i = 0; i < 5; i++) addItineraryDay('crd');
+    showShipPreview();
+  }
+  if (dest === 'crucero-otros' && itineraryCounters.cro === 0) {
+    for (let i = 0; i < 5; i++) addItineraryDay('cro');
+    if (priceGroupCounter === 0) addPriceGroup();
+  }
+
+  // Hide preview when changing destination
+  hide('preview-section');
+}
+
+// Orlando: toggle comidas detail
+document.getElementById('orl-comidas').addEventListener('change', function() {
+  document.getElementById('orl-comidas-detail').style.display = this.checked ? '' : 'none';
+});
+
+// ========================================================
+// DYNAMIC FIELDS: Itinerary
+// ========================================================
+function addItineraryDay(prefix) {
+  itineraryCounters[prefix]++;
+  const n = itineraryCounters[prefix];
+  const container = document.getElementById(`${prefix}-itinerario-container`);
+  const row = document.createElement('div');
+  row.className = 'itinerary-row';
+  row.id = `${prefix}-day-${n}`;
+  row.innerHTML = `
+    <span class="text-xs font-semibold text-gray-400 w-12 shrink-0">Día ${n}</span>
+    <input type="text" placeholder="Ej: Puerto Cañaveral, Florida" class="field-input text-xs flex-1" id="${prefix}-day-${n}-val">
+    <button type="button" onclick="removeItineraryDay('${prefix}', ${n})" class="text-red-400 hover:text-red-600 text-lg font-bold shrink-0 w-8 h-8 flex items-center justify-center">×</button>
+  `;
+  container.appendChild(row);
+}
+
+function removeItineraryDay(prefix, n) {
+  const row = document.getElementById(`${prefix}-day-${n}`);
+  if (row) row.remove();
+}
+
+function getItinerary(prefix) {
+  const container = document.getElementById(`${prefix}-itinerario-container`);
+  const rows = container.querySelectorAll('.itinerary-row');
+  let lines = [];
+  let dayNum = 1;
+  rows.forEach(row => {
+    const input = row.querySelector('input');
+    if (input && input.value.trim()) {
+      lines.push(`⁃\tDía ${dayNum}: ${input.value.trim()}`);
+      dayNum++;
+    }
+  });
+  return lines.join('\n');
+}
+
+// ========================================================
+// DYNAMIC FIELDS: Price Groups (Crucero Otras Navieras)
+// ========================================================
+function addPriceGroup() {
+  priceGroupCounter++;
+  const n = priceGroupCounter;
+  const container = document.getElementById('cro-precios-container');
+  const div = document.createElement('div');
+  div.className = 'price-group-card';
+  div.id = `pg-${n}`;
+  div.innerHTML = `
+    <div class="flex items-center justify-between mb-2">
+      <input type="text" placeholder="Ej: 2 Adultos 1 Menor (8 años)" class="field-input text-xs flex-1 mr-2" id="pg-${n}-desc">
+      <button type="button" onclick="document.getElementById('pg-${n}').remove()" class="text-red-400 hover:text-red-600 text-lg font-bold shrink-0">×</button>
+    </div>
+    <div class="grid grid-cols-3 gap-2">
+      <div>
+        <label class="text-xs text-gray-400">Interior</label>
+        <input type="text" placeholder="$" class="field-input text-xs" id="pg-${n}-int">
+      </div>
+      <div>
+        <label class="text-xs text-gray-400">Vista al mar</label>
+        <input type="text" placeholder="$" class="field-input text-xs" id="pg-${n}-vis">
+      </div>
+      <div>
+        <label class="text-xs text-gray-400">Balcón</label>
+        <input type="text" placeholder="$" class="field-input text-xs" id="pg-${n}-bal">
+      </div>
+    </div>
+  `;
+  container.appendChild(div);
+}
+
+function getPriceGroups() {
+  const container = document.getElementById('cro-precios-container');
+  const groups = container.querySelectorAll('.price-group-card');
+  let text = '';
+  groups.forEach(g => {
+    const id = g.id;
+    const desc = g.querySelector(`#${id}-desc`)?.value?.trim() || '';
+    const int = g.querySelector(`#${id}-int`)?.value?.trim() || '';
+    const vis = g.querySelector(`#${id}-vis`)?.value?.trim() || '';
+    const bal = g.querySelector(`#${id}-bal`)?.value?.trim() || '';
+    if (desc) {
+      text += `\n💸Precios para ${desc}\n`;
+      if (int) text += `- Camarote interior: Desde $${int} USD\n`;
+      if (vis) text += `- Camarote con vista al mar: Desde $${vis} USD\n`;
+      if (bal) text += `- Camarote con balcón: Desde $${bal} USD\n`;
+    }
+  });
+  return text.trim();
+}
+
+// ========================================================
+// MESSAGE GENERATORS
+// ========================================================
+function buildGreeting(dest) {
+  const nombre = val('nombre');
+  const title = AGENT_TITLES[dest] || 'Agente de viajes';
+  const hi = nombre ? `Hola ${nombre}! Cómo estás?` : 'Hola! Cómo estás?';
+  return `${hi}\nSoy Mich Murrieta, ${title}\n\nTe comparto tu cotización, avísame cómo la ves y si gustas que hagamos alguna modificación o tienes alguna duda ⬇️`;
+}
+
+function buildTravelers() {
+  const adultos = val('adultos');
+  const menorsText = getMinorsText();
+  let text = `\n*Adultos:* ${adultos}`;
+  if (menorsText) text += `\n*Menores:* ${menorsText}`;
+  return text;
+}
+
+function buildClosing() {
+  return 'Cualquier duda estoy a tus órdenes ✨';
+}
+
+function generateOrlando() {
+  const hotel = val('orl-hotel');
+  const modalidad = val('orl-modalidad');
+  const dias = val('orl-dias');
+  const precio = val('precio');
+  const incluyeComidas = checked('orl-comidas');
+  const comidasDesc = val('orl-comidas-desc');
+  const incluyeMemory = checked('orl-memory');
+
+  let msg = buildGreeting('orlando');
+  msg += '\n' + buildTravelers();
+  if (hotel) msg += `\n*Hospedaje:* ${hotel}`;
+  msg += `\n\nCheck in: ${formatDate(val('checkin'))}`;
+  msg += `\nCheck out: ${formatDate(val('checkout'))}`;
+  msg += `\n\n🎟 Entradas a los parques con modalidad "${modalidad}" válido por ${dias} días`;
+  if (incluyeComidas) msg += `\n🍔 Plan de comidas rápidas (${comidasDesc})`;
+  msg += `\n\n*💸$${precio} USD*`;
+  if (incluyeMemory) msg += `\n\n📸Agrega el paquete de fotos "Memory Maker" por *$185 USD* adicionales`;
+  msg += `\n\n${CONDITIONS['orlando']}`;
+  const notas = val('notas');
+  if (notas) msg += `\n\n${notas}`;
+  msg += `\n\n${buildClosing()}`;
+  return msg;
+}
+
+function generateUniversal() {
+  const hotel = val('uni-hotel');
+  const modalidad = val('uni-modalidad');
+  const dias = val('uni-dias');
+  const precio = val('precio');
+  const incluyeIsla = checked('uni-isla');
+  const incluyeStudios = checked('uni-studios');
+  const incluyeEpic = checked('uni-epic');
+
+  let msg = buildGreeting('universal');
+  msg += '\n' + buildTravelers();
+  if (hotel) msg += `\n\nHospedaje: ${hotel}`;
+  msg += `\n\nCheck in: ${formatDate(val('checkin'))}`;
+  msg += `\nCheck out: ${formatDate(val('checkout'))}`;
+  msg += `\n\n🎟 Entradas a los parques con modalidad "${modalidad}" válido por ${dias} días`;
+  let parks = [];
+  if (incluyeIsla) parks.push('•⁠  ⁠Isla de la aventura');
+  if (incluyeStudios) parks.push('•⁠  ⁠Universal Studios');
+  if (parks.length > 0) msg += `\n que te permite entrar a:\n${parks.join('\n')}`;
+  if (incluyeEpic) msg += `\n ⁠+ 1 día de EPIC Universe`;
+  msg += `\n\n💸 *$${precio} USD*`;
+  msg += `\n\n${CONDITIONS['universal']}`;
+  const notas = val('notas');
+  if (notas) msg += `\n\n${notas}`;
+  msg += `\n\n${buildClosing()}`;
+  return msg;
+}
+
+function generateCalifornia() {
+  const hotel = val('cal-hotel');
+  const modalidad = val('cal-modalidad');
+  const dias = val('cal-dias');
+  const precio = val('precio');
+  const starWars = checked('cal-starwars');
+
+  let msg = buildGreeting('california');
+  msg += '\n' + buildTravelers();
+  if (hotel) msg += `\n*Hospedaje:* ${hotel}`;
+  msg += `\n\nCheck in: ${formatDate(val('checkin'))}`;
+  msg += `\nCheck out: ${formatDate(val('checkout'))}`;
+  msg += `\n\n🎟 Entradas a los parques con modalidad "${modalidad}" válido por ${dias} días`;
+  msg += `\n\n*💸$${precio} USD*`;
+  msg += `\n\n${CONDITIONS['california']}`;
+  if (starWars) msg += `\n\n*STAR WARS NITE🪐* La entrada a este evento es adicional y costaría aproximadamente $200 USD x persona. Aún no tenemos los precios, pero yo les avisaría en cuanto estén disponibles`;
+  const notas = val('notas');
+  if (notas) msg += `\n\n${notas}`;
+  msg += `\n\n${buildClosing()}`;
+  return msg;
+}
+
+function generateParis() {
+  const hotel = val('par-hotel');
+  const precio = val('precio');
+
+  let msg = buildGreeting('paris');
+  msg += '\n' + buildTravelers();
+  if (hotel) msg += `\n*Hospedaje:* ${hotel}`;
+  msg += `\n\nCheck in: ${formatDate(val('checkin'))}`;
+  msg += `\nCheck out: ${formatDate(val('checkout'))}`;
+  msg += `\n\n🎟 Entradas válidas por toda su estancia`;
+  msg += `\n🍽 Desayuno incluido`;
+  msg += `\n\n*💸$${precio} USD*`;
+  const notas = val('notas');
+  if (notas) msg += `\n\n${notas}`;
+  msg += `\n\n${buildClosing()}`;
+  return msg;
+}
+
+function generateCruceroDisney() {
+  const barco = val('crd-barco');
+  const camarote = val('crd-camarote').toLowerCase();
+  const precio = val('precio');
+  const promo = val('crd-promo');
+  const itinerario = getItinerary('crd');
+
+  let msg = buildGreeting('crucero-disney');
+  msg += '\n' + buildTravelers();
+  msg += `\n\n🛳Barco: *${barco}*`;
+  if (itinerario) msg += `\n\n📍Itinerario\n${itinerario}`;
+  msg += `\n\n🗓*Fechas*\n${formatDate(val('checkin'))} al ${formatDate(val('checkout'))}`;
+  msg += `\n\n💸Precios`;
+  msg += `\n• Camarote con ${camarote}: *Desde $${precio} USD*`;
+  if (promo) msg += `\n\n*PROMOCIÓN: ${promo}✨🤩*`;
+  msg += `\n\n${CONDITIONS['crucero-disney']}`;
+  msg += `\n\n${INCLUSIONS_CRUISE_DISNEY}`;
+  const notas = val('notas');
+  if (notas) msg += `\n\n${notas}`;
+  msg += `\n\n${buildClosing()}`;
+  return msg;
+}
+
+function generateCruceroOtros() {
+  const barco = val('cro-barco');
+  const itinerario = getItinerary('cro');
+  const priceGroups = getPriceGroups();
+
+  let msg = buildGreeting('crucero-otros');
+  msg += '\n' + buildTravelers();
+  if (barco) msg += `\n\n🛳Barco: ${barco}`;
+  if (itinerario) msg += `\n\n📍Itinerario\n${itinerario}`;
+  msg += `\n\n🗓Fechas\n${formatDate(val('checkin'))} al ${formatDate(val('checkout'))}`;
+  if (priceGroups) msg += `\n\n${priceGroups}`;
+  msg += `\n\n${CONDITIONS['crucero-otros']}`;
+  const notas = val('notas');
+  if (notas) msg += `\n\n${notas}`;
+  msg += `\n\n${buildClosing()}`;
+  return msg;
+}
+
+function generateNickelodeon() {
+  const precio = val('precio');
+
+  let msg = buildGreeting('nickelodeon');
+  msg += '\n' + buildTravelers();
+  msg += `\n*Hospedaje:* Nickelodeon Resort - Riviera Maya - TODO INCLUIDO`;
+  msg += `\n\nCheck in: ${formatDate(val('checkin'))}`;
+  msg += `\nCheck out: ${formatDate(val('checkout'))}`;
+  msg += `\n\n*💸$${precio} USD*`;
+  msg += `\n${CONDITIONS['nickelodeon']}`;
+  msg += `\n\n${INCLUSIONS_NICK}`;
+  const notas = val('notas');
+  if (notas) msg += `\n\n${notas}`;
+  msg += `\n\n${buildClosing()}`;
+  return msg;
+}
+
+function generateXcaret() {
+  const hotel = val('xca-hotel');
+  const precio = val('precio');
+
+  let msg = buildGreeting('xcaret');
+  msg += '\n' + buildTravelers();
+  msg += `\n*Hospedaje:* ${hotel}`;
+  msg += `\n\nCheck in: ${formatDate(val('checkin'))}`;
+  msg += `\nCheck out: ${formatDate(val('checkout'))}`;
+  msg += `\n\n*💸$${precio} USD*`;
+  msg += `\n${CONDITIONS['xcaret']}`;
+  msg += `\n\n${INCLUSIONS_XCARET}`;
+  const notas = val('notas');
+  if (notas) msg += `\n\n${notas}`;
+  msg += `\n\n${buildClosing()}`;
+  return msg;
+}
+
+// ========================================================
+// MAIN GENERATE FUNCTION
+// ========================================================
+function generarMensaje() {
+  const dest = val('destino');
+  if (!dest) return;
+
+  const generators = {
+    'orlando': generateOrlando,
+    'universal': generateUniversal,
+    'california': generateCalifornia,
+    'paris': generateParis,
+    'crucero-disney': generateCruceroDisney,
+    'crucero-otros': generateCruceroOtros,
+    'nickelodeon': generateNickelodeon,
+    'xcaret': generateXcaret
+  };
+
+  const msg = generators[dest]();
+  document.getElementById('mensaje-preview').value = msg;
+
+  const ta = document.getElementById('mensaje-preview');
+  ta.style.height = 'auto';
+  ta.style.height = ta.scrollHeight + 'px';
+
+  generateCard(dest, msg);
+  show('preview-section');
+  switchTab('texto');
+  document.getElementById('preview-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ========================================================
+// VISUAL CARD GENERATION
+// ========================================================
+function generateCard(dest, msg) {
+  const nombre = val('nombre') || 'Cliente';
+  const adultos = val('adultos');
+  const minorsCardText = getMinorsCardText();
+  const checkin = val('checkin');
+  const checkout = val('checkout');
+  const precio = val('precio');
+
+  const destNames = {
+    'orlando': '🏰 Disney World · Orlando',
+    'universal': '🎢 Universal Studios · Orlando',
+    'california': '🎡 Disneyland · California',
+    'paris': '🗼 Disneyland · Paris',
+    'crucero-disney': '🚢 Crucero Disney',
+    'crucero-otros': '🛳 Crucero',
+    'nickelodeon': '🧽 Nickelodeon Resort',
+    'xcaret': '🌴 Xcaret'
+  };
+
+  let detailsHTML = '';
+
+  if (dest === 'orlando') {
+    const hotel = val('orl-hotel');
+    if (hotel) detailsHTML += `<div style="display:flex;align-items:center;gap:8px;"><span>🏨</span><span>${hotel}</span></div>`;
+    detailsHTML += `<div style="display:flex;align-items:center;gap:8px;"><span>🎟</span><span>${val('orl-modalidad')} · ${val('orl-dias')} días</span></div>`;
+    if (checked('orl-comidas')) detailsHTML += `<div style="display:flex;align-items:center;gap:8px;"><span>🍔</span><span>Plan de comidas incluido</span></div>`;
+  } else if (dest === 'universal') {
+    const hotel = val('uni-hotel');
+    if (hotel) detailsHTML += `<div style="display:flex;align-items:center;gap:8px;"><span>🏨</span><span>${hotel}</span></div>`;
+    detailsHTML += `<div style="display:flex;align-items:center;gap:8px;"><span>🎟</span><span>${val('uni-modalidad')} · ${val('uni-dias')} días</span></div>`;
+    if (checked('uni-epic')) detailsHTML += `<div style="display:flex;align-items:center;gap:8px;"><span>🎢</span><span>+ EPIC Universe</span></div>`;
+  } else if (dest === 'california') {
+    const hotel = val('cal-hotel');
+    if (hotel) detailsHTML += `<div style="display:flex;align-items:center;gap:8px;"><span>🏨</span><span>${hotel}</span></div>`;
+    detailsHTML += `<div style="display:flex;align-items:center;gap:8px;"><span>🎟</span><span>${val('cal-modalidad')} · ${val('cal-dias')} días</span></div>`;
+  } else if (dest === 'paris') {
+    const hotel = val('par-hotel');
+    if (hotel) detailsHTML += `<div style="display:flex;align-items:center;gap:8px;"><span>🏨</span><span>${hotel}</span></div>`;
+    detailsHTML += `<div style="display:flex;align-items:center;gap:8px;"><span>🎟</span><span>Entradas toda la estancia</span></div>`;
+    detailsHTML += `<div style="display:flex;align-items:center;gap:8px;"><span>🍽</span><span>Desayuno incluido</span></div>`;
+  } else if (dest === 'crucero-disney') {
+    detailsHTML += `<div style="display:flex;align-items:center;gap:8px;"><span>🚢</span><span>${val('crd-barco')}</span></div>`;
+    detailsHTML += `<div style="display:flex;align-items:center;gap:8px;"><span>🛏</span><span>Camarote ${val('crd-camarote').toLowerCase()}</span></div>`;
+    if (val('crd-promo')) detailsHTML += `<div style="display:flex;align-items:center;gap:8px;color:#E8716D;font-weight:600;"><span>🎉</span><span>${val('crd-promo')}</span></div>`;
+  } else if (dest === 'crucero-otros') {
+    if (val('cro-barco')) detailsHTML += `<div style="display:flex;align-items:center;gap:8px;"><span>🚢</span><span>${val('cro-barco')}</span></div>`;
+  } else if (dest === 'nickelodeon') {
+    detailsHTML += `<div style="display:flex;align-items:center;gap:8px;"><span>🏨</span><span>Nickelodeon Resort · Riviera Maya</span></div>`;
+    detailsHTML += `<div style="display:flex;align-items:center;gap:8px;"><span>✅</span><span>TODO INCLUIDO</span></div>`;
+  } else if (dest === 'xcaret') {
+    detailsHTML += `<div style="display:flex;align-items:center;gap:8px;"><span>🏨</span><span>${val('xca-hotel')}</span></div>`;
+    detailsHTML += `<div style="display:flex;align-items:center;gap:8px;"><span>✅</span><span>TODO INCLUIDO</span></div>`;
+  }
+
+  const isCruise = dest.startsWith('crucero');
+  const dateLabel = isCruise ? `${formatDate(checkin)} al ${formatDate(checkout)}` : `${formatDateShort(checkin)} → ${formatDateShort(checkout)}`;
+  const priceDisplay = dest === 'crucero-otros' ? '' : `$${precio} USD`;
+  const gradient = DEST_GRADIENTS[dest] || 'linear-gradient(135deg, #E8716D 0%, #D4605C 100%)';
+  const destImgUrl = DEST_IMAGES[dest] || '';
+
+  const condMap = {
+    'orlando': '✅ Aparta con $200 USD · Liquida 1 mes antes',
+    'california': '✅ Aparta con $200 USD · Liquida 1 mes antes',
+    'universal': '✅ Aparta con $50 USD/persona · Liquida 45 días antes',
+    'crucero-disney': '✅ Aparta con 10% · Liquida 3 meses antes del embarque',
+    'crucero-otros': '✅ Aparta con 20% · Liquida 3 meses antes del embarque',
+    'nickelodeon': '✅ Aparta con $200 USD',
+    'xcaret': '✅ Aparta con $200 USD',
+    'paris': ''
+  };
+
+  document.getElementById('card-render').innerHTML = `
+    <div style="width:100%; background:#fff; border-radius:20px; overflow:hidden; box-shadow:0 4px 30px rgba(0,0,0,0.12); font-family:'Poppins',sans-serif;">
+      <!-- Destination Image Banner -->
+      <div style="position:relative; height:140px; background:${gradient}; overflow:hidden;">
+        ${destImgUrl ? `<img src="${destImgUrl}" style="width:100%;height:100%;object-fit:cover;opacity:0.5;" onerror="this.style.display='none'" crossorigin="anonymous">` : ''}
+        <div style="position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:16px 20px;background:linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 100%);">
+          <div style="font-size:18px; font-weight:800; color:white; text-shadow:0 2px 8px rgba(0,0,0,0.3);">${destNames[dest] || dest}</div>
+        </div>
+      </div>
+      <!-- Agent info strip -->
+      <div style="background:#1B2A4A; color:white; padding:10px 20px; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <span style="font-size:13px; font-weight:700;">✨ Mich Murrieta</span>
+          <span style="font-size:10px; opacity:0.7; margin-left:8px;">${AGENT_TITLES[dest] || ''}</span>
+        </div>
+      </div>
+      <!-- Body -->
+      <div style="padding:20px 24px;">
+        <!-- Travelers -->
+        <div style="display:flex; gap:16px; margin-bottom:16px; padding-bottom:16px; border-bottom:1px solid #f0f0f0;">
+          <div style="text-align:center; flex:1;">
+            <div style="font-size:24px;">👥</div>
+            <div style="font-size:12px; font-weight:600; color:#1B2A4A;">${adultos} Adulto${parseInt(adultos) !== 1 ? 's' : ''}</div>
+          </div>
+          ${getMinorsTotal() > 0 ? `<div style="text-align:center; flex:1;">
+            <div style="font-size:24px;">👶</div>
+            <div style="font-size:11px; font-weight:600; color:#1B2A4A;">${minorsCardText}</div>
+          </div>` : ''}
+        </div>
+        <!-- Dates -->
+        <div style="background:#FFF8F0; border-radius:12px; padding:12px 16px; margin-bottom:16px; text-align:center;">
+          <div style="font-size:11px; color:#888; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:2px;">📅 Fechas</div>
+          <div style="font-size:14px; font-weight:600; color:#1B2A4A;">${dateLabel}</div>
+        </div>
+        <!-- Details -->
+        <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:16px; font-size:13px; color:#333;">
+          ${detailsHTML}
+        </div>
+        ${priceDisplay ? `
+        <!-- Price -->
+        <div style="background:linear-gradient(135deg,#1B2A4A 0%,#2C4570 100%); border-radius:14px; padding:16px; text-align:center; margin-bottom:16px;">
+          <div style="font-size:11px; color:rgba(255,255,255,0.7); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Precio total</div>
+          <div style="font-size:28px; font-weight:800; color:white;">$${precio}</div>
+          <div style="font-size:12px; color:rgba(255,255,255,0.7);">USD</div>
+        </div>` : ''}
+        <!-- Conditions summary -->
+        <div style="font-size:11px; color:#888; line-height:1.5;">
+          ${condMap[dest] || ''}
+        </div>
+      </div>
+      <!-- Footer -->
+      <div style="background:#FFF8F0; padding:14px 20px; display:flex; justify-content:space-between; align-items:center; border-top:1px solid #f0e8dc;">
+        <div>
+          <div style="font-size:11px; color:#1B2A4A; font-weight:600;">📲 +52 55 1766 6721</div>
+          <div style="font-size:10px; color:#888;">michmurrietaviajes.com</div>
+        </div>
+        <div style="font-size:10px; color:#888; text-align:right;">
+          📸 @michmurrieta_viajes
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ========================================================
+// TABS
+// ========================================================
+function switchTab(tab) {
+  document.getElementById('tab-texto').classList.toggle('active', tab === 'texto');
+  document.getElementById('tab-tarjeta').classList.toggle('active', tab === 'tarjeta');
+  document.getElementById('panel-texto').style.display = tab === 'texto' ? '' : 'none';
+  document.getElementById('panel-tarjeta').style.display = tab === 'tarjeta' ? '' : 'none';
+}
+
+// ========================================================
+// ACTIONS
+// ========================================================
+function copiarTexto() {
+  const texto = document.getElementById('mensaje-preview').value;
+  navigator.clipboard.writeText(texto).then(() => {
+    showToast('Copiado al portapapeles ✅');
+  });
+}
+
+function descargarImagen() {
+  const card = document.getElementById('card-render');
+  showToast('Generando imagen...');
+  html2canvas(card, {
+    scale: 2,
+    backgroundColor: null,
+    useCORS: true,
+    logging: false
+  }).then(canvas => {
+    const link = document.createElement('a');
+    const nombre = val('nombre') || 'cotizacion';
+    const dest = val('destino');
+    link.download = `Cotizacion_${nombre.replace(/\s+/g, '_')}_${dest}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    showToast('Imagen descargada ✅');
+  });
+}
+</script>
+
+</body>
+</html>
