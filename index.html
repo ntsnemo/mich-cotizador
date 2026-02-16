@@ -3,9 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>Mich Cotizador ✨</title>
+  <title>Mich Travel Tools ✨</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script>
     tailwind.config = {
@@ -93,22 +94,125 @@
       #card-render{width:340px}
       .s-card{padding:20px;border-radius:16px}
     }
+
+    /* ── Main Tab Navigation ── */
+    .main-tabs{display:flex;gap:4px;margin-top:12px}
+    .main-tab{padding:8px 20px;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;border:none;color:rgba(255,255,255,0.6);background:rgba(255,255,255,0.1)}
+    .main-tab.active{background:#fff;color:#D4605C;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
+    .main-tab:hover:not(.active){background:rgba(255,255,255,0.2);color:#fff}
+
+    /* ── Itinerary Form ── */
+    .it-day-card{background:#fff;border-radius:16px;border:1.5px solid #FFE8CC;margin-bottom:12px;overflow:hidden;transition:all .2s}
+    .it-day-header{display:flex;align-items:center;gap:10px;padding:14px 16px;cursor:pointer;user-select:none;transition:background .15s}
+    .it-day-header:hover{background:#FFF8F0}
+    .it-day-body{padding:0 16px 16px;display:none}
+    .it-day-card.open .it-day-body{display:block}
+    .it-day-card.open .it-chevron{transform:rotate(180deg)}
+    .it-chevron{transition:transform .2s;color:#999;font-size:12px}
+    .it-act-row,.it-tip-row,.it-doc-row{display:flex;gap:8px;align-items:start;margin-bottom:8px}
+    .it-mini-input{padding:8px 12px!important;font-size:12px!important;border-radius:10px!important}
+    .it-remove-btn{width:28px;height:28px;border-radius:8px;border:none;background:#FFF1F0;color:#E8716D;font-weight:700;font-size:14px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s}
+    .it-remove-btn:hover{background:#E8716D;color:#fff}
+    .it-day-num{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#E8716D,#D4605C);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0}
+    .it-day-num.cruise{background:linear-gradient(135deg,#0D9488,#0891B2)}
+    .it-day-num.park{background:linear-gradient(135deg,#7C3AED,#6D28D9)}
+    .it-day-num.travel{background:linear-gradient(135deg,#F59E0B,#D97706)}
+    .it-day-num.free{background:linear-gradient(135deg,#059669,#047857)}
+
+    /* ── Itinerary Preview ── */
+    .itp{max-width:440px;margin:0 auto;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 8px 40px rgba(27,42,74,0.12);font-family:'Poppins',sans-serif}
+    .itp-hero{position:relative;height:220px;background-size:cover;background-position:center}
+    .itp-hero-ov{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.75) 0%,rgba(0,0,0,0.05) 60%);display:flex;flex-direction:column;justify-content:flex-end;padding:24px}
+    .itp-hero h1{font-size:22px;font-weight:800;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,0.3);line-height:1.2;margin-bottom:2px}
+    .itp-hero p{font-size:12px;color:rgba(255,255,255,0.85)}
+    .itp-agent{background:#1B2A4A;padding:16px 20px;display:flex;align-items:center;gap:14px}
+    .itp-agent-info h3{font-size:14px;font-weight:700;color:#fff;margin-bottom:1px}
+    .itp-agent-info p{font-size:11px;color:rgba(255,255,255,0.55)}
+    .itp-agent-avatar{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+    .itp-contact{display:flex;gap:12px;margin-top:6px}
+    .itp-contact span{font-size:11px;color:#E8716D;font-weight:600;cursor:pointer}
+    .itp-travelers{display:flex;gap:16px;padding:14px 20px;background:#FFF8F0;font-size:12px;font-weight:600;color:#1B2A4A}
+    .itp-section{padding:16px 20px}
+    .itp-stitle{font-size:13px;font-weight:700;color:#1B2A4A;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+    .itp-doc{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f5f0eb}
+    .itp-doc:last-child{border-bottom:none}
+    .itp-doc-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+    .itp-doc-text{font-size:12px;color:#333;font-weight:500}
+    .itp-doc-desc{font-size:10px;color:#999;margin-top:1px}
+
+    /* Day accordion in preview */
+    .itp-day{border-bottom:1px solid #f0ebe5}
+    .itp-day:last-child{border-bottom:none}
+    .itp-day-head{display:flex;align-items:center;gap:12px;padding:14px 20px;cursor:pointer;transition:background .15s;user-select:none}
+    .itp-day-head:hover{background:#FFFDF9}
+    .itp-day-badge{width:42px;height:42px;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-weight:700;flex-shrink:0;line-height:1.1}
+    .itp-day-badge .db-num{font-size:15px;font-weight:800}
+    .itp-day-badge .db-label{font-size:8px;text-transform:uppercase;letter-spacing:.5px;opacity:.8}
+    .itp-day-info{flex:1;min-width:0}
+    .itp-day-date{font-size:10px;color:#999;font-weight:500}
+    .itp-day-name{font-size:14px;font-weight:700;color:#1B2A4A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .itp-day-icon{font-size:20px;flex-shrink:0}
+    .itp-day-chev{font-size:10px;color:#ccc;transition:transform .3s;flex-shrink:0}
+    .itp-day.open .itp-day-chev{transform:rotate(180deg)}
+    .itp-day-body{max-height:0;overflow:hidden;transition:max-height .4s cubic-bezier(0.4,0,0.2,1)}
+    .itp-day.open .itp-day-body{max-height:3000px}
+
+    /* Timeline in preview */
+    .itp-timeline{padding:0 20px 12px}
+    .itp-act{display:flex;gap:12px;position:relative}
+    .itp-act-time{width:52px;font-size:10px;font-weight:600;color:#999;text-align:right;padding-top:4px;flex-shrink:0}
+    .itp-act-line{position:relative;width:20px;display:flex;flex-direction:column;align-items:center;flex-shrink:0}
+    .itp-act-dot{width:10px;height:10px;border-radius:50%;background:#E8716D;flex-shrink:0;margin-top:5px;z-index:1}
+    .itp-act-bar{flex:1;width:2px;background:#f0ebe5;margin-top:4px}
+    .itp-act:last-child .itp-act-bar{display:none}
+    .itp-act-desc{flex:1;font-size:12px;color:#333;line-height:1.6;padding:2px 0 10px}
+    .itp-tips{margin:0 20px 16px;background:linear-gradient(135deg,#FFF8F0,#FFF1F0);border-radius:12px;padding:14px 16px}
+    .itp-tips h4{font-size:11px;font-weight:700;color:#1B2A4A;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+    .itp-tips li{font-size:11px;color:#555;margin-bottom:5px;padding-left:20px;position:relative;line-height:1.5}
+    .itp-tips li::before{content:'💡';position:absolute;left:0;font-size:9px;top:1px}
+    .itp-footer{background:#FFF8F0;padding:16px 20px;text-align:center;border-top:1px solid #f0e8dc}
+    .itp-footer div{font-size:11px;color:#1B2A4A;margin-bottom:3px;font-weight:500}
+    .itp-footer .sub{font-size:9px;color:#888;font-weight:400}
+
+    /* PDF mode */
+    .itp.pdf-mode .itp-day-body{max-height:none!important;overflow:visible!important}
+    .itp.pdf-mode .itp-day-head{cursor:default}
+    .itp.pdf-mode .itp-day-chev{display:none}
+    .itp.pdf-mode{box-shadow:none;border-radius:0;max-width:100%}
+
+    /* Saved itineraries list */
+    .saved-item{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:14px;background:#fff;border:1px solid #f0ece4;margin-bottom:8px;transition:all .2s}
+    .saved-item:hover{border-color:#E8716D;box-shadow:0 2px 8px rgba(232,113,109,.12)}
+    .saved-item-info{flex:1;min-width:0}
+    .saved-item-title{font-size:13px;font-weight:700;color:#1B2A4A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .saved-item-meta{font-size:10px;color:#999;margin-top:2px}
+    .saved-item-actions{display:flex;gap:6px;flex-shrink:0}
+    .saved-item-btn{width:32px;height:32px;border-radius:10px;border:1px solid #e8e0d4;background:#faf8f4;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;transition:all .15s}
+    .saved-item-btn:hover{background:#E8716D;color:#fff;border-color:#E8716D}
+    .saved-item-btn.danger:hover{background:#dc2626;border-color:#dc2626}
   </style>
 </head>
 <body class="bg-cream-100 min-h-screen">
 
 <!-- ═══════════════ HEADER ═══════════════ -->
-<header style="background:linear-gradient(135deg,#E8716D 0%,#D4605C 100%)" class="text-white py-5 px-5 shadow-lg sticky top-0 z-40">
-  <div class="max-w-2xl mx-auto flex items-center justify-between">
-    <div>
-      <h1 class="text-xl font-extrabold tracking-tight leading-tight">Mich Cotizador ✨</h1>
-      <p class="text-[11px] opacity-80 font-light mt-0.5">Generador de cotizaciones personalizadas</p>
+<header style="background:linear-gradient(135deg,#E8716D 0%,#D4605C 100%)" class="text-white py-4 px-5 shadow-lg sticky top-0 z-40">
+  <div class="max-w-2xl mx-auto">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-xl font-extrabold tracking-tight leading-tight">Mich Travel Tools ✨</h1>
+        <p class="text-[11px] opacity-80 font-light mt-0.5">Cotizaciones e itinerarios personalizados</p>
+      </div>
+      <div class="w-11 h-11 bg-white/20 rounded-2xl flex items-center justify-center text-xl backdrop-blur-sm">🏰</div>
     </div>
-    <div class="w-11 h-11 bg-white/20 rounded-2xl flex items-center justify-center text-xl backdrop-blur-sm">🏰</div>
+    <div class="main-tabs">
+      <button onclick="switchMainTab('cotizador')" id="mtab-cotizador" class="main-tab active">🏷 Cotizador</button>
+      <button onclick="switchMainTab('itinerario')" id="mtab-itinerario" class="main-tab">📋 Itinerario</button>
+    </div>
   </div>
 </header>
 
-<!-- ═══════════════ MAIN ═══════════════ -->
+<!-- ═══════════════ TAB: COTIZADOR ═══════════════ -->
+<div id="tab-cotizador-content">
 <main class="max-w-2xl mx-auto px-4 py-6 pb-32">
 
   <!-- Destination Selector -->
@@ -465,6 +569,129 @@
   </div><!-- /form-container -->
 </main>
 
+</div><!-- /tab-cotizador-content -->
+
+<!-- ═══════════════ TAB: ITINERARIO ═══════════════ -->
+<div id="tab-itinerario-content" style="display:none">
+<main class="max-w-2xl mx-auto px-4 py-6 pb-32">
+
+  <!-- Saved Itineraries -->
+  <div class="s-card" id="saved-section">
+    <h2>💾 Mis itinerarios guardados</h2>
+    <div id="saved-list"></div>
+    <div id="saved-empty" class="text-center py-4">
+      <p class="text-gray-400 text-sm">No hay itinerarios guardados aún</p>
+      <p class="text-gray-300 text-xs mt-1">Crea uno desde una plantilla y guárdalo</p>
+    </div>
+    <div class="flex gap-2 mt-3">
+      <button onclick="importItJSON()" class="btn-link" style="flex:1;justify-content:center;font-size:12px">📥 Importar JSON</button>
+      <button onclick="exportAllJSON()" class="btn-link" style="flex:1;justify-content:center;font-size:12px">📤 Exportar todos</button>
+    </div>
+    <input type="file" id="import-file" accept=".json" style="display:none" onchange="handleImport(event)">
+  </div>
+
+  <!-- Template Selector -->
+  <div class="s-card">
+    <h2>📋 Crear desde plantilla</h2>
+    <select id="it-template" class="fi-select text-base font-semibold" onchange="loadTemplate()">
+      <option value="">— Selecciona una plantilla —</option>
+      <optgroup label="🏰 Disney World · Orlando">
+        <option value="disney-world-3">3 días de parques (5 noches)</option>
+        <option value="disney-world-5">5 días de parques (7 noches)</option>
+        <option value="disney-world-7">7 días completos (9 noches)</option>
+        <option value="disney-adults">Solo adultos · Fine dining (7 noches)</option>
+      </optgroup>
+      <optgroup label="🎡 Disneyland · California">
+        <option value="disneyland-cal">3 días en Anaheim (5 noches)</option>
+        <option value="california-combo">California completo + Universal Hollywood (7 noches)</option>
+      </optgroup>
+      <optgroup label="🚢 Cruceros Disney">
+        <option value="crucero-disney-3">3 noches · Bahamas express</option>
+        <option value="crucero-disney-4">4 noches · Bahamas</option>
+        <option value="crucero-disney-7">7 noches · Caribe</option>
+        <option value="crucero-parks">Crucero + Disney World combo (12 noches)</option>
+      </optgroup>
+      <optgroup label="🎢 Universal · Orlando">
+        <option value="universal-3">3 días · Epic Universe (5 noches)</option>
+      </optgroup>
+      <optgroup label="🏰+🎢 Combos">
+        <option value="disney-uni-combo">Disney + Universal · Orlando completo (10 noches)</option>
+      </optgroup>
+      <optgroup label="🌴 México">
+        <option value="nickelodeon">Nickelodeon Resort · Riviera Maya (5 noches)</option>
+        <option value="xcaret">Xcaret · Todo incluido (5 noches)</option>
+      </optgroup>
+      <optgroup label="🗼 Europa">
+        <option value="paris">Disneyland Paris (5 noches)</option>
+      </optgroup>
+      <optgroup label="📝 Otro">
+        <option value="blank">Itinerario en blanco</option>
+      </optgroup>
+    </select>
+  </div>
+
+  <!-- Form (hidden until template selected) -->
+  <div id="it-form" style="display:none">
+
+    <!-- Trip Info -->
+    <div class="s-card">
+      <h2>✈️ Información del viaje</h2>
+      <label class="fi-label">Título del viaje</label>
+      <input id="it-title" type="text" placeholder="Ej: Aventura Mágica en Disney World" class="fi-input mb-3">
+      <label class="fi-label">Nombre del cliente / familia</label>
+      <input id="it-client" type="text" placeholder="Familia García" class="fi-input mb-3">
+      <div class="grid grid-cols-2 gap-3 mb-3">
+        <div><label class="fi-label">Fecha de inicio</label><input id="it-start" type="date" class="fi-input" onchange="updateItDates()"></div>
+        <div><label class="fi-label">Fecha de fin</label><input id="it-end" type="date" class="fi-input"></div>
+      </div>
+      <div class="grid grid-cols-2 gap-3 mb-3">
+        <div><label class="fi-label">Adultos</label><input id="it-adults" type="number" min="1" value="2" class="fi-input"></div>
+        <div><label class="fi-label">Menores (edades)</label><input id="it-kids" type="text" placeholder="Ej: 2 (5 y 8 años)" class="fi-input"></div>
+      </div>
+      <label class="fi-label">Hotel / Hospedaje</label>
+      <input id="it-hotel" type="text" placeholder="Disney's Art of Animation Resort" class="fi-input mb-3">
+      <label class="fi-label">Imagen de portada (URL)</label>
+      <input id="it-cover" type="text" placeholder="Se carga automáticamente con la plantilla" class="fi-input">
+    </div>
+
+    <!-- Documents & Links -->
+    <div class="s-card">
+      <h2>📎 Documentos y links importantes</h2>
+      <div id="it-docs-container"></div>
+      <button type="button" onclick="addItDoc()" class="btn-link"><span class="text-lg leading-none">+</span> Agregar documento/link</button>
+    </div>
+
+    <!-- Days Builder -->
+    <div class="s-card">
+      <h2>📅 Días del itinerario</h2>
+      <p class="text-[11px] text-gray-400 mb-4">Toca cada día para expandir y editar. Puedes agregar, quitar o reordenar actividades y tips.</p>
+      <div id="it-days-container"></div>
+      <button type="button" onclick="addItDay()" class="btn-link mt-2"><span class="text-lg leading-none">+</span> Agregar día</button>
+    </div>
+
+    <!-- Actions -->
+    <div class="grid grid-cols-2 gap-3 mb-2">
+      <button onclick="generateItPreview()" class="btn-generate" style="margin:0">✨ Vista Previa</button>
+      <button onclick="saveCurrentIt()" class="btn-generate" style="margin:0;background:linear-gradient(135deg,#059669,#047857)">💾 Guardar</button>
+    </div>
+    <p class="text-[11px] text-gray-400 text-center mb-8">La vista previa es interactiva — perfecta para compartir pantalla en videollamada</p>
+  </div>
+
+  <!-- Preview Section -->
+  <div id="it-preview-section" style="display:none">
+    <div class="grid grid-cols-2 gap-3 mb-4">
+      <button onclick="showItForm()" class="btn-action">✏️ Editar itinerario</button>
+      <button onclick="downloadItPDF()" class="btn-action" style="background:#1B2A4A;color:#fff;border-color:#1B2A4A">📄 Descargar PDF</button>
+    </div>
+    <div class="flex justify-center">
+      <div id="it-preview-render"></div>
+    </div>
+    <p class="text-[11px] text-gray-400 text-center mt-4">Toca cada día para expandir/colapsar — ideal para videollamada</p>
+  </div>
+
+</main>
+</div><!-- /tab-itinerario-content -->
+
 <div id="toast" class="toast opacity-0 pointer-events-none">Copiado ✅</div>
 
 <!-- ═══════════════════════════════════════════════════════════ -->
@@ -491,7 +718,7 @@ const INCLUSIONS_CRUISE=`*🌊 Tu tarifa incluye:*\n\n🍽️ Comidas ilimitadas
 
 const HOTEL_CATS={"Disney's All-Star Movies Resort":{cat:'Value',c:'cat-value'},"Disney's All-Star Music Resort":{cat:'Value',c:'cat-value'},"Disney's All-Star Sports Resort":{cat:'Value',c:'cat-value'},"Disney's Art of Animation Resort":{cat:'Value',c:'cat-value'},"Disney's Pop Century Resort":{cat:'Value',c:'cat-value'},"Disney's Caribbean Beach Resort":{cat:'Moderate',c:'cat-moderate'},"Disney's Coronado Springs Resort":{cat:'Moderate',c:'cat-moderate'},"Disney's Port Orleans - French Quarter":{cat:'Moderate',c:'cat-moderate'},"Disney's Port Orleans - Riverside":{cat:'Moderate',c:'cat-moderate'},"Disney's Fort Wilderness Cabins":{cat:'Moderate',c:'cat-moderate'},"Disney's Grand Floridian Resort & Spa":{cat:'Deluxe',c:'cat-deluxe'},"Disney's Contemporary Resort":{cat:'Deluxe',c:'cat-deluxe'},"Disney's Polynesian Village Resort":{cat:'Deluxe',c:'cat-deluxe'},"Disney's Animal Kingdom Lodge":{cat:'Deluxe',c:'cat-deluxe'},"Disney's Wilderness Lodge":{cat:'Deluxe',c:'cat-deluxe'},"Disney's BoardWalk Inn":{cat:'Deluxe',c:'cat-deluxe'},"Disney's Beach Club Resort":{cat:'Deluxe',c:'cat-deluxe'},"Disney's Yacht Club Resort":{cat:'Deluxe',c:'cat-deluxe'},"Disney's Riviera Resort":{cat:'Deluxe',c:'cat-deluxe'},"Walt Disney World Swan":{cat:'On-site',c:'cat-onsite'},"Walt Disney World Dolphin":{cat:'On-site',c:'cat-onsite'},"Four Seasons Resort Orlando":{cat:'Premier',c:'cat-premier'},"Universal's Endless Summer - Surfside Inn":{cat:'Value',c:'cat-value'},"Universal's Endless Summer - Dockside Inn":{cat:'Value',c:'cat-value'},"Universal's Cabana Bay Beach Resort":{cat:'Prime Value',c:'cat-prime'},"Universal's Aventura Hotel":{cat:'Prime Value',c:'cat-prime'},"Universal Stella Nova Resort":{cat:'Prime Value',c:'cat-prime'},"Universal Terra Luna Resort":{cat:'Prime Value',c:'cat-prime'},"Loews Sapphire Falls Resort":{cat:'Preferred',c:'cat-preferred'},"Loews Royal Pacific Resort":{cat:'Preferred',c:'cat-preferred'},"Hard Rock Hotel Orlando":{cat:'Preferred',c:'cat-preferred'},"Loews Portofino Bay Hotel":{cat:'Preferred',c:'cat-preferred'},"Universal's Grand Helios Hotel":{cat:'Preferred',c:'cat-preferred'},"Disneyland Hotel":{cat:'Disney',c:'cat-disney'},"Disney's Grand Californian Hotel & Spa":{cat:'Disney',c:'cat-disney'},"Pixar Place Hotel":{cat:'Disney',c:'cat-disney'},"Disney's Hotel New York – The Art of Marvel":{cat:'Deluxe',c:'cat-deluxe'},"Disney Newport Bay Club":{cat:'Premium',c:'cat-moderate'},"Disney Sequoia Lodge":{cat:'Premium',c:'cat-moderate'},"Disney Hotel Cheyenne":{cat:'Estándar',c:'cat-value'},"Disney Hotel Santa Fe":{cat:'Estándar',c:'cat-value'},"Hotel Xcaret México":{cat:'5 Diamantes',c:'cat-deluxe'},"Hotel Xcaret Arte":{cat:'5 Diamantes',c:'cat-premier'},"La Casa de la Playa":{cat:'Adults Only',c:'cat-preferred'}};
 
-const DEST_IMAGES={orlando:'https://images.unsplash.com/photo-1597466599360-3b9775841aec?w=800&h=400&fit=crop&q=80',universal:'https://images.unsplash.com/photo-1581084324659-bc65fa92df5c?w=800&h=400&fit=crop&q=80',california:'https://images.unsplash.com/photo-1587162146766-e06b1189b907?w=800&h=400&fit=crop&q=80',paris:'https://images.unsplash.com/photo-1595577248023-3ecf7637d6bb?w=800&h=400&fit=crop&q=80','crucero-disney':'https://images.unsplash.com/photo-1548574505-5e239809ee19?w=800&h=400&fit=crop&q=80','crucero-otros':'https://images.unsplash.com/photo-1599640842225-85d111c60e6b?w=800&h=400&fit=crop&q=80',nickelodeon:'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=800&h=400&fit=crop&q=80',xcaret:'https://images.unsplash.com/photo-1552074284-5e88ef1aef18?w=800&h=400&fit=crop&q=80'};
+const DEST_IMAGES={orlando:'https://images.unsplash.com/photo-1597466599360-3b9775841aec?w=800&h=400&fit=crop&q=80',universal:'https://images.unsplash.com/photo-1581084324659-bc65fa92df5c?w=800&h=400&fit=crop&q=80',california:'img/california.png',paris:'https://images.unsplash.com/photo-1595577248023-3ecf7637d6bb?w=800&h=400&fit=crop&q=80','crucero-disney':'https://images.unsplash.com/photo-1548574505-5e239809ee19?w=800&h=400&fit=crop&q=80','crucero-otros':'https://images.unsplash.com/photo-1599640842225-85d111c60e6b?w=800&h=400&fit=crop&q=80',nickelodeon:'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=800&h=400&fit=crop&q=80',xcaret:'https://images.unsplash.com/photo-1552074284-5e88ef1aef18?w=800&h=400&fit=crop&q=80'};
 const DEST_GRADIENTS={orlando:'linear-gradient(135deg,#1a1a6e,#4b2583,#c33f91)',universal:'linear-gradient(135deg,#003366,#0066cc,#00ccff)',california:'linear-gradient(135deg,#ff6b35,#ff9a56,#ffd700)',paris:'linear-gradient(135deg,#2d1b69,#5b3a8c,#e8716d)','crucero-disney':'linear-gradient(135deg,#001a33,#003d66,#0099cc)','crucero-otros':'linear-gradient(135deg,#1a3a4a,#2d6b7a,#4fc3c3)',nickelodeon:'linear-gradient(135deg,#ff6600,#ff9900,#33cc33)',xcaret:'linear-gradient(135deg,#004d40,#00897b,#4dd0e1)'};
 
 const SHIP_DATA={'Disney Magic':{y:'1998',d:'El barco original · Rutas clásicas'},'Disney Wonder':{y:'1999',d:'Alaska y Caribe · Frozen Musical'},'Disney Dream':{y:'2011',d:'AquaDuck · Caribe y Bahamas'},'Disney Fantasy':{y:'2012',d:'AquaDuck · Caribe occidental'},'Disney Wish':{y:'2022',d:'AquaMouse · Gran Hall · Lo más nuevo'},'Disney Treasure':{y:'2024',d:'Aventura y exploración · Último barco'}};
@@ -607,6 +834,1051 @@ function switchTab(t){$('#tab-texto').classList.toggle('active',t==='texto');$('
 // ── ACTIONS ──
 function copiarTexto(){const raw=waHtmlToText($('#wa-preview'));navigator.clipboard.writeText(raw).then(()=>showToast('Copiado al portapapeles ✅'))}
 function descargarImagen(){const card=$('#card-render');showToast('Generando imagen...');html2canvas(card,{scale:2,backgroundColor:null,useCORS:true,logging:false}).then(canvas=>{const a=document.createElement('a');a.download=`Cotizacion_${(v('nombre')||'cliente').replace(/\s+/g,'_')}_${v('destino')}.png`;a.href=canvas.toDataURL('image/png');a.click();showToast('Imagen descargada ✅')})}
+
+// ══════════════════════════════════════════════════════════════
+// MAIN TAB SWITCHING
+// ══════════════════════════════════════════════════════════════
+function switchMainTab(tab){
+  document.getElementById('tab-cotizador-content').style.display=tab==='cotizador'?'':'none';
+  document.getElementById('tab-itinerario-content').style.display=tab==='itinerario'?'':'none';
+  document.getElementById('mtab-cotizador').classList.toggle('active',tab==='cotizador');
+  document.getElementById('mtab-itinerario').classList.toggle('active',tab==='itinerario');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ══════════════════════════════════════════════════════════════
+// ITINERARY TEMPLATES
+// ══════════════════════════════════════════════════════════════
+const IT_IMAGES={
+  'disney-world':'https://images.unsplash.com/photo-1597466599360-3b9775841aec?w=1200&h=600&fit=crop&q=80',
+  'disneyland-cal':'https://images.unsplash.com/photo-1587162146766-e06b1189b907?w=1200&h=600&fit=crop&q=80',
+  'crucero-disney':'https://images.unsplash.com/photo-1548574505-5e239809ee19?w=1200&h=600&fit=crop&q=80',
+  'universal':'https://images.unsplash.com/photo-1581084324659-bc65fa92df5c?w=1200&h=600&fit=crop&q=80'
+};
+const IT_GRADIENTS={
+  'disney-world':'linear-gradient(135deg,#1a1a6e,#4b2583,#c33f91)',
+  'disneyland-cal':'linear-gradient(135deg,#ff6b35,#ff9a56,#ffd700)',
+  'crucero-disney':'linear-gradient(135deg,#001a33,#003d66,#0099cc)',
+  'universal':'linear-gradient(135deg,#003366,#0066cc,#00ccff)'
+};
+const DAY_COLORS=['#E8716D','#7C3AED','#0D9488','#2563EB','#D97706','#059669','#E11D48','#6366F1','#14B8A6','#F59E0B','#8B5CF6','#EC4899'];
+
+const IT_TEMPLATES={
+'disney-world-5':{
+  title:'Aventura Mágica en Disney World ✨',
+  hotel:"Disney's Art of Animation Resort",
+  cover:IT_IMAGES['disney-world'],
+  gradient:IT_GRADIENTS['disney-world'],
+  docs:[
+    {icon:'📱',title:'Descargar My Disney Experience',desc:'App oficial para reservaciones, filas y mapa'},
+    {icon:'🎫',title:'Vincular entradas a la app',desc:'Tener los boletos listos en la app antes de llegar'},
+    {icon:'📋',title:'Check-in online del hotel',desc:'Disponible 60 días antes'},
+    {icon:'🍽️',title:'Reservaciones de restaurantes',desc:'Se abren 60 días antes — reservar con anticipación'},
+    {icon:'⚡',title:'Lightning Lane',desc:'Se reserva desde la app el mismo día'}
+  ],
+  days:[
+    {title:'Llegada a Orlando',icon:'✈️',type:'travel',
+     acts:[
+       {t:'',d:'✈️ Llegada al Aeropuerto Internacional de Orlando (MCO)',i:''},
+       {t:'',d:'🚐 Traslado al hotel (Uber/Lyft o servicio contratado)',i:''},
+       {t:'',d:'🏨 Check-in en el hotel — recoger MagicBands si aplica',i:''},
+       {t:'',d:'🛍️ Explorar Disney Springs — tiendas, restaurantes y ambiente Disney',i:''},
+       {t:'',d:'🍽️ Cena en Disney Springs (T-REX Cafe, The Boathouse o similar)',i:''}
+     ],
+     tips:['Descarga la app My Disney Experience y vincula tus entradas ANTES de llegar','Si llegas temprano, aprovecha para comprar souvenirs en Disney Springs sin prisa','Pide tu MagicBand+ personalizado con anticipación en la app','Acuéstate temprano — mañana arranca la magia temprano']},
+    {title:'Magic Kingdom 🏰',icon:'🏰',type:'park',
+     acts:[
+       {t:'7:00 AM',d:'⏰ Despertar y prepararse — desayuno rápido',i:''},
+       {t:'7:30 AM',d:'🚌 Tomar transporte al parque (bus, monorriel o ferry)',i:''},
+       {t:'8:00 AM',d:'🎟️ Entrada anticipada (30 min antes para huéspedes Disney)',i:''},
+       {t:'8:00 AM',d:'🎢 Directo a Tiana\'s Bayou Adventure y Seven Dwarfs Mine Train',i:''},
+       {t:'9:30 AM',d:'🚀 TRON Lightcycle Run (fila virtual o Lightning Lane)',i:''},
+       {t:'10:30 AM',d:'🎠 Peter Pan\'s Flight + It\'s a Small World + Haunted Mansion',i:''},
+       {t:'12:30 PM',d:'🍽️ Almuerzo (reservación en Be Our Guest o Columbia Harbour House)',i:''},
+       {t:'2:00 PM',d:'🏴‍☠️ Pirates of the Caribbean + Jungle Cruise + Thunder Mountain',i:''},
+       {t:'3:30 PM',d:'🎪 Festival of Fantasy Parade (buscar lugar 20 min antes)',i:''},
+       {t:'4:30 PM',d:'🏰 Foto en el Castillo de Cenicienta + explorar tiendas Main Street',i:''},
+       {t:'6:00 PM',d:'🍕 Cena (Cosmic Ray\'s o reservación en restaurante)',i:''},
+       {t:'7:00 PM',d:'🎢 Re-rides de atracciones favoritas con menos fila',i:''},
+       {t:'9:00 PM',d:'🎆 Happily Ever After — Show de fuegos artificiales',i:''}
+     ],
+     tips:['Llega 30 min antes de apertura — la primera hora es la menos concurrida','TRON tiene Virtual Queue — reserva a las 7:00 AM exactas en la app','El mejor lugar para fuegos artificiales es al inicio de Main Street frente al castillo','Si tienes niños pequeños, haz Rider Switch en las montañas rusas','Usa Mobile Order en la app para pedir comida rápida sin esperar fila']},
+    {title:'EPCOT 🌎',icon:'🌎',type:'park',
+     acts:[
+       {t:'8:00 AM',d:'🎟️ Entrada anticipada — directo a Guardians of the Galaxy: Cosmic Rewind',i:''},
+       {t:'9:00 AM',d:'🧊 Frozen Ever After (ir temprano, siempre tiene fila)',i:''},
+       {t:'10:00 AM',d:'🚀 Test Track + Mission: SPACE + Journey of Water',i:''},
+       {t:'11:30 AM',d:'🌎 Inicio del recorrido por World Showcase — México y Noruega',i:''},
+       {t:'12:30 PM',d:'🍽️ Almuerzo en World Showcase (San Angel Inn en México o Le Cellier en Canadá)',i:''},
+       {t:'2:00 PM',d:'🗾 Continuar World Showcase — Japón, Marruecos, Francia, UK',i:''},
+       {t:'3:30 PM',d:'🍦 Snacks del mundo — croissant en Francia, gelato en Italia',i:''},
+       {t:'5:00 PM',d:'🎭 Remy\'s Ratatouille Adventure en el pabellón de Francia',i:''},
+       {t:'6:30 PM',d:'🍽️ Cena en World Showcase',i:''},
+       {t:'9:00 PM',d:'🎆 Luminous: The Symphony of Us — Show nocturno en la laguna',i:''}
+     ],
+     tips:['Guardians of the Galaxy tiene Virtual Queue — reserva a las 7:00 AM','World Showcase abre a las 11:00 AM — aprovecha la mañana en Future World','Los snacks de los pabellones son una experiencia imperdible — prueba de todo','EPCOT es enorme — usa zapatos cómodos, vas a caminar mucho','Si hay festival (Food & Wine, Flower & Garden), prueba los platillos especiales']},
+    {title:'Hollywood Studios 🎬',icon:'🎬',type:'park',
+     acts:[
+       {t:'8:00 AM',d:'🎟️ Entrada anticipada — directo a Star Wars: Rise of the Resistance',i:''},
+       {t:'9:15 AM',d:'🧸 Slinky Dog Dash en Toy Story Land',i:''},
+       {t:'10:00 AM',d:'🗼 Tower of Terror + Rock \'n\' Roller Coaster',i:''},
+       {t:'11:00 AM',d:'🤠 Toy Story Mania + Alien Swirling Saucers',i:''},
+       {t:'12:00 PM',d:'🍽️ Almuerzo (Woody\'s Lunch Box o Backlot Express)',i:''},
+       {t:'1:00 PM',d:'🚀 Millennium Falcon: Smugglers Run en Galaxy\'s Edge',i:''},
+       {t:'2:00 PM',d:'🔫 Explorar Star Wars: Galaxy\'s Edge — cantina Oga\'s, tiendas',i:''},
+       {t:'3:30 PM',d:'🎭 Indiana Jones Stunt Spectacular o shows en vivo',i:''},
+       {t:'5:00 PM',d:'📸 Fotos en Hollywood Boulevard + tiendas',i:''},
+       {t:'6:30 PM',d:'🍽️ Cena (50\'s Prime Time Café o reservación)',i:''},
+       {t:'8:00 PM',d:'🎆 Fantasmic! — Show nocturno (llegar 45 min antes para buen lugar)',i:''}
+     ],
+     tips:['Rise of the Resistance es LA atracción — ve PRIMERO al abrir','En Galaxy\'s Edge puedes construir tu propia espada láser ($249 USD) — experiencia única','Slinky Dog Dash tiene filas largas TODO el día — hazlo temprano','Para Fantasmic! llega al menos 45 min antes para buen asiento','Si llueve, Tower of Terror y las atracciones techadas son tu mejor opción']},
+    {title:'Animal Kingdom 🦁',icon:'🦁',type:'park',
+     acts:[
+       {t:'7:30 AM',d:'🎟️ Entrada anticipada — directo a Flight of Passage en Pandora',i:''},
+       {t:'8:30 AM',d:'🌊 Na\'vi River Journey en Pandora',i:''},
+       {t:'9:30 AM',d:'🦁 Kilimanjaro Safaris (animales más activos por la mañana)',i:''},
+       {t:'10:30 AM',d:'🎢 Expedition Everest',i:''},
+       {t:'11:30 AM',d:'🦕 Dinosaur + Kali River Rapids',i:''},
+       {t:'12:30 PM',d:'🍽️ Almuerzo (Flame Tree Barbecue o Satu\'li Canteen en Pandora)',i:''},
+       {t:'2:00 PM',d:'🌳 Explorar los senderos — Maharajah Jungle Trek, Gorilla Falls',i:''},
+       {t:'3:00 PM',d:'🎭 Finding Nemo: The Big Blue...and Beyond! (show)',i:''},
+       {t:'4:00 PM',d:'🌟 Regreso al hotel — tarde de piscina y descanso',i:''},
+       {t:'6:00 PM',d:'🍽️ Cena fuera de parques o en Disney Springs',i:''}
+     ],
+     tips:['Flight of Passage es la mejor atracción de TODOS los parques — vale cualquier espera','El safari es MUCHO mejor por la mañana — los animales están activos y visibles','Animal Kingdom cierra más temprano que los demás parques — planea tu tarde libre','Pandora de noche es espectacular — si el parque cierra tarde, quédate','Kali River Rapids te moja MUCHO — lleva poncho o cambio de ropa']},
+    {title:'Día libre · Disney Springs 🛍️',icon:'🌴',type:'free',
+     acts:[
+       {t:'9:00 AM',d:'😴 Despertar sin prisa — desayuno relajado',i:''},
+       {t:'10:00 AM',d:'🏊 Mañana de piscina en el hotel — disfrutar las instalaciones',i:''},
+       {t:'12:00 PM',d:'🍽️ Almuerzo en el hotel o en Disney Springs',i:''},
+       {t:'2:00 PM',d:'🛍️ Disney Springs — tiendas, World of Disney, LEGO Store',i:''},
+       {t:'4:00 PM',d:'🎳 Actividades opcionales: boliche Splitsville o AMC Cines',i:''},
+       {t:'6:00 PM',d:'🍽️ Cena especial — The Boathouse, Morimoto Asia o Wine Bar George',i:''},
+       {t:'8:00 PM',d:'🎆 Paseo nocturno por Disney Springs — ambiente y música en vivo',i:''}
+     ],
+     tips:['Es importante tener un día de descanso — los pies y el cuerpo lo agradecerán','Disney Springs no requiere entrada — es gratis','Estacionamiento gratuito en Disney Springs','Las tiendas de Pin Trading y Bibbidi Bobbidi Boutique son experiencias en sí','Si quieres un día extra de parque, puedes ir a revisitar tu favorito']},
+    {title:'Check-out y regreso ✈️',icon:'✈️',type:'travel',
+     acts:[
+       {t:'7:00 AM',d:'🧳 Empacar y preparar maletas',i:''},
+       {t:'8:00 AM',d:'🍳 Último desayuno en el hotel',i:''},
+       {t:'9:00 AM',d:'🏨 Check-out del hotel (dejar maletas en Bell Services si el vuelo es tarde)',i:''},
+       {t:'10:00 AM',d:'🛍️ Últimas compras o visita rápida a un parque si hay tiempo',i:''},
+       {t:'',d:'🚐 Traslado al aeropuerto MCO',i:''},
+       {t:'',d:'✈️ Vuelo de regreso a casa — ¡llenos de magia! 🏠✨',i:''}
+     ],
+     tips:['Bell Services puede guardar tus maletas gratis si el vuelo es en la tarde','Llega al aeropuerto al menos 2.5 horas antes para vuelos internacionales','Las tiendas del aeropuerto MCO tienen souvenirs Disney de último minuto','Si compraste mucho, considera pagar maleta extra vs enviar por paquetería']}
+  ]
+},
+
+'disney-world-7':{
+  title:'Semana Mágica Completa en Disney World ✨',
+  hotel:"Disney's Caribbean Beach Resort",
+  cover:IT_IMAGES['disney-world'],
+  gradient:IT_GRADIENTS['disney-world'],
+  docs:[
+    {icon:'📱',title:'Descargar My Disney Experience',desc:'App oficial — indispensable'},
+    {icon:'🎫',title:'Vincular entradas a la app',desc:'Tener boletos listos antes de llegar'},
+    {icon:'📋',title:'Check-in online del hotel',desc:'Disponible 60 días antes'},
+    {icon:'🍽️',title:'Reservaciones de restaurantes',desc:'Reservar 60 días antes'},
+    {icon:'⚡',title:'Lightning Lane',desc:'Se reserva el mismo día desde la app'},
+    {icon:'💧',title:'Info parques de agua',desc:'Typhoon Lagoon o Blizzard Beach'}
+  ],
+  days:[
+    {title:'Llegada a Orlando',icon:'✈️',type:'travel',
+     acts:[{t:'',d:'✈️ Llegada al aeropuerto MCO',i:''},{t:'',d:'🚐 Traslado al hotel',i:''},{t:'',d:'🏨 Check-in y descanso',i:''},{t:'',d:'🛍️ Disney Springs — cena y paseo nocturno',i:''}],
+     tips:['Descarga My Disney Experience antes de llegar','Pide tus MagicBands personalizados con anticipación']},
+    {title:'Magic Kingdom 🏰',icon:'🏰',type:'park',
+     acts:[{t:'7:30 AM',d:'🚌 Transporte al parque',i:''},{t:'8:00 AM',d:'🎟️ Entrada anticipada — Tiana\'s Bayou Adventure + Seven Dwarfs Mine Train',i:''},{t:'9:30 AM',d:'🚀 TRON Lightcycle Run',i:''},{t:'10:30 AM',d:'🎠 Fantasyland: Peter Pan, Small World, Haunted Mansion',i:''},{t:'12:30 PM',d:'🍽️ Almuerzo',i:''},{t:'2:00 PM',d:'🏴‍☠️ Adventureland + Frontierland: Pirates, Jungle Cruise, Thunder Mountain',i:''},{t:'3:30 PM',d:'🎪 Festival of Fantasy Parade',i:''},{t:'6:00 PM',d:'🍕 Cena',i:''},{t:'9:00 PM',d:'🎆 Happily Ever After',i:''}],
+     tips:['TRON Virtual Queue a las 7:00 AM','Primer hora del parque = menos filas','Festival of Fantasy es a las 3:00 PM — busca lugar 20 min antes']},
+    {title:'EPCOT 🌎',icon:'🌎',type:'park',
+     acts:[{t:'8:00 AM',d:'🎟️ Entrada anticipada — Guardians of the Galaxy: Cosmic Rewind',i:''},{t:'9:00 AM',d:'🧊 Frozen Ever After',i:''},{t:'10:00 AM',d:'🚀 Test Track + Mission: SPACE',i:''},{t:'11:00 AM',d:'🌎 World Showcase — recorrido por los países',i:''},{t:'12:30 PM',d:'🍽️ Almuerzo en World Showcase',i:''},{t:'2:00 PM',d:'🍦 Snacks del mundo + más pabellones',i:''},{t:'5:00 PM',d:'🎭 Remy\'s Ratatouille Adventure',i:''},{t:'7:00 PM',d:'🍽️ Cena',i:''},{t:'9:00 PM',d:'🎆 Luminous: The Symphony of Us',i:''}],
+     tips:['Guardians Virtual Queue a las 7:00 AM','World Showcase abre a las 11 AM','Prueba snacks de cada país — es la mejor experiencia']},
+    {title:'Hollywood Studios 🎬',icon:'🎬',type:'park',
+     acts:[{t:'8:00 AM',d:'🎟️ Entrada anticipada — Rise of the Resistance',i:''},{t:'9:15 AM',d:'🧸 Slinky Dog Dash',i:''},{t:'10:00 AM',d:'🗼 Tower of Terror + Rock\'n\'Roller Coaster',i:''},{t:'11:30 AM',d:'🤠 Toy Story Mania',i:''},{t:'12:30 PM',d:'🍽️ Almuerzo',i:''},{t:'1:30 PM',d:'🚀 Galaxy\'s Edge: Millennium Falcon + Oga\'s Cantina',i:''},{t:'4:00 PM',d:'🎭 Shows en vivo',i:''},{t:'6:30 PM',d:'🍽️ Cena',i:''},{t:'8:00 PM',d:'🎆 Fantasmic!',i:''}],
+     tips:['Rise of the Resistance es imprescindible — ve al abrir','Galaxy\'s Edge = construir tu sable láser es experiencia ÚNICA','Para Fantasmic! llega 45 min antes']},
+    {title:'Animal Kingdom 🦁',icon:'🦁',type:'park',
+     acts:[{t:'7:30 AM',d:'🎟️ Entrada anticipada — Flight of Passage',i:''},{t:'8:30 AM',d:'🌊 Na\'vi River Journey',i:''},{t:'9:30 AM',d:'🦁 Kilimanjaro Safaris',i:''},{t:'10:30 AM',d:'🎢 Expedition Everest',i:''},{t:'12:00 PM',d:'🍽️ Almuerzo en Satu\'li Canteen',i:''},{t:'1:30 PM',d:'🦕 Dinosaur + Kali River Rapids',i:''},{t:'3:00 PM',d:'🎭 Finding Nemo show',i:''},{t:'4:30 PM',d:'🏊 Regreso al hotel — piscina y descanso',i:''}],
+     tips:['Flight of Passage = mejor atracción de todo Disney World','Safari por la mañana = animales más activos','Animal Kingdom cierra temprano — aprovecha la tarde para descansar']},
+    {title:'Parque de agua · Typhoon Lagoon 🌊',icon:'🌊',type:'park',
+     acts:[{t:'9:00 AM',d:'😴 Despertar sin prisa',i:''},{t:'10:00 AM',d:'🌊 Llegada a Typhoon Lagoon',i:''},{t:'10:30 AM',d:'🏄 Ola gigante + toboganes',i:''},{t:'12:00 PM',d:'🍽️ Almuerzo en el parque',i:''},{t:'1:00 PM',d:'🛟 Lazy river + snorkel con tiburones (opcional)',i:''},{t:'3:00 PM',d:'🏊 Regreso al hotel — descanso',i:''},{t:'6:00 PM',d:'🍽️ Cena especial fuera de parques',i:''}],
+     tips:['Lleva bloqueador solar waterproof','Los lockers cuestan ~$13-16 USD','El snorkel con tiburones es con tiburones REALES — experiencia increíble']},
+    {title:'Magic Kingdom (regreso favoritos) 🏰',icon:'🏰',type:'park',
+     acts:[{t:'8:00 AM',d:'🎟️ Entrada anticipada — re-rides de favoritos',i:''},{t:'10:00 AM',d:'🎠 Atracciones que faltaron o quieras repetir',i:''},{t:'12:00 PM',d:'🍽️ Almuerzo especial (Be Our Guest o Crystal Palace con personajes)',i:''},{t:'2:00 PM',d:'📸 Fotos con personajes en los meet & greets',i:''},{t:'4:00 PM',d:'🛍️ Compras de último momento en Main Street',i:''},{t:'6:00 PM',d:'🍽️ Última cena mágica',i:''},{t:'9:00 PM',d:'🎆 Happily Ever After — despedida perfecta',i:''}],
+     tips:['Este día es para disfrutar sin prisa — ya conoces el parque','Es tu última oportunidad para fotos y souvenirs','Disfruta los detalles que no viste la primera vez']},
+    {title:'Disney Springs y último día 🛍️',icon:'🛍️',type:'free',
+     acts:[{t:'9:00 AM',d:'😴 Despertar relajado',i:''},{t:'10:00 AM',d:'🏊 Piscina del hotel',i:''},{t:'12:00 PM',d:'🛍️ Disney Springs — últimas compras',i:''},{t:'3:00 PM',d:'🧳 Preparar maletas',i:''},{t:'6:00 PM',d:'🍽️ Cena de despedida',i:''}],
+     tips:['World of Disney en Springs es la tienda MÁS grande','Empaca recuerdos con cuidado — hay cosas frágiles']},
+    {title:'Check-out y regreso ✈️',icon:'✈️',type:'travel',
+     acts:[{t:'7:00 AM',d:'🧳 Empacar',i:''},{t:'8:00 AM',d:'🍳 Último desayuno',i:''},{t:'9:00 AM',d:'🏨 Check-out',i:''},{t:'',d:'🚐 Traslado al aeropuerto',i:''},{t:'',d:'✈️ Vuelo de regreso 🏠✨',i:''}],
+     tips:['Bell Services guarda maletas gratis','Llega 2.5 hrs antes al aeropuerto para vuelos internacionales']}
+  ]
+},
+
+'disneyland-cal':{
+  title:'Escapada Mágica a Disneyland California 🎡',
+  hotel:'Disneyland Hotel',
+  cover:IT_IMAGES['disneyland-cal'],
+  gradient:IT_GRADIENTS['disneyland-cal'],
+  docs:[
+    {icon:'📱',title:'Descargar Disneyland App',desc:'App oficial para filas, mapa y Mobile Order'},
+    {icon:'🎫',title:'Vincular entradas a la app',desc:'Tener boletos listos'},
+    {icon:'⚡',title:'Lightning Lane',desc:'Opciones Multi Pass, Single Pass o Premier Pass'},
+    {icon:'🅿️',title:'Estacionamiento / Transporte',desc:'Info del hotel al parque'}
+  ],
+  days:[
+    {title:'Llegada a Anaheim',icon:'✈️',type:'travel',
+     acts:[{t:'',d:'✈️ Llegada al aeropuerto LAX o SNA',i:''},{t:'',d:'🚐 Traslado al hotel en Anaheim (~30 min desde SNA)',i:''},{t:'',d:'🏨 Check-in en el hotel',i:''},{t:'',d:'🛍️ Explorar Downtown Disney — tiendas y restaurantes',i:''},{t:'',d:'🍽️ Cena en Downtown Disney (Earl of Sandwich, Tortilla Jo\'s)',i:''}],
+     tips:['El aeropuerto John Wayne (SNA) es más cercano que LAX','El hotel Disneyland tiene entrada peatonal directa a los parques','Downtown Disney es gratuito — ideal para tu primera noche']},
+    {title:'Disneyland Park 🏰',icon:'🏰',type:'park',
+     acts:[{t:'7:30 AM',d:'🎟️ Entrada anticipada para huéspedes de hoteles Disney',i:''},{t:'7:30 AM',d:'🎢 Directo a Rise of the Resistance en Galaxy\'s Edge',i:''},{t:'9:00 AM',d:'⛰️ Matterhorn Bobsleds + Space Mountain',i:''},{t:'10:30 AM',d:'🎠 Fantasyland: Indiana Jones, Pirates, Haunted Mansion',i:''},{t:'12:00 PM',d:'🍽️ Almuerzo (Blue Bayou para experiencia única o Docking Bay 7)',i:''},{t:'1:30 PM',d:'🚀 Galaxy\'s Edge: Millennium Falcon + explorar',i:''},{t:'3:00 PM',d:'🏰 Sleeping Beauty Castle + Main Street',i:''},{t:'5:00 PM',d:'🎢 Big Thunder Mountain + Splash Mountain',i:''},{t:'7:00 PM',d:'🍽️ Cena',i:''},{t:'9:00 PM',d:'🎆 Wondrous Journeys o show nocturno',i:''}],
+     tips:['Rise of the Resistance PRIMERO — es la más popular','Blue Bayou es el restaurante DENTRO de Pirates of the Caribbean — experiencia mágica','El castillo de Disneyland es el ORIGINAL — Walt Disney caminó por aquí','Disneyland es más compacto que WDW — puedes hacer más en menos tiempo']},
+    {title:'Disney California Adventure 🎡',icon:'🎡',type:'park',
+     acts:[{t:'8:00 AM',d:'🎟️ Entrada al parque',i:''},{t:'8:00 AM',d:'🕸️ Directo a WEB SLINGERS: A Spider-Man Adventure',i:''},{t:'9:00 AM',d:'🎢 Radiator Springs Racers en Cars Land (fila o Lightning Lane)',i:''},{t:'10:00 AM',d:'🦸 Avengers Campus — encuentros con superhéroes',i:''},{t:'11:00 AM',d:'🎢 Incredicoaster + Guardians of the Galaxy: Mission Breakout',i:''},{t:'12:30 PM',d:'🍽️ Almuerzo (Lamplight Lounge o Pym Test Kitchen)',i:''},{t:'2:00 PM',d:'🎭 Frozen: Live at the Hyperion',i:''},{t:'3:30 PM',d:'🏖️ Pixar Pier + juegos',i:''},{t:'6:00 PM',d:'🍽️ Cena',i:''},{t:'8:00 PM',d:'🌊 World of Color — show de agua y luces',i:''}],
+     tips:['Radiator Springs Racers es LA atracción — ve temprano','Cars Land de noche es ESPECTACULAR — las luces de neón son mágicas','World of Color es imperdible — busca lugar 30 min antes','Pym Test Kitchen tiene comida con porciones gigantes — divertidísimo']},
+    {title:'Park Hopper + Downtown Disney 🎉',icon:'🎉',type:'park',
+     acts:[{t:'8:00 AM',d:'🏰 Disneyland Park — atracciones favoritas para repetir',i:''},{t:'10:00 AM',d:'🎡 Saltar a California Adventure — lo que faltó ayer',i:''},{t:'12:00 PM',d:'🍽️ Almuerzo',i:''},{t:'2:00 PM',d:'📸 Fotos con personajes y re-rides',i:''},{t:'4:00 PM',d:'🛍️ Downtown Disney — compras y souvenirs',i:''},{t:'6:00 PM',d:'🍽️ Cena especial de despedida',i:''},{t:'8:00 PM',d:'🎆 Show nocturno de despedida',i:''}],
+     tips:['Este es tu día para lo que te faltó y repetir favoritos','Park Hopper te permite saltar entre ambos parques','Las tiendas de Downtown Disney tienen cosas exclusivas']},
+    {title:'Check-out y regreso ✈️',icon:'✈️',type:'travel',
+     acts:[{t:'8:00 AM',d:'🧳 Empacar y desayuno',i:''},{t:'9:00 AM',d:'🏨 Check-out del hotel',i:''},{t:'',d:'🚐 Traslado al aeropuerto',i:''},{t:'',d:'✈️ Vuelo de regreso 🏠✨',i:''}],
+     tips:['Si tu vuelo es en la tarde, puedes dar una última vuelta por Downtown Disney','El aeropuerto SNA es pequeño y rápido — no necesitas llegar tan temprano como LAX']}
+  ]
+},
+
+'crucero-disney-4':{
+  title:'Crucero Disney · Bahamas ⚓',
+  hotel:'Puerto Cañaveral, Florida',
+  cover:IT_IMAGES['crucero-disney'],
+  gradient:IT_GRADIENTS['crucero-disney'],
+  docs:[
+    {icon:'📱',title:'Descargar Disney Cruise Line App',desc:'Para actividades, horarios y reservaciones a bordo'},
+    {icon:'🛂',title:'Documentos de viaje',desc:'Pasaporte vigente obligatorio para todos los viajeros'},
+    {icon:'📋',title:'Check-in online',desc:'Disponible 30 días antes — obligatorio'},
+    {icon:'👗',title:'Código de vestimenta',desc:'Noche de gala: vestido/traje · Noche pirata: opcional disfraz'},
+    {icon:'💳',title:'Crédito a bordo',desc:'Vincular tarjeta de crédito para compras a bordo'}
+  ],
+  days:[
+    {title:'Llegada y embarque 🚢',icon:'🚢',type:'cruise',
+     acts:[{t:'',d:'✈️ Llegada a Orlando (si aplica)',i:''},{t:'',d:'🚐 Traslado a Puerto Cañaveral (~1 hora desde MCO)',i:''},{t:'12:00 PM',d:'🚢 Inicio de embarque (check-in y foto de bienvenida)',i:''},{t:'1:00 PM',d:'🍽️ Almuerzo buffet en Cabanas — está incluido',i:''},{t:'2:00 PM',d:'🗺️ Explorar el barco — piscinas, restaurantes, spa',i:''},{t:'3:00 PM',d:'👶 Registrar niños en los clubs (Oceaneer Club)',i:''},{t:'4:00 PM',d:'🎉 Sail Away Party en la cubierta — ¡zarpa el barco!',i:''},{t:'5:45 PM',d:'🍽️ Primera cena en restaurante rotativo (vestimenta casual elegante)',i:''},{t:'8:30 PM',d:'🎭 Show en el Walt Disney Theatre',i:''},{t:'10:00 PM',d:'🌙 Explorar zonas de adultos — bar, discoteca, cubierta',i:''}],
+     tips:['Llega al puerto entre 11 AM - 1 PM para embarque relajado','El almuerzo del día de embarque es buffet — come bien porque la cena es más tarde','La Sail Away Party es mágica — no te la pierdas','Lleva traje de baño en tu equipaje de mano — las piscinas abren desde el embarque','Registra a los niños en Oceaneer Club el primer día — es INCREÍBLE']},
+    {title:'Día en el mar 🌊',icon:'🌊',type:'cruise',
+     acts:[{t:'7:30 AM',d:'🍳 Desayuno en restaurante o buffet',i:''},{t:'9:00 AM',d:'🏊 Piscinas y toboganes (AquaDuck/AquaMouse según barco)',i:''},{t:'10:30 AM',d:'👸 Encuentro con princesas y personajes',i:''},{t:'12:00 PM',d:'🍽️ Almuerzo',i:''},{t:'1:00 PM',d:'🎨 Actividades: trivia, manualidades, concursos en piscina',i:''},{t:'3:00 PM',d:'🧖 Spa o tiempo libre en cubierta',i:''},{t:'4:00 PM',d:'🍹 Snack en cubierta + helado gratis',i:''},{t:'5:45 PM',d:'🍽️ Cena en restaurante rotativo',i:''},{t:'8:00 PM',d:'🎭 Show nocturno en el teatro',i:''},{t:'9:30 PM',d:'🏴‍☠️ Fiesta pirata en cubierta con fuegos artificiales',i:''}],
+     tips:['La fiesta pirata con fuegos artificiales es ÚNICA — solo Disney lo hace en el mar','El helado y servicio a la habitación son GRATIS 24/7','Reserva Palo o Remy (restaurantes de adultos) con anticipación — son la mejor cena','Los clubs de niños están incluidos y los niños NO van a querer salir','Reserva tratamientos de spa el día de navegación — se llenan rápido']},
+    {title:'Castaway Cay 🏝️',icon:'🏝️',type:'cruise',
+     acts:[{t:'8:00 AM',d:'🍳 Desayuno temprano',i:''},{t:'9:00 AM',d:'🏝️ Desembarque en Castaway Cay — isla privada de Disney',i:''},{t:'9:30 AM',d:'🏖️ Elegir camastros en la playa familiar o de adultos',i:''},{t:'10:00 AM',d:'🚴 Actividades: snorkel, kayak, bicicletas, tobogán acuático',i:''},{t:'12:00 PM',d:'🍔 Almuerzo BBQ en la isla — ¡INCLUIDO y delicioso!',i:''},{t:'1:00 PM',d:'🏊 Más playa + actividades acuáticas',i:''},{t:'3:00 PM',d:'🛍️ Compras en las tienditas de la isla',i:''},{t:'4:00 PM',d:'🚢 Regreso al barco',i:''},{t:'5:45 PM',d:'🍽️ Cena de gala (noche elegante)',i:''},{t:'8:30 PM',d:'🎭 Show final en el teatro',i:''}],
+     tips:['Castaway Cay es EXCLUSIVA de Disney — solo se puede llegar en crucero Disney','La playa de adultos (Serenity Bay) es espectacular — paz total','El almuerzo BBQ en la isla está incluido y es delicioso','Lleva zapatos de agua — la arena puede ser dura en algunas zonas','Reserva la cabaña privada si quieres la experiencia VIP','Esta noche es de gala — lleva vestido/traje para la cena']},
+    {title:'Desembarque 🛳️',icon:'🛳️',type:'cruise',
+     acts:[{t:'7:00 AM',d:'🍳 Último desayuno a bordo',i:''},{t:'8:00 AM',d:'🧳 Desembarque según grupo asignado',i:''},{t:'9:00 AM',d:'🛂 Pasar por aduanas e inmigración',i:''},{t:'',d:'🚐 Traslado al aeropuerto o siguiente destino',i:''},{t:'',d:'✈️ Vuelo de regreso 🏠✨',i:''}],
+     tips:['Deja tus maletas grandes afuera del camarote la noche anterior','Desayuna temprano para evitar las multitudes','Ten a la mano pasaporte y documentos de desembarque','Si tu vuelo es tarde, puedes visitar Kennedy Space Center camino al aeropuerto']}
+  ]
+},
+
+'crucero-disney-7':{
+  title:'Crucero Disney · 7 Noches Caribe ⚓',
+  hotel:'Puerto Cañaveral, Florida',
+  cover:IT_IMAGES['crucero-disney'],
+  gradient:IT_GRADIENTS['crucero-disney'],
+  docs:[
+    {icon:'📱',title:'Descargar Disney Cruise Line App',desc:'Actividades y horarios'},
+    {icon:'🛂',title:'Documentos de viaje',desc:'Pasaporte vigente obligatorio'},
+    {icon:'📋',title:'Check-in online',desc:'30 días antes — obligatorio'},
+    {icon:'👗',title:'Código de vestimenta',desc:'2 noches de gala + noche pirata'},
+    {icon:'🏖️',title:'Excursiones en puertos',desc:'Reservar con anticipación en la app'}
+  ],
+  days:[
+    {title:'Embarque 🚢',icon:'🚢',type:'cruise',
+     acts:[{t:'12:00 PM',d:'🚢 Embarque en Puerto Cañaveral',i:''},{t:'1:00 PM',d:'🍽️ Almuerzo buffet',i:''},{t:'2:00 PM',d:'🗺️ Explorar el barco',i:''},{t:'4:00 PM',d:'🎉 Sail Away Party',i:''},{t:'5:45 PM',d:'🍽️ Primera cena',i:''},{t:'8:30 PM',d:'🎭 Show en el teatro',i:''}],
+     tips:['Llega al puerto entre 11 AM - 1 PM','Traje de baño en equipaje de mano — piscinas abren desde embarque']},
+    {title:'Día en el mar 🌊',icon:'🌊',type:'cruise',
+     acts:[{t:'8:00 AM',d:'🍳 Desayuno',i:''},{t:'9:00 AM',d:'🏊 Piscinas y toboganes',i:''},{t:'10:30 AM',d:'👸 Meet & greet con personajes',i:''},{t:'12:00 PM',d:'🍽️ Almuerzo',i:''},{t:'2:00 PM',d:'🎨 Actividades y trivia',i:''},{t:'4:00 PM',d:'🍹 Snacks y helado en cubierta',i:''},{t:'5:45 PM',d:'🍽️ Cena — noche de gala',i:''},{t:'8:30 PM',d:'🎭 Show de Broadway',i:''}],
+     tips:['Reserva Palo/Remy con anticipación','Los clubs de niños son INCREÍBLES','Primera noche de gala — traje/vestido elegante']},
+    {title:'Puerto 1 — Cozumel, México 🇲🇽',icon:'🏖️',type:'cruise',
+     acts:[{t:'7:00 AM',d:'🍳 Desayuno temprano',i:''},{t:'8:00 AM',d:'🚢 Llegada a Cozumel',i:''},{t:'9:00 AM',d:'🏖️ Excursión: snorkel en arrecife, playa o paseo en la isla',i:''},{t:'12:00 PM',d:'🍽️ Almuerzo en la isla o regreso al barco',i:''},{t:'2:00 PM',d:'🛍️ Compras en el muelle',i:''},{t:'4:00 PM',d:'🚢 Regreso al barco (verificar hora límite)',i:''},{t:'5:45 PM',d:'🍽️ Cena',i:''},{t:'8:30 PM',d:'🎭 Show nocturno',i:''}],
+     tips:['Reserva excursiones con anticipación — las de Disney son las más seguras','El barco NO te espera si llegas tarde — respeta los horarios','El snorkel en Cozumel es espectacular — agua cristalina']},
+    {title:'Puerto 2 — Grand Cayman 🇰🇾',icon:'🏖️',type:'cruise',
+     acts:[{t:'7:00 AM',d:'🍳 Desayuno',i:''},{t:'8:30 AM',d:'🚤 Tender boat a la isla (no hay muelle directo)',i:''},{t:'9:30 AM',d:'🏖️ 7 Mile Beach o excursión con mantarrayas en Stingray City',i:''},{t:'12:00 PM',d:'🍽️ Almuerzo',i:''},{t:'2:00 PM',d:'🛍️ George Town — tiendas duty-free',i:''},{t:'4:00 PM',d:'🚤 Tender de regreso al barco',i:''},{t:'5:45 PM',d:'🍽️ Cena',i:''},{t:'9:30 PM',d:'🏴‍☠️ Fiesta pirata + fuegos artificiales',i:''}],
+     tips:['Stingray City es experiencia ÚNICA — acariciar mantarrayas','El tender boat puede tener fila — ve temprano','Noche pirata — vístanse de pirata si quieren']},
+    {title:'Puerto 3 — Falmouth, Jamaica 🇯🇲',icon:'🏖️',type:'cruise',
+     acts:[{t:'7:00 AM',d:'🍳 Desayuno',i:''},{t:'8:30 AM',d:'🚢 Llegada a Falmouth',i:''},{t:'9:30 AM',d:'🏖️ Excursión: Dunn\'s River Falls, playa o tour de la isla',i:''},{t:'12:00 PM',d:'🍽️ Almuerzo',i:''},{t:'3:00 PM',d:'🛍️ Compras en el puerto',i:''},{t:'5:00 PM',d:'🚢 Regreso al barco',i:''},{t:'5:45 PM',d:'🍽️ Cena — segunda noche de gala',i:''},{t:'8:30 PM',d:'🎭 Show final en el teatro',i:''}],
+     tips:['Dunn\'s River Falls es icónico pero mojado — lleva cambio de ropa','Segunda noche de gala — tu mejor outfit']},
+    {title:'Día en el mar 🌊',icon:'🌊',type:'cruise',
+     acts:[{t:'9:00 AM',d:'😴 Despertar sin prisa — desayuno relajado',i:''},{t:'10:00 AM',d:'🏊 Último día de piscina y toboganes',i:''},{t:'12:00 PM',d:'🍽️ Almuerzo',i:''},{t:'2:00 PM',d:'📸 Últimas fotos con personajes',i:''},{t:'4:00 PM',d:'🧖 Spa o cubierta',i:''},{t:'5:45 PM',d:'🍽️ Última cena a bordo — disfruten',i:''},{t:'8:30 PM',d:'🎭 Show de despedida',i:''},{t:'10:00 PM',d:'🧳 Dejar maletas afuera del camarote para desembarque',i:''}],
+     tips:['Último día — disfruta cada momento','Deja maletas empacadas afuera de tu puerta esta noche','Guarda un cambio de ropa para mañana en tu carry-on']},
+    {title:'Castaway Cay 🏝️',icon:'🏝️',type:'cruise',
+     acts:[{t:'8:00 AM',d:'🍳 Desayuno',i:''},{t:'9:00 AM',d:'🏝️ Desembarque en Castaway Cay',i:''},{t:'10:00 AM',d:'🏖️ Playa + snorkel + actividades',i:''},{t:'12:00 PM',d:'🍔 BBQ en la isla',i:''},{t:'2:00 PM',d:'🏊 Más playa',i:''},{t:'4:00 PM',d:'🚢 Regreso al barco',i:''},{t:'5:45 PM',d:'🍽️ Cena de despedida',i:''},{t:'8:30 PM',d:'🎆 Último show',i:''}],
+     tips:['Castaway Cay es lo mejor del crucero — disfrútalo al máximo','Playa de adultos Serenity Bay = paraíso']},
+    {title:'Desembarque ⚓',icon:'⚓',type:'cruise',
+     acts:[{t:'7:00 AM',d:'🍳 Último desayuno',i:''},{t:'8:00 AM',d:'🧳 Desembarque',i:''},{t:'',d:'🚐 Traslado al aeropuerto',i:''},{t:'',d:'✈️ Vuelo de regreso 🏠✨',i:''}],
+     tips:['Desayuna temprano para evitar multitudes','Ten pasaporte y documentos a la mano']}
+  ]
+},
+
+'universal-3':{
+  title:'Aventura en Universal Orlando 🎢',
+  hotel:"Universal's Cabana Bay Beach Resort",
+  cover:IT_IMAGES['universal'],
+  gradient:IT_GRADIENTS['universal'],
+  docs:[
+    {icon:'📱',title:'Descargar Universal Orlando App',desc:'Tiempos de espera, mapa y Virtual Queue'},
+    {icon:'🎫',title:'Vincular entradas',desc:'Tener boletos listos en la app'},
+    {icon:'⚡',title:'Express Pass',desc:'Incluido para huéspedes de hoteles Premier/Preferred'},
+    {icon:'🌋',title:'Info Volcano Bay',desc:'Si incluye parque de agua'}
+  ],
+  days:[
+    {title:'Llegada a Orlando',icon:'✈️',type:'travel',
+     acts:[{t:'',d:'✈️ Llegada al aeropuerto MCO',i:''},{t:'',d:'🚐 Traslado al hotel Universal',i:''},{t:'',d:'🏨 Check-in',i:''},{t:'',d:'🛍️ CityWalk — restaurantes y entretenimiento',i:''},{t:'',d:'🍽️ Cena en CityWalk (Toothsome Chocolate, Bigfire)',i:''}],
+     tips:['Descarga la Universal app antes de llegar','CityWalk no requiere entrada — es gratis','Si te hospedas en hotel Preferred, tienes Express Pass INCLUIDO — game changer']},
+    {title:'Universal Studios Florida 🎬',icon:'🎬',type:'park',
+     acts:[{t:'8:00 AM',d:'🎟️ Early Park Admission (1 hora antes)',i:''},{t:'8:00 AM',d:'🎢 Directo a Hagrid\'s Magical Creatures (si aplica) o Revenge of the Mummy',i:''},{t:'9:00 AM',d:'🧙 Diagon Alley — Harry Potter and the Escape from Gringotts',i:''},{t:'10:30 AM',d:'🦈 JAWS tribute + MEN IN BLACK: Alien Attack',i:''},{t:'11:30 AM',d:'🎢 Hollywood Rip Ride Rockit',i:''},{t:'12:30 PM',d:'🍽️ Almuerzo (Leaky Cauldron en Diagon Alley)',i:''},{t:'2:00 PM',d:'🚂 Hogwarts Express a Islands of Adventure',i:''},{t:'2:30 PM',d:'🏰 Hogsmeade — Forbidden Journey + Flight of the Hippogriff',i:''},{t:'4:00 PM',d:'🍺 Cerveza de mantequilla en Hogsmeade',i:''},{t:'5:00 PM',d:'🚂 Regreso en Hogwarts Express',i:''},{t:'6:00 PM',d:'🍽️ Cena',i:''},{t:'8:00 PM',d:'✨ Paseo nocturno por Diagon Alley iluminado',i:''}],
+     tips:['Hogwarts Express requiere boleto Park-to-Park — es una EXPERIENCIA','Diagon Alley de noche es mágico — las luces son increíbles','En Ollivanders hacen una demostración de selección de varita — ve temprano','Si tienes Express Pass, úsalo en las atracciones con más de 30 min de espera']},
+    {title:'Islands of Adventure 🏝️',icon:'🏝️',type:'park',
+     acts:[{t:'8:00 AM',d:'🎟️ Early Park Admission',i:''},{t:'8:00 AM',d:'🎢 Directo a VelociCoaster (la mejor montaña rusa de Orlando)',i:''},{t:'9:00 AM',d:'🎢 Hagrid\'s Magical Creatures Motorbike Adventure',i:''},{t:'10:00 AM',d:'🦖 Jurassic World: The Ride',i:''},{t:'11:00 AM',d:'🕷️ Amazing Adventures of Spider-Man',i:''},{t:'12:00 PM',d:'🍽️ Almuerzo (Three Broomsticks en Hogsmeade o Mythos)',i:''},{t:'1:30 PM',d:'🐉 Hagrid\'s (repetir si la fila lo permite)',i:''},{t:'2:30 PM',d:'💧 Popeye\'s Rapids + Dudley Do-Right',i:''},{t:'4:00 PM',d:'🏊 Regreso al hotel — piscina',i:''},{t:'6:00 PM',d:'🍽️ Cena en CityWalk',i:''}],
+     tips:['VelociCoaster es IMPERDIBLE — la mejor montaña rusa de todo Orlando','Hagrid\'s tiene filas de 2+ horas — ve al abrir','Mythos fue nombrado mejor restaurante de parques temáticos del mundo','Popeye\'s te moja COMPLETAMENTE — lleva poncho']},
+    {title:'Epic Universe 🌟',icon:'🌟',type:'park',
+     acts:[{t:'8:00 AM',d:'🎟️ Entrada al nuevo parque Epic Universe',i:''},{t:'8:00 AM',d:'🎢 Explorar los mundos: Super Nintendo World, How to Train Your Dragon, Dark Universe',i:''},{t:'10:00 AM',d:'🍄 Super Nintendo World — Mario Kart ride + actividades interactivas',i:''},{t:'12:00 PM',d:'🍽️ Almuerzo temático',i:''},{t:'1:30 PM',d:'🐉 How to Train Your Dragon — montaña rusa + explorar',i:''},{t:'3:00 PM',d:'🧛 Dark Universe — atracciones de monstruos clásicos',i:''},{t:'4:30 PM',d:'🌌 Celestial Park — área central del parque',i:''},{t:'6:00 PM',d:'🍽️ Cena en Epic Universe',i:''},{t:'8:00 PM',d:'✨ Shows nocturnos de cierre',i:''}],
+     tips:['Epic Universe es el parque MÁS NUEVO de Universal — abierto desde 2025','Super Nintendo World es la atracción estrella — lleva la Power-Up Band','El parque es ENORME — planifica tu ruta','Llega temprano — la primera hora tiene menos gente']},
+    {title:'Check-out y regreso ✈️',icon:'✈️',type:'travel',
+     acts:[{t:'8:00 AM',d:'🧳 Empacar y desayuno',i:''},{t:'9:00 AM',d:'🏨 Check-out',i:''},{t:'',d:'🚐 Traslado al aeropuerto',i:''},{t:'',d:'✈️ Vuelo de regreso 🏠✨',i:''}],
+     tips:['CityWalk tiene tiendas de souvenirs de último momento','Llega 2.5 hrs antes al aeropuerto para vuelos internacionales']}
+  ]
+},
+
+'disney-uni-combo':{
+  title:'Disney World + Universal · Orlando Completo 🏰🎢',
+  hotel:"Disney's Pop Century Resort / Universal's Cabana Bay",
+  cover:IT_IMAGES['disney-world'],
+  gradient:'linear-gradient(135deg,#1a1a6e,#003366,#00ccff)',
+  docs:[
+    {icon:'📱',title:'My Disney Experience + Universal App',desc:'Descargar ambas apps'},
+    {icon:'🎫',title:'Entradas Disney + Universal',desc:'Vincular en ambas apps'},
+    {icon:'📋',title:'Check-in online hoteles',desc:'Ambos hoteles'},
+    {icon:'🍽️',title:'Reservaciones de restaurantes',desc:'Disney: 60 días antes'},
+    {icon:'🚐',title:'Traslado entre resorts',desc:'Uber/Lyft entre propiedades Disney y Universal (~20 min)'}
+  ],
+  days:[
+    {title:'Llegada a Orlando',icon:'✈️',type:'travel',
+     acts:[{t:'',d:'✈️ Llegada a MCO',i:''},{t:'',d:'🚐 Traslado al hotel Disney',i:''},{t:'',d:'🏨 Check-in',i:''},{t:'',d:'🛍️ Disney Springs',i:''}],
+     tips:['Los primeros 5 días son Disney, luego Universal — así no cambias de hotel a medio viaje']},
+    {title:'Magic Kingdom 🏰',icon:'🏰',type:'park',
+     acts:[{t:'8:00 AM',d:'🎟️ Entrada anticipada',i:''},{t:'8:00 AM',d:'🎢 Tiana\'s + Seven Dwarfs Mine Train + TRON',i:''},{t:'10:30 AM',d:'🎠 Fantasyland + Adventureland',i:''},{t:'12:30 PM',d:'🍽️ Almuerzo',i:''},{t:'2:00 PM',d:'🏴‍☠️ Frontierland + Liberty Square',i:''},{t:'3:30 PM',d:'🎪 Parade',i:''},{t:'6:00 PM',d:'🍽️ Cena',i:''},{t:'9:00 PM',d:'🎆 Happily Ever After',i:''}],
+     tips:['TRON Virtual Queue a las 7 AM','Primera hora = menos filas']},
+    {title:'EPCOT 🌎',icon:'🌎',type:'park',
+     acts:[{t:'8:00 AM',d:'🎟️ Guardians of the Galaxy',i:''},{t:'9:00 AM',d:'🧊 Frozen Ever After + Test Track',i:''},{t:'11:00 AM',d:'🌎 World Showcase',i:''},{t:'12:30 PM',d:'🍽️ Almuerzo',i:''},{t:'2:00 PM',d:'🍦 Snacks del mundo',i:''},{t:'5:00 PM',d:'🎭 Remy\'s Ratatouille',i:''},{t:'7:00 PM',d:'🍽️ Cena',i:''},{t:'9:00 PM',d:'🎆 Luminous',i:''}],
+     tips:['Guardians VQ a las 7 AM','Prueba snacks de cada país']},
+    {title:'Hollywood Studios 🎬',icon:'🎬',type:'park',
+     acts:[{t:'8:00 AM',d:'🎟️ Rise of the Resistance',i:''},{t:'9:15 AM',d:'🧸 Slinky Dog Dash + Tower of Terror',i:''},{t:'11:00 AM',d:'🚀 Galaxy\'s Edge',i:''},{t:'12:30 PM',d:'🍽️ Almuerzo',i:''},{t:'2:00 PM',d:'🎭 Shows',i:''},{t:'6:30 PM',d:'🍽️ Cena',i:''},{t:'8:00 PM',d:'🎆 Fantasmic!',i:''}],
+     tips:['Rise PRIMERO','Fantasmic! llega 45 min antes']},
+    {title:'Animal Kingdom 🦁',icon:'🦁',type:'park',
+     acts:[{t:'7:30 AM',d:'🎟️ Flight of Passage',i:''},{t:'9:00 AM',d:'🦁 Safari + Everest',i:''},{t:'12:00 PM',d:'🍽️ Almuerzo',i:''},{t:'2:00 PM',d:'🎭 Shows + senderos',i:''},{t:'4:00 PM',d:'🏊 Hotel — piscina',i:''}],
+     tips:['Safari temprano = animales activos','AK cierra temprano — aprovecha la tarde']},
+    {title:'Traslado + CityWalk 🚐',icon:'🚐',type:'travel',
+     acts:[{t:'9:00 AM',d:'🏨 Check-out del hotel Disney',i:''},{t:'10:00 AM',d:'🚐 Traslado a hotel Universal (~20 min)',i:''},{t:'11:00 AM',d:'🏨 Check-in hotel Universal',i:''},{t:'12:00 PM',d:'🍽️ Almuerzo en CityWalk',i:''},{t:'2:00 PM',d:'🏊 Piscina del hotel',i:''},{t:'6:00 PM',d:'🍽️ Cena en CityWalk',i:''}],
+     tips:['Uber entre Disney y Universal cuesta ~$15-20 USD','Día de transición — relax y prepararse para Universal']},
+    {title:'Universal Studios Florida 🎬',icon:'🎬',type:'park',
+     acts:[{t:'8:00 AM',d:'🎟️ Early Entry',i:''},{t:'8:00 AM',d:'🧙 Diagon Alley + Gringotts',i:''},{t:'10:00 AM',d:'🎢 Hollywood Rip Ride + MIB + Mummy',i:''},{t:'12:30 PM',d:'🍽️ Almuerzo en Leaky Cauldron',i:''},{t:'2:00 PM',d:'🚂 Hogwarts Express a IoA',i:''},{t:'2:30 PM',d:'🏰 Hogsmeade + Forbidden Journey',i:''},{t:'5:00 PM',d:'🚂 Regreso',i:''},{t:'6:00 PM',d:'🍽️ Cena',i:''}],
+     tips:['Hogwarts Express = experiencia obligatoria','Diagon Alley de noche es mágico']},
+    {title:'Islands of Adventure 🏝️',icon:'🏝️',type:'park',
+     acts:[{t:'8:00 AM',d:'🎢 VelociCoaster + Hagrid\'s',i:''},{t:'10:00 AM',d:'🦖 Jurassic World + Spider-Man',i:''},{t:'12:00 PM',d:'🍽️ Almuerzo',i:''},{t:'2:00 PM',d:'💧 Water rides + re-rides',i:''},{t:'4:00 PM',d:'🏊 Hotel — piscina',i:''},{t:'6:00 PM',d:'🍽️ Cena en CityWalk',i:''}],
+     tips:['VelociCoaster = mejor montaña rusa de Orlando','Hagrid\'s temprano — filas de 2+ hrs']},
+    {title:'Epic Universe 🌟',icon:'🌟',type:'park',
+     acts:[{t:'8:00 AM',d:'🎢 Super Nintendo World + Dark Universe',i:''},{t:'10:00 AM',d:'🐉 How to Train Your Dragon world',i:''},{t:'12:00 PM',d:'🍽️ Almuerzo',i:''},{t:'2:00 PM',d:'🍄 Re-rides y explorar',i:''},{t:'5:00 PM',d:'🛍️ Compras de último momento',i:''},{t:'7:00 PM',d:'🍽️ Última cena en Orlando',i:''}],
+     tips:['Epic Universe es ENORME — planifica tu ruta','Power-Up Band para Super Nintendo World']},
+    {title:'Check-out y regreso ✈️',icon:'✈️',type:'travel',
+     acts:[{t:'8:00 AM',d:'🧳 Empacar',i:''},{t:'9:00 AM',d:'🏨 Check-out',i:''},{t:'',d:'🚐 Aeropuerto',i:''},{t:'',d:'✈️ Regreso 🏠✨',i:''}],
+     tips:['10 días mágicos completados — ¡épico!']}
+  ]
+},
+
+// ── Disney World 3 días express ──
+'disney-world-3':{
+  title:'Disney World Express ⚡✨',
+  hotel:"Disney's All-Star Movies Resort",
+  cover:IT_IMAGES['disney-world'],
+  gradient:IT_GRADIENTS['disney-world'],
+  docs:[
+    {icon:'📱',title:'Descargar My Disney Experience',desc:'App oficial para reservaciones, filas y mapa'},
+    {icon:'🎫',title:'Vincular entradas a la app',desc:'Tener los boletos listos antes de llegar'},
+    {icon:'⚡',title:'Comprar Genie+ / Lightning Lane',desc:'Imprescindible para 3 días — aprovecha cada minuto'},
+    {icon:'🍽️',title:'Reservaciones de restaurantes',desc:'Se abren 60 días antes'}
+  ],
+  days:[
+    {title:'Llegada a Orlando',icon:'✈️',type:'travel',
+     acts:[{t:'',d:'✈️ Llegada al Aeropuerto (MCO)',i:''},{t:'',d:'🚐 Traslado al hotel',i:''},{t:'',d:'🏨 Check-in',i:''},{t:'',d:'🛍️ Disney Springs — compras y cena',i:''},{t:'7:00 PM',d:'🍽️ Cena en Disney Springs',i:''}],
+     tips:['Descarga My Disney Experience y vincula todo antes de llegar','Compra Genie+ desde la app — es esencial en un viaje corto']},
+    {title:'Magic Kingdom 🏰',icon:'🏰',type:'park',
+     acts:[{t:'7:00 AM',d:'⏰ Despertar temprano',i:''},{t:'7:30 AM',d:'🚌 Transporte al parque',i:''},{t:'8:00 AM',d:'🎟️ Early Entry — directo a TRON y Seven Dwarfs',i:''},{t:'10:00 AM',d:'🏴‍☠️ Pirates + Jungle Cruise + Haunted Mansion',i:''},{t:'12:00 PM',d:'🍽️ Almuerzo rápido en Cosmic Ray\'s',i:''},{t:'1:00 PM',d:'🎢 Thunder Mountain + Splash Mountain',i:''},{t:'3:00 PM',d:'🎪 Festival of Fantasy Parade',i:''},{t:'4:00 PM',d:'🏰 Fotos en el Castillo + It\'s a Small World',i:''},{t:'6:00 PM',d:'🍽️ Cena en el parque',i:''},{t:'8:00 PM',d:'🎆 Happily Ever After — fuegos artificiales',i:''}],
+     tips:['Early Entry es tu arma secreta — llega 30 min antes de apertura','Usa Lightning Lane para las atracciones top']},
+    {title:'EPCOT 🌍',icon:'🌍',type:'park',
+     acts:[{t:'8:00 AM',d:'🎟️ Early Entry — Guardians of the Galaxy: Cosmic Rewind',i:''},{t:'9:30 AM',d:'🚀 Test Track + Mission: SPACE',i:''},{t:'11:00 AM',d:'🍺 World Showcase — tour gastronómico',i:''},{t:'1:00 PM',d:'🍽️ Almuerzo en México o Japón',i:''},{t:'3:00 PM',d:'❄️ Frozen Ever After (Noruega)',i:''},{t:'5:00 PM',d:'🍷 Seguir explorando pabellones',i:''},{t:'7:00 PM',d:'🍽️ Cena en World Showcase',i:''},{t:'9:00 PM',d:'🎆 Luminous — show nocturno',i:''}],
+     tips:['El Virtual Queue de Guardians se abre a las 7 AM — prepárate','World Showcase es increíble para adultos — prueba todo']},
+    {title:'Hollywood Studios ⭐',icon:'⭐',type:'park',
+     acts:[{t:'7:30 AM',d:'🚌 Transporte al parque',i:''},{t:'8:00 AM',d:'🎟️ Early Entry — Rise of the Resistance',i:''},{t:'9:30 AM',d:'🚀 Millennium Falcon: Smugglers Run',i:''},{t:'10:30 AM',d:'🧸 Toy Story Land — Slinky Dog Dash',i:''},{t:'12:00 PM',d:'🍽️ Almuerzo en Backlot Express',i:''},{t:'1:30 PM',d:'🗼 Tower of Terror + Rock \'n\' Roller Coaster',i:''},{t:'3:00 PM',d:'🎬 Shows y entretenimiento',i:''},{t:'5:00 PM',d:'🎬 Fantasmic! (si hay función)',i:''},{t:'7:00 PM',d:'🍽️ Cena',i:''}],
+     tips:['Rise of the Resistance es imperdible — hazla primero','Galaxy\'s Edge vale la pena explorar con calma']},
+    {title:'Día libre y regreso ✈️',icon:'✈️',type:'travel',
+     acts:[{t:'8:00 AM',d:'🧳 Empacar con calma',i:''},{t:'9:00 AM',d:'🏨 Check-out',i:''},{t:'10:00 AM',d:'🛍️ Últimas compras en Disney Springs o Outlets',i:''},{t:'',d:'🚐 Traslado al aeropuerto',i:''},{t:'',d:'✈️ Vuelo de regreso 🏠✨',i:''}],
+     tips:['Organiza souvenirs la noche anterior para no correr','5 días mágicos completados!']}
+  ]
+},
+
+// ── Disney World Solo Adultos ──
+'disney-adults':{
+  title:'Disney World · Escapada Solo Adultos 🥂',
+  hotel:"Disney's Grand Floridian Resort & Spa",
+  cover:IT_IMAGES['disney-world'],
+  gradient:'linear-gradient(135deg,#1a1a2e,#16213e,#0f3460)',
+  docs:[
+    {icon:'📱',title:'Descargar My Disney Experience',desc:'Reservaciones, filas y mapa'},
+    {icon:'🍷',title:'Reservar restaurantes fine dining',desc:'Victoria & Albert\'s, California Grill, Le Cellier'},
+    {icon:'💆',title:'Reservar spa',desc:'Senses Spa en Grand Floridian'},
+    {icon:'⚡',title:'Lightning Lane Multi Pass',desc:'Para maximizar tu tiempo en parques'}
+  ],
+  days:[
+    {title:'Llegada VIP',icon:'✈️',type:'travel',
+     acts:[{t:'',d:'✈️ Llegada a Orlando (MCO)',i:''},{t:'',d:'🚐 Traslado privado al Grand Floridian',i:''},{t:'',d:'🏨 Check-in — Club Level si disponible',i:''},{t:'5:00 PM',d:'💆 Spa o relajarse en la piscina',i:''},{t:'7:30 PM',d:'🍷 Cena en Narcoossee\'s con vista a fuegos artificiales',i:''}],
+     tips:['El Grand Floridian tiene monorriel directo a Magic Kingdom','Club Level incluye lounge con snacks y bebidas todo el día']},
+    {title:'EPCOT Gourmet 🍷',icon:'🌍',type:'park',
+     acts:[{t:'8:00 AM',d:'🎟️ Early Entry — Guardians of the Galaxy',i:''},{t:'9:30 AM',d:'🚀 Test Track',i:''},{t:'10:30 AM',d:'🎨 Figment + Spaceship Earth',i:''},{t:'11:30 AM',d:'🍷 Tour gastronómico World Showcase (empezar por México)',i:''},{t:'1:00 PM',d:'🍽️ Almuerzo en Le Cellier (Canadá) o Takumi-Tei (Japón)',i:''},{t:'3:00 PM',d:'❄️ Frozen + Remy\'s Ratatouille',i:''},{t:'5:00 PM',d:'🍸 Drinks around the world — cada pabellón tiene su coctel',i:''},{t:'7:30 PM',d:'🍽️ Cena en Monsieur Paul (Francia)',i:''},{t:'9:00 PM',d:'🎆 Luminous',i:''}],
+     tips:['EPCOT es EL parque para adultos — disfrutá cada pabellón','Los cocteles de cada país son únicos — prueba el de Japón y Francia']},
+    {title:'Magic Kingdom sin prisas 🏰',icon:'🏰',type:'park',
+     acts:[{t:'8:00 AM',d:'🎟️ Early Entry — TRON',i:''},{t:'9:30 AM',d:'🏴‍☠️ Clásicos: Pirates, Haunted Mansion, Jungle Cruise',i:''},{t:'11:30 AM',d:'🍽️ Brunch en Be Our Guest',i:''},{t:'1:00 PM',d:'🎢 Seven Dwarfs + Thunder Mountain',i:''},{t:'3:00 PM',d:'☕ Pausa — café y relax en el hotel vía monorriel',i:''},{t:'6:00 PM',d:'🏰 Regreso al parque para la noche',i:''},{t:'7:00 PM',d:'🍽️ Cena en Liberty Tree Tavern',i:''},{t:'9:00 PM',d:'🎆 Happily Ever After desde el hub',i:''}],
+     tips:['La ventaja de ir sin niños: puedes tomar pausas y regresar','El monorriel te lleva del Grand Floridian a Magic Kingdom en 5 min']},
+    {title:'Hollywood Studios + Spa 🎬',icon:'⭐',type:'park',
+     acts:[{t:'8:00 AM',d:'🎟️ Early Entry — Rise of the Resistance',i:''},{t:'9:30 AM',d:'🚀 Smugglers Run + explorar Galaxy\'s Edge',i:''},{t:'11:00 AM',d:'🍸 Oga\'s Cantina — bar temático Star Wars',i:''},{t:'12:00 PM',d:'🗼 Tower of Terror',i:''},{t:'1:00 PM',d:'🍽️ Almuerzo en 50\'s Prime Time Cafe',i:''},{t:'2:30 PM',d:'🏨 Regreso al hotel',i:''},{t:'3:30 PM',d:'💆 Spa treatment en Senses Spa',i:''},{t:'6:00 PM',d:'🍸 Cocteles en Enchanted Rose lounge',i:''},{t:'8:00 PM',d:'🍽️ Cena en Victoria & Albert\'s (vestimenta formal)',i:''}],
+     tips:['Victoria & Albert\'s es la MEJOR experiencia gastronómica en Disney','Oga\'s Cantina: reservación obligatoria, cocteles increíbles']},
+    {title:'Animal Kingdom + Pool Day 🦁',icon:'🦁',type:'park',
+     acts:[{t:'7:30 AM',d:'🎟️ Early Entry — Flight of Passage',i:''},{t:'9:00 AM',d:'🦁 Safari Kilimanjaro',i:''},{t:'10:30 AM',d:'🎢 Expedition Everest',i:''},{t:'11:30 AM',d:'🍽️ Almuerzo en Yak & Yeti',i:''},{t:'1:00 PM',d:'🌳 Trails + Tree of Life',i:''},{t:'2:30 PM',d:'🏊 Regreso al hotel — pool day en Grand Floridian',i:''},{t:'5:00 PM',d:'🍸 Cocteles junto a la piscina',i:''},{t:'7:30 PM',d:'🍽️ Cena en California Grill (vista de fuegos a lo lejos)',i:''}],
+     tips:['Flight of Passage es la mejor atracción de todo Disney World','California Grill tiene vista panorámica a Magic Kingdom']},
+    {title:'Disney Springs + Día libre',icon:'🛍️',type:'free',
+     acts:[{t:'9:00 AM',d:'☕ Desayuno tardío en el hotel',i:''},{t:'10:30 AM',d:'💆 Último spa o piscina',i:''},{t:'12:00 PM',d:'🛍️ Disney Springs — tiendas exclusivas',i:''},{t:'1:30 PM',d:'🍽️ Almuerzo en The Boathouse',i:''},{t:'3:00 PM',d:'🍫 Gideon\'s Bakehouse (llega temprano, siempre hay fila)',i:''},{t:'5:00 PM',d:'🎨 Explorar galerías y tiendas de diseñador',i:''},{t:'7:30 PM',d:'🍽️ Cena de despedida en STK Orlando',i:''}],
+     tips:['Gideon\'s Bakehouse: cookies increíbles, siempre hay fila 30-45 min','STK es perfecto para una noche de adultos elegante']},
+    {title:'Check-out y regreso ✈️',icon:'✈️',type:'travel',
+     acts:[{t:'8:00 AM',d:'☕ Último desayuno en el hotel',i:''},{t:'9:30 AM',d:'🏨 Check-out',i:''},{t:'',d:'🚐 Traslado al aeropuerto',i:''},{t:'',d:'✈️ Regreso 🏠✨',i:''}],
+     tips:['Una escapada de lujo Disney completada — sin niños, puro disfrute 🥂']}
+  ]
+},
+
+// ── California Combo (Disneyland + Universal Hollywood) ──
+'california-combo':{
+  title:'California Dreaming · Disneyland + Universal 🌴',
+  hotel:'Disneyland Hotel',
+  cover:IT_IMAGES['disneyland-cal'],
+  gradient:IT_GRADIENTS['disneyland-cal'],
+  docs:[
+    {icon:'📱',title:'Descargar Disneyland App',desc:'Para Genie+, filas y mapa'},
+    {icon:'📱',title:'Descargar Universal App',desc:'Para Express Pass y filas'},
+    {icon:'🎫',title:'Vincular entradas',desc:'Tener boletos listos en ambas apps'},
+    {icon:'🚗',title:'Rentar auto',desc:'Necesario para moverse entre Anaheim y Hollywood'}
+  ],
+  days:[
+    {title:'Llegada a Los Ángeles',icon:'✈️',type:'travel',
+     acts:[{t:'',d:'✈️ Llegada a LAX',i:''},{t:'',d:'🚗 Recoger auto rentado',i:''},{t:'',d:'🏨 Check-in en Disneyland Hotel, Anaheim',i:''},{t:'',d:'🚶 Caminar por Downtown Disney District',i:''},{t:'7:00 PM',d:'🍽️ Cena en Downtown Disney',i:''}],
+     tips:['LAX a Anaheim: ~45 min sin tráfico, 1.5 hrs con tráfico','Evita horas pico (7-9 AM y 4-7 PM) para conducir en LA']},
+    {title:'Disneyland Park 🏰',icon:'🏰',type:'park',
+     acts:[{t:'7:30 AM',d:'🎟️ Early Entry — directo a Rise of the Resistance',i:''},{t:'9:00 AM',d:'🎢 Matterhorn + Space Mountain + Indiana Jones',i:''},{t:'11:00 AM',d:'🏰 Sleeping Beauty Castle + fantasyland',i:''},{t:'12:30 PM',d:'🍽️ Almuerzo en Blue Bayou (dentro de Pirates)',i:''},{t:'2:00 PM',d:'🏴‍☠️ Pirates + Haunted Mansion + Big Thunder Mountain',i:''},{t:'4:00 PM',d:'🎡 Toontown + It\'s a Small World',i:''},{t:'6:00 PM',d:'🍽️ Cena en el parque',i:''},{t:'8:00 PM',d:'🎆 Wondrous Journeys — show nocturno',i:''}],
+     tips:['Blue Bayou es THE restaurante de Disneyland — reserva con anticipación','El parque original de Walt tiene una magia especial']},
+    {title:'Disney California Adventure 🎡',icon:'🎡',type:'park',
+     acts:[{t:'8:00 AM',d:'🎟️ Early Entry — Radiator Springs Racers',i:''},{t:'9:30 AM',d:'🎢 Incredicoaster + Guardians: Mission Breakout',i:''},{t:'11:00 AM',d:'🌊 Grizzly River Run',i:''},{t:'12:00 PM',d:'🍽️ Almuerzo en Flo\'s V8 Cafe (Cars Land)',i:''},{t:'1:30 PM',d:'🕸️ WEB SLINGERS: A Spider-Man Adventure',i:''},{t:'3:00 PM',d:'🎭 Shows y entretenimiento',i:''},{t:'5:00 PM',d:'🍺 Craft beer trail en Pacific Wharf',i:''},{t:'7:00 PM',d:'🍽️ Cena en Carthay Circle Restaurant',i:''},{t:'9:00 PM',d:'💡 World of Color — show nocturno',i:''}],
+     tips:['Cars Land de noche es ESPECTACULAR — quédate para las fotos','Radiator Springs Racers es la mejor atracción del parque']},
+    {title:'Disneyland Park día 2 🏰',icon:'🏰',type:'park',
+     acts:[{t:'8:00 AM',d:'🎟️ Early Entry — lo que faltó ayer',i:''},{t:'9:00 AM',d:'🌟 Star Wars: Galaxy\'s Edge completo',i:''},{t:'10:30 AM',d:'🚀 Smugglers Run + Rise of the Resistance (si no ayer)',i:''},{t:'11:30 AM',d:'🍹 Oga\'s Cantina',i:''},{t:'12:30 PM',d:'🍽️ Almuerzo',i:''},{t:'2:00 PM',d:'🎢 Re-rides favoritas',i:''},{t:'4:00 PM',d:'☕ Pausa y snacks',i:''},{t:'6:00 PM',d:'🍽️ Cena de despedida de Disney',i:''},{t:'8:00 PM',d:'🎆 Último show nocturno',i:''}],
+     tips:['Galaxy\'s Edge merece tiempo — construir tu lightsaber es una experiencia única','Oga\'s Cantina: reservación obligatoria']},
+    {title:'Drive a Hollywood + Universal 🎬',icon:'🎬',type:'travel',
+     acts:[{t:'8:00 AM',d:'🏨 Check-out de Anaheim',i:''},{t:'9:00 AM',d:'🚗 Drive a Hollywood (~1 hr)',i:''},{t:'10:00 AM',d:'🏨 Check-in en hotel Universal area',i:''},{t:'11:00 AM',d:'🌟 Hollywood Walk of Fame + TCL Chinese Theatre',i:''},{t:'1:00 PM',d:'🍽️ Almuerzo en Hollywood Blvd',i:''},{t:'2:00 PM',d:'🎥 Griffith Observatory (vista panorámica de LA)',i:''},{t:'5:00 PM',d:'🛍️ Universal CityWalk — compras y cena',i:''},{t:'7:00 PM',d:'🍽️ Cena en CityWalk',i:''}],
+     tips:['Griffith Observatory es GRATIS y las vistas son increíbles','El tráfico en LA es real — planifica rutas con Google Maps']},
+    {title:'Universal Studios Hollywood 🎢',icon:'🎢',type:'park',
+     acts:[{t:'8:00 AM',d:'🎟️ Apertura — directo a Super Nintendo World',i:''},{t:'10:00 AM',d:'🎬 Studio Tour (obligatorio)',i:''},{t:'11:30 AM',d:'🦕 Jurassic World ride',i:''},{t:'12:30 PM',d:'🍽️ Almuerzo',i:''},{t:'1:30 PM',d:'🧙 Harry Potter — Hogwarts ride + Hogsmeade',i:''},{t:'3:00 PM',d:'🎢 Rides restantes + shows',i:''},{t:'5:00 PM',d:'🍺 Butterbeer en Hogsmeade',i:''},{t:'6:30 PM',d:'🍽️ Cena en CityWalk',i:''}],
+     tips:['El Studio Tour es ÚNICO — no existe en Orlando','Super Nintendo World de Hollywood tiene Power-Up Band incluido']},
+    {title:'Santa Monica + Regreso ✈️',icon:'✈️',type:'travel',
+     acts:[{t:'8:00 AM',d:'🏨 Check-out',i:''},{t:'9:00 AM',d:'🏖️ Santa Monica Pier + Venice Beach',i:''},{t:'11:00 AM',d:'🍽️ Brunch frente al mar',i:''},{t:'1:00 PM',d:'🚗 Devolver auto y aeropuerto',i:''},{t:'',d:'✈️ Vuelo de regreso 🏠✨',i:''}],
+     tips:['Santa Monica Pier es icónico — tómate la foto','California dreaming completado! 🌴']}
+  ]
+},
+
+// ── Crucero Disney 3 noches ──
+'crucero-disney-3':{
+  title:'Crucero Disney · 3 Noches Bahamas Express 🚢',
+  hotel:'Disney Wish / Disney Dream',
+  cover:IT_IMAGES['crucero-disney'],
+  gradient:IT_GRADIENTS['crucero-disney'],
+  docs:[
+    {icon:'📱',title:'Descargar Disney Cruise Line App',desc:'Navigator digital, horarios y reservaciones'},
+    {icon:'🛂',title:'Pasaportes vigentes',desc:'Verificar vigencia mínima 6 meses'},
+    {icon:'🏥',title:'Check-in online',desc:'Se abre con anticipación — completar antes de llegar'},
+    {icon:'🧳',title:'Etiquetas de equipaje',desc:'Imprimir y pegar en maletas antes de llegar al puerto'}
+  ],
+  days:[
+    {title:'Embarque en Port Canaveral 🚢',icon:'🚢',type:'cruise',
+     acts:[{t:'11:00 AM',d:'🚐 Llegada al puerto',i:''},{t:'12:00 PM',d:'🚢 Embarque y exploración del barco',i:''},{t:'1:00 PM',d:'🍽️ Buffet de bienvenida en Cabanas',i:''},{t:'2:00 PM',d:'🏊 Explorar cubierta, piscinas y AquaDuck/AquaMouse',i:''},{t:'4:00 PM',d:'⛵ Sail Away Party en cubierta',i:''},{t:'5:30 PM',d:'🎭 Show en Walt Disney Theatre',i:''},{t:'7:00 PM',d:'🍽️ Cena rotativa (primer restaurante)',i:''},{t:'9:00 PM',d:'🎉 Explorar entretenimiento nocturno',i:''}],
+     tips:['Llega al puerto temprano para aprovechar el primer día','Reserva Palo/Remy desde la app para cena premium','La Sail Away Party es imperdible — lleguen a cubierta 15 min antes']},
+    {title:'Día en el mar 🌊',icon:'🌊',type:'cruise',
+     acts:[{t:'7:30 AM',d:'☕ Desayuno en Cabanas o Room Service',i:''},{t:'9:00 AM',d:'🏊 Día de alberca y toboganes',i:''},{t:'10:30 AM',d:'🎨 Actividades a bordo / clubs de niños',i:''},{t:'12:00 PM',d:'🍽️ Almuerzo en cubierta',i:''},{t:'2:00 PM',d:'🎬 Cine en el Buena Vista Theatre',i:''},{t:'3:30 PM',d:'🧖 Spa Rainforest Room (pase de día)',i:''},{t:'5:00 PM',d:'📸 Sesión de fotos con personajes',i:''},{t:'6:30 PM',d:'🍽️ Cena rotativa (segundo restaurante)',i:''},{t:'8:30 PM',d:'🎭 Show principal + Pirate Night',i:''}],
+     tips:['Pirate Night es tradición Disney — disfrázate y sube a la fiesta en cubierta','El pase de Rainforest Room vale mucho la pena']},
+    {title:'Castaway Cay 🏝️',icon:'🏝️',type:'cruise',
+     acts:[{t:'8:00 AM',d:'🏝️ Desembarco en Castaway Cay (isla privada Disney)',i:''},{t:'9:00 AM',d:'🏖️ Playa familiar o Serenity Bay (solo adultos)',i:''},{t:'10:30 AM',d:'🤿 Snorkel + actividades acuáticas',i:''},{t:'12:00 PM',d:'🍽️ BBQ buffet en la isla (INCLUIDO)',i:''},{t:'2:00 PM',d:'🚴 Bicicletas, caminata o relajarse',i:''},{t:'4:00 PM',d:'🚢 Regreso al barco',i:''},{t:'6:00 PM',d:'🍽️ Última cena rotativa',i:''},{t:'8:00 PM',d:'🎭 Show de despedida + last night party',i:''}],
+     tips:['Castaway Cay es EXCLUSIVA de Disney Cruise Line — aprovéchala','Serenity Bay (playa solo adultos) es un paraíso','La comida en la isla está incluida — no te limites']},
+    {title:'Desembarque y regreso 🏠',icon:'✈️',type:'travel',
+     acts:[{t:'7:00 AM',d:'☕ Último desayuno a bordo',i:''},{t:'8:00 AM',d:'🚢 Desembarque en Port Canaveral',i:''},{t:'',d:'🚐 Traslado al aeropuerto de Orlando',i:''},{t:'',d:'✈️ Vuelo de regreso 🏠✨',i:''}],
+     tips:['3 noches mágicas en el mar completadas!','Port Canaveral está a ~45 min del aeropuerto de Orlando']}
+  ]
+},
+
+// ── Crucero Disney + Disney World combo ──
+'crucero-parks':{
+  title:'Crucero Disney + Disney World Combo 🚢🏰',
+  hotel:'Disney Wish + Disney\'s Contemporary Resort',
+  cover:IT_IMAGES['crucero-disney'],
+  gradient:'linear-gradient(135deg,#001a33,#4b2583,#c33f91)',
+  docs:[
+    {icon:'📱',title:'Descargar Disney Cruise Line App',desc:'Para el crucero'},
+    {icon:'📱',title:'Descargar My Disney Experience',desc:'Para los parques'},
+    {icon:'🛂',title:'Pasaportes vigentes',desc:'Mínimo 6 meses de vigencia'},
+    {icon:'🎫',title:'Vincular entradas de parques',desc:'Tener boletos listos en la app'},
+    {icon:'🍽️',title:'Reservar restaurantes parques',desc:'Se abren 60 días antes'},
+    {icon:'⚡',title:'Lightning Lane',desc:'Comprar para los días de parques'}
+  ],
+  days:[
+    {title:'Llegada a Orlando',icon:'✈️',type:'travel',
+     acts:[{t:'',d:'✈️ Llegada a Orlando (MCO)',i:''},{t:'',d:'🏨 Check-in en hotel de transición',i:''},{t:'',d:'🛍️ Disney Springs',i:''},{t:'7:00 PM',d:'🍽️ Cena',i:''}],
+     tips:['Prepara todo para el crucero mañana — maletas con etiquetas listas']},
+    {title:'Embarque en Port Canaveral 🚢',icon:'🚢',type:'cruise',
+     acts:[{t:'9:00 AM',d:'🚐 Traslado al puerto (~1 hr)',i:''},{t:'11:00 AM',d:'🚢 Embarque',i:''},{t:'1:00 PM',d:'🍽️ Buffet de bienvenida',i:''},{t:'2:00 PM',d:'🏊 Explorar el barco',i:''},{t:'4:00 PM',d:'⛵ Sail Away Party',i:''},{t:'5:30 PM',d:'🎭 Show',i:''},{t:'7:00 PM',d:'🍽️ Cena rotativa',i:''}],
+     tips:['Familiarízate con el barco hoy — hay MUCHO que explorar']},
+    {title:'Día en el mar 🌊',icon:'🌊',type:'cruise',
+     acts:[{t:'8:00 AM',d:'☕ Desayuno',i:''},{t:'9:30 AM',d:'🏊 Piscina y toboganes',i:''},{t:'12:00 PM',d:'🍽️ Almuerzo',i:''},{t:'2:00 PM',d:'🎬 Cine + actividades',i:''},{t:'5:00 PM',d:'📸 Fotos con personajes',i:''},{t:'7:00 PM',d:'🍽️ Cena rotativa',i:''},{t:'9:00 PM',d:'🎭 Show nocturno',i:''}],
+     tips:['Relájate — mañana es Castaway Cay!']},
+    {title:'Castaway Cay 🏝️',icon:'🏝️',type:'cruise',
+     acts:[{t:'8:00 AM',d:'🏝️ Desembarco en la isla',i:''},{t:'9:00 AM',d:'🏖️ Playa + actividades acuáticas',i:''},{t:'12:00 PM',d:'🍽️ BBQ en la isla',i:''},{t:'3:00 PM',d:'🚴 Explorar la isla',i:''},{t:'4:30 PM',d:'🚢 Regreso al barco',i:''},{t:'7:00 PM',d:'🍽️ Última cena',i:''},{t:'9:00 PM',d:'🎉 Fiesta de despedida',i:''}],
+     tips:['Aprovecha cada minuto en Castaway Cay']},
+    {title:'Desembarque + Hotel Disney 🏰',icon:'🏨',type:'travel',
+     acts:[{t:'8:00 AM',d:'🚢 Desembarque',i:''},{t:'9:30 AM',d:'🚐 Traslado a Walt Disney World',i:''},{t:'11:00 AM',d:'🏨 Check-in en Contemporary Resort',i:''},{t:'12:00 PM',d:'🍽️ Almuerzo en el hotel',i:''},{t:'2:00 PM',d:'🏊 Piscina y descanso',i:''},{t:'5:00 PM',d:'🚶 Caminar a Magic Kingdom (está al lado!)',i:''},{t:'6:00 PM',d:'🍽️ Cena en el parque',i:''},{t:'9:00 PM',d:'🎆 Happily Ever After',i:''}],
+     tips:['Contemporary Resort tiene acceso a pie a Magic Kingdom','Descansa hoy — los próximos días son intensos en parques']},
+    {title:'Magic Kingdom 🏰',icon:'🏰',type:'park',
+     acts:[{t:'7:30 AM',d:'🚶 Caminar al parque desde el hotel',i:''},{t:'8:00 AM',d:'🎟️ Early Entry — TRON + Seven Dwarfs',i:''},{t:'10:00 AM',d:'🏴‍☠️ Pirates + Haunted Mansion + Jungle Cruise',i:''},{t:'12:00 PM',d:'🍽️ Almuerzo en Be Our Guest',i:''},{t:'2:00 PM',d:'🎢 Thunder Mountain + Tiana\'s Bayou',i:''},{t:'3:30 PM',d:'🎪 Parade',i:''},{t:'5:00 PM',d:'☕ Pausa en el hotel',i:''},{t:'7:00 PM',d:'🍽️ Cena',i:''},{t:'9:00 PM',d:'🎆 Fuegos artificiales',i:''}],
+     tips:['La ventaja del Contemporary: pausa de medio día en el hotel']},
+    {title:'EPCOT 🌍',icon:'🌍',type:'park',
+     acts:[{t:'8:00 AM',d:'🎟️ Early Entry — Guardians of the Galaxy',i:''},{t:'9:30 AM',d:'🚀 Test Track + Spaceship Earth',i:''},{t:'11:00 AM',d:'🍷 World Showcase tour gastronómico',i:''},{t:'1:00 PM',d:'🍽️ Almuerzo en World Showcase',i:''},{t:'3:00 PM',d:'❄️ Frozen + Remy\'s Ratatouille',i:''},{t:'5:00 PM',d:'🍸 Drinks around the world',i:''},{t:'7:30 PM',d:'🍽️ Cena especial',i:''},{t:'9:00 PM',d:'🎆 Luminous',i:''}],
+     tips:['Después del crucero, EPCOT se siente como extensión del viaje']},
+    {title:'Hollywood Studios ⭐',icon:'⭐',type:'park',
+     acts:[{t:'8:00 AM',d:'🎟️ Early Entry — Rise of the Resistance',i:''},{t:'9:30 AM',d:'🚀 Galaxy\'s Edge completo',i:''},{t:'11:00 AM',d:'🍹 Oga\'s Cantina',i:''},{t:'12:00 PM',d:'🍽️ Almuerzo',i:''},{t:'1:30 PM',d:'🧸 Toy Story Land — Slinky Dog Dash',i:''},{t:'3:00 PM',d:'🗼 Tower of Terror',i:''},{t:'5:00 PM',d:'🎬 Shows',i:''},{t:'7:00 PM',d:'🍽️ Cena',i:''},{t:'8:30 PM',d:'🎬 Fantasmic!',i:''}],
+     tips:['Rise of the Resistance: la atracción más épica de Disney']},
+    {title:'Animal Kingdom 🦁',icon:'🦁',type:'park',
+     acts:[{t:'7:30 AM',d:'🎟️ Early Entry — Flight of Passage',i:''},{t:'9:00 AM',d:'🦁 Safari Kilimanjaro',i:''},{t:'10:30 AM',d:'🎢 Expedition Everest',i:''},{t:'12:00 PM',d:'🍽️ Almuerzo en Flame Tree BBQ',i:''},{t:'1:30 PM',d:'🌳 Trails y explorar',i:''},{t:'3:00 PM',d:'🏊 Regreso al hotel — piscina',i:''},{t:'6:00 PM',d:'🍽️ Cena de despedida en California Grill',i:''}],
+     tips:['Animal Kingdom se hace en medio día — aprovecha la tarde para descansar']},
+    {title:'Día libre + Disney Springs',icon:'🛍️',type:'free',
+     acts:[{t:'9:00 AM',d:'☕ Desayuno tardío',i:''},{t:'10:30 AM',d:'🏊 Última mañana en la piscina',i:''},{t:'12:00 PM',d:'🛍️ Disney Springs — compras finales',i:''},{t:'2:00 PM',d:'🍽️ Almuerzo en Disney Springs',i:''},{t:'4:00 PM',d:'🛍️ Outlets Premium (opcional)',i:''},{t:'7:00 PM',d:'🍽️ Última cena',i:''}],
+     tips:['Relax day after 12 amazing days!']},
+    {title:'Regreso a casa ✈️',icon:'✈️',type:'travel',
+     acts:[{t:'8:00 AM',d:'🧳 Empacar',i:''},{t:'9:30 AM',d:'🏨 Check-out',i:''},{t:'',d:'🚐 Aeropuerto',i:''},{t:'',d:'✈️ Vuelo de regreso 🏠✨',i:''}],
+     tips:['12 noches épicas: mar + parques — el combo definitivo!']}
+  ]
+},
+
+// ── Nickelodeon Resort Riviera Maya ──
+'nickelodeon':{
+  title:'Nickelodeon Resort · Riviera Maya 🟠',
+  hotel:'Nickelodeon Hotels & Resorts Riviera Maya',
+  cover:'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&h=600&fit=crop&q=80',
+  gradient:'linear-gradient(135deg,#FF6600,#FF9900,#FFCC00)',
+  docs:[
+    {icon:'🛂',title:'Pasaportes o INE',desc:'Verificar vigencia'},
+    {icon:'🏥',title:'Seguro de viaje',desc:'Recomendado para cualquier viaje'},
+    {icon:'📋',title:'Reservación del hotel',desc:'Todo incluido — confirmación impresa o digital'},
+    {icon:'🚐',title:'Traslado aeropuerto',desc:'Reservar con anticipación'}
+  ],
+  days:[
+    {title:'Llegada a Cancún',icon:'✈️',type:'travel',
+     acts:[{t:'',d:'✈️ Llegada al Aeropuerto de Cancún (CUN)',i:''},{t:'',d:'🚐 Traslado al hotel (~30 min)',i:''},{t:'',d:'🏨 Check-in + pulsera all-inclusive',i:''},{t:'',d:'🏊 Explorar el hotel y piscinas',i:''},{t:'',d:'🟠 Conocer el Aqua Nick (parque acuático)',i:''},{t:'7:00 PM',d:'🍽️ Cena buffet Nickerie',i:''}],
+     tips:['El resort es TODO INCLUIDO — comida, bebidas, actividades','Aqua Nick tiene toboganes increíbles — lleven protector solar reef-safe']},
+    {title:'Día de Aqua Nick + playa 🏊',icon:'🏊',type:'free',
+     acts:[{t:'8:00 AM',d:'🍳 Desayuno',i:''},{t:'9:00 AM',d:'🟠 Aqua Nick — toboganes y zona de juegos',i:''},{t:'11:00 AM',d:'🏖️ Playa del resort',i:''},{t:'1:00 PM',d:'🍽️ Almuerzo en restaurante del hotel',i:''},{t:'3:00 PM',d:'🎨 Actividades de personajes (Bob Esponja, Dora)',i:''},{t:'4:30 PM',d:'🏊 Piscina infinita',i:''},{t:'6:00 PM',d:'🟠 Slime Time — ceremonia del slime!',i:''},{t:'7:30 PM',d:'🍽️ Cena temática',i:''}],
+     tips:['La ceremonia del SLIME es imperdible para los niños','Todas las actividades con personajes están incluidas']},
+    {title:'Excursión: Xcaret o cenote',icon:'🌿',type:'free',
+     acts:[{t:'7:00 AM',d:'🍳 Desayuno temprano',i:''},{t:'8:30 AM',d:'🚐 Salida a Xcaret/cenote cercano',i:''},{t:'10:00 AM',d:'🤿 Snorkel en cenote o río subterráneo',i:''},{t:'12:00 PM',d:'🍽️ Almuerzo',i:''},{t:'2:00 PM',d:'🌿 Explorar parque/cenote',i:''},{t:'5:00 PM',d:'🚐 Regreso al hotel',i:''},{t:'7:00 PM',d:'🍽️ Cena en el resort',i:''},{t:'8:30 PM',d:'🎬 Cine al aire libre o show nocturno',i:''}],
+     tips:['Los cenotes de la Riviera Maya son una experiencia ÚNICA','Lleva zapatos acuáticos y protector solar biodegradable']},
+    {title:'Día de relax en el resort 🏖️',icon:'🏖️',type:'free',
+     acts:[{t:'9:00 AM',d:'🍳 Desayuno tardío',i:''},{t:'10:00 AM',d:'💆 Spa (con costo extra)',i:''},{t:'11:00 AM',d:'🏊 Piscina + toboganes',i:''},{t:'1:00 PM',d:'🍽️ Almuerzo en la playa',i:''},{t:'3:00 PM',d:'🎨 Actividades con personajes Nickelodeon',i:''},{t:'4:30 PM',d:'🟠 Aqua Nick round 2',i:''},{t:'6:00 PM',d:'📸 Sesión de fotos con Bob Esponja',i:''},{t:'7:30 PM',d:'🍽️ Cena de despedida — restaurante gourmet',i:''}],
+     tips:['El spa es el único servicio con costo extra','Aprovecha los últimos momentos en el paraíso']},
+    {title:'Playa de Tulum + regreso ✈️',icon:'✈️',type:'travel',
+     acts:[{t:'7:00 AM',d:'🍳 Último desayuno',i:''},{t:'9:00 AM',d:'🏨 Check-out',i:''},{t:'9:30 AM',d:'🏖️ Parada en playa de Tulum (opcional)',i:''},{t:'11:00 AM',d:'📸 Ruinas de Tulum vista rápida',i:''},{t:'12:30 PM',d:'🚐 Traslado al aeropuerto',i:''},{t:'',d:'✈️ Vuelo de regreso 🏠✨',i:''}],
+     tips:['Si el vuelo es tarde, vale la pena visitar Tulum','5 noches de diversión Nickelodeon completadas! 🟠']}
+  ]
+},
+
+// ── Xcaret Todo Incluido ──
+'xcaret':{
+  title:'Xcaret · Aventura Todo Incluido 🌿',
+  hotel:'Hotel Xcaret México',
+  cover:'https://images.unsplash.com/photo-1552074284-5e88ef1aef18?w=1200&h=600&fit=crop&q=80',
+  gradient:'linear-gradient(135deg,#1a472a,#2d5a27,#4caf50)',
+  docs:[
+    {icon:'🛂',title:'Pasaportes o INE',desc:'Verificar vigencia'},
+    {icon:'📋',title:'Reservación All-Fun Inclusive',desc:'Incluye parques Xcaret, Xel-Há, Xplor'},
+    {icon:'🏥',title:'Seguro de viaje',desc:'Recomendado'},
+    {icon:'🚐',title:'Traslado aeropuerto',desc:'Incluido con el hotel'}
+  ],
+  days:[
+    {title:'Llegada al paraíso',icon:'✈️',type:'travel',
+     acts:[{t:'',d:'✈️ Llegada a Cancún (CUN)',i:''},{t:'',d:'🚐 Traslado al Hotel Xcaret México (~1 hr)',i:''},{t:'',d:'🏨 Check-in All-Fun Inclusive',i:''},{t:'',d:'🏊 Explorar el hotel — ríos, piscinas, cenotes',i:''},{t:'7:00 PM',d:'🍽️ Cena en alguno de los 10+ restaurantes',i:''}],
+     tips:['All-Fun Inclusive = hotel + TODOS los parques del grupo Xcaret','El hotel tiene ríos internos y cenotes propios — explora con calma']},
+    {title:'Parque Xcaret 🌿',icon:'🌿',type:'free',
+     acts:[{t:'8:00 AM',d:'🍳 Desayuno en el hotel',i:''},{t:'9:00 AM',d:'🌿 Entrada a Parque Xcaret (incluido)',i:''},{t:'9:30 AM',d:'🤿 Ríos subterráneos — snorkel',i:''},{t:'11:00 AM',d:'🦋 Mariposario + aviario',i:''},{t:'12:30 PM',d:'🍽️ Almuerzo en el parque (incluido)',i:''},{t:'2:00 PM',d:'🐢 Tortugario + acuario de arrecife',i:''},{t:'4:00 PM',d:'🏊 Playa y caleta para snorkel',i:''},{t:'6:30 PM',d:'🎭 Show Xcaret México Espectacular (imperdible)',i:''},{t:'9:00 PM',d:'🍽️ Cena en el hotel',i:''}],
+     tips:['El show nocturno de Xcaret es DE LO MEJOR de México — no falten','Los ríos subterráneos son la actividad más popular — hazlo temprano']},
+    {title:'Xel-Há o Xplor 🌊',icon:'🌊',type:'free',
+     acts:[{t:'7:00 AM',d:'🍳 Desayuno temprano',i:''},{t:'8:30 AM',d:'🚐 Traslado a Xel-Há (incluido)',i:''},{t:'9:30 AM',d:'🤿 Snorkel en la caleta (todo el día)',i:''},{t:'11:00 AM',d:'🎿 Toboganes y tirolesas',i:''},{t:'12:30 PM',d:'🍽️ Buffet todo incluido con barra abierta',i:''},{t:'2:00 PM',d:'🌊 Río + cliff jumping',i:''},{t:'4:00 PM',d:'🚲 Bicicletas y cenotes',i:''},{t:'5:00 PM',d:'🚐 Regreso al hotel',i:''},{t:'7:30 PM',d:'🍽️ Cena en el hotel',i:''}],
+     tips:['Xel-Há = todo incluido (comida y bebidas ilimitadas en el parque)','Alternativa: Xplor para aventura extrema (tirolesas y vehículos anfibios)']},
+    {title:'Día de hotel + cenotes 💎',icon:'💎',type:'free',
+     acts:[{t:'9:00 AM',d:'🍳 Desayuno tardío',i:''},{t:'10:00 AM',d:'💎 Explorar cenotes del hotel',i:''},{t:'11:00 AM',d:'🏊 Ríos del hotel + piscina infinita',i:''},{t:'1:00 PM',d:'🍽️ Almuerzo en restaurante gourmet',i:''},{t:'3:00 PM',d:'💆 Spa Muluk (con costo adicional)',i:''},{t:'5:00 PM',d:'🏖️ Playa del hotel',i:''},{t:'7:00 PM',d:'🍽️ Cena de despedida — degustación mexicana',i:''}],
+     tips:['El hotel en sí es una experiencia — los cenotes y ríos son mágicos','Prueba un restaurante diferente cada noche']},
+    {title:'Tulum + regreso ✈️',icon:'✈️',type:'travel',
+     acts:[{t:'7:00 AM',d:'🍳 Último desayuno',i:''},{t:'9:00 AM',d:'🏨 Check-out',i:''},{t:'10:00 AM',d:'🏛️ Ruinas de Tulum (parada express)',i:''},{t:'11:30 AM',d:'📸 Fotos en la playa de Tulum',i:''},{t:'1:00 PM',d:'🚐 Traslado al aeropuerto',i:''},{t:'',d:'✈️ Vuelo de regreso 🏠✨',i:''}],
+     tips:['Xcaret es un paraíso mexicano — 5 noches de naturaleza y cultura 🌿']}
+  ]
+},
+
+// ── Disneyland Paris ──
+'paris':{
+  title:'Disneyland Paris · La Magie ✨🗼',
+  hotel:'Disneyland Hotel (en el parque)',
+  cover:'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=1200&h=600&fit=crop&q=80',
+  gradient:'linear-gradient(135deg,#1a1a6e,#4169E1,#FFD700)',
+  docs:[
+    {icon:'📱',title:'Descargar Disneyland Paris App',desc:'Para filas, mapa y reservaciones'},
+    {icon:'🛂',title:'Pasaportes vigentes',desc:'Mínimo 6 meses de vigencia'},
+    {icon:'✈️',title:'Visa Schengen (si aplica)',desc:'Verificar requisitos según nacionalidad'},
+    {icon:'🚄',title:'Boletos de tren',desc:'Si llegas por Eurostar o TGV'},
+    {icon:'🍽️',title:'Reservar restaurantes',desc:'Se reservan en la app'}
+  ],
+  days:[
+    {title:'Llegada a París',icon:'✈️',type:'travel',
+     acts:[{t:'',d:'✈️ Llegada a París (CDG o Orly)',i:''},{t:'',d:'🚄 Tren RER A o TGV a Marne-la-Vallée (~35-45 min)',i:''},{t:'',d:'🏨 Check-in en Disneyland Hotel (entrada al parque incluida)',i:''},{t:'',d:'🏰 Explorar Disney Village — tiendas y restaurantes',i:''},{t:'7:00 PM',d:'🍽️ Cena en Disney Village',i:''}],
+     tips:['El Disneyland Hotel está DENTRO del parque — la ubicación es imbatible','RER A desde CDG cambia en Châtelet-Les Halles','Descansa — mañana hay que madrugar para la magia']},
+    {title:'Disneyland Park 🏰',icon:'🏰',type:'park',
+     acts:[{t:'8:00 AM',d:'🎟️ Extra Magic Time (huéspedes Disney)',i:''},{t:'8:00 AM',d:'🎢 Big Thunder Mountain + Peter Pan (sin fila)',i:''},{t:'10:00 AM',d:'🏰 Castillo de la Bella Durmiente (es recorrible!)',i:''},{t:'10:30 AM',d:'🎢 Hyperspace Mountain + Buzz Lightyear',i:''},{t:'12:00 PM',d:'🍽️ Almuerzo en Auberge de Cendrillon (princesas)',i:''},{t:'2:00 PM',d:'🏴‍☠️ Pirates of the Caribbean + Phantom Manor',i:''},{t:'3:30 PM',d:'🎪 Disney Stars on Parade',i:''},{t:'5:00 PM',d:'🎡 Rides faltantes + explorar',i:''},{t:'7:00 PM',d:'🍽️ Cena en Walt\'s — An American Restaurant',i:''},{t:'9:30 PM',d:'🎆 Disney Illuminations — show del castillo',i:''}],
+     tips:['El castillo de Paris se puede RECORRER POR DENTRO — incluyendo el dragón en el sótano','Extra Magic Time para huéspedes Disney: 1 hora antes de apertura general','El Phantom Manor es diferente al Haunted Mansion — vale la pena']},
+    {title:'Walt Disney Studios Park 🎬',icon:'🎬',type:'park',
+     acts:[{t:'8:00 AM',d:'🎟️ Extra Magic Time',i:''},{t:'8:00 AM',d:'🎢 Avengers Assemble: Flight Force',i:''},{t:'9:30 AM',d:'🕸️ Spider-Man W.E.B. Adventure',i:''},{t:'10:30 AM',d:'🧊 Frozen: A Musical Invitation',i:''},{t:'11:30 AM',d:'🎢 Crush\'s Coaster + Ratatouille',i:''},{t:'1:00 PM',d:'🍽️ Almuerzo en Bistrot Chez Rémy',i:''},{t:'2:30 PM',d:'🗼 Tower of Terror',i:''},{t:'4:00 PM',d:'🎭 Shows y entertainment',i:''},{t:'5:30 PM',d:'☕ Pausa + regresar a Disneyland Park',i:''},{t:'7:00 PM',d:'🍽️ Cena en Disneyland Park',i:''},{t:'9:30 PM',d:'🎆 Disney Illuminations (desde otra perspectiva)',i:''}],
+     tips:['Crush\'s Coaster SIEMPRE tiene fila — hazlo temprano o con Premier Access','Bistrot Chez Rémy te encoge al tamaño de Remy — experiencia única','Studios Park es más pequeño — combínalo con tiempo en Disneyland Park']},
+    {title:'París ciudad 🗼',icon:'🗼',type:'free',
+     acts:[{t:'8:00 AM',d:'🚄 RER A al centro de París (~40 min)',i:''},{t:'9:30 AM',d:'🗼 Torre Eiffel (reserva con anticipación!)',i:''},{t:'11:00 AM',d:'🚶 Caminar por Champs-Élysées hasta Arc de Triomphe',i:''},{t:'12:30 PM',d:'🍽️ Almuerzo en bistró parisino',i:''},{t:'2:00 PM',d:'🖼️ Louvre o Musée d\'Orsay',i:''},{t:'4:00 PM',d:'🏛️ Pasear por Montmartre + Sacré-Cœur',i:''},{t:'6:00 PM',d:'🥐 Café + patisserie',i:''},{t:'7:30 PM',d:'🍽️ Cena en el barrio Le Marais',i:''},{t:'9:00 PM',d:'🗼 Torre Eiffel iluminada (cada hora)',i:''},{t:'10:30 PM',d:'🚄 Regreso al hotel',i:''}],
+     tips:['Reserva la Torre Eiffel ONLINE con semanas de anticipación','El metro de París es eficiente — compra carnet de 10 billetes','Si solo puedes ver un museo: Louvre para arte, Orsay para impresionistas']},
+    {title:'Disneyland Park encore + regreso',icon:'🏰',type:'park',
+     acts:[{t:'8:00 AM',d:'🎟️ Extra Magic Time — rides favoritos',i:''},{t:'10:00 AM',d:'🎢 Todo lo que faltó',i:''},{t:'12:00 PM',d:'🍽️ Último almuerzo Disney',i:''},{t:'2:00 PM',d:'🛍️ Compras de souvenirs en Main Street',i:''},{t:'4:00 PM',d:'🏨 Check-out y preparar equipaje',i:''},{t:'5:00 PM',d:'📸 Últimas fotos en el castillo',i:''}],
+     tips:['Main Street tiene las mejores tiendas — no dejes todo para el último día']},
+    {title:'Regreso a casa ✈️',icon:'✈️',type:'travel',
+     acts:[{t:'8:00 AM',d:'☕ Último desayuno',i:''},{t:'9:00 AM',d:'🚄 Tren al aeropuerto CDG',i:''},{t:'',d:'✈️ Vuelo de regreso 🏠✨',i:''}],
+     tips:['Disneyland Paris completado — la magie! 🗼✨']}
+  ]
+},
+
+'blank':{
+  title:'Mi Itinerario de Viaje',
+  hotel:'',
+  cover:'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1200&h=600&fit=crop&q=80',
+  gradient:'linear-gradient(135deg,#E8716D,#D4605C)',
+  docs:[],
+  days:[
+    {title:'Día 1',icon:'📍',type:'travel',acts:[{t:'',d:'Actividad...',i:''}],tips:[]},
+    {title:'Día 2',icon:'📍',type:'park',acts:[{t:'',d:'Actividad...',i:''}],tips:[]},
+    {title:'Día 3',icon:'📍',type:'free',acts:[{t:'',d:'Actividad...',i:''}],tips:[]}
+  ]
+}
+};
+
+// ══════════════════════════════════════════════════════════════
+// ITINERARY FORM MANAGEMENT
+// ══════════════════════════════════════════════════════════════
+let itDayCount=0,itDocCount=0;
+let currentItData=null;
+
+function loadTemplate(){
+  const tpl=v('it-template');
+  if(!tpl){document.getElementById('it-form').style.display='none';return}
+  document.getElementById('it-form').style.display='';
+  document.getElementById('it-preview-section').style.display='none';
+  const t=IT_TEMPLATES[tpl];
+  if(!t)return;
+  document.getElementById('it-title').value=t.title;
+  document.getElementById('it-hotel').value=t.hotel;
+  document.getElementById('it-cover').value=t.cover;
+  itDayCount=0;itDocCount=0;
+  document.getElementById('it-days-container').innerHTML='';
+  document.getElementById('it-docs-container').innerHTML='';
+  t.docs.forEach(d=>addItDoc(d.icon,d.title,d.desc));
+  t.days.forEach(d=>addItDay(d));
+  document.getElementById('it-form').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function addItDoc(icon,title,desc){
+  itDocCount++;
+  const n=itDocCount;
+  const c=document.getElementById('it-docs-container');
+  const div=document.createElement('div');
+  div.className='it-doc-row';
+  div.id='itdoc-'+n;
+  div.innerHTML=`<input type="text" value="${icon||''}" placeholder="📄" class="fi-input it-mini-input" style="width:44px;text-align:center;flex-shrink:0" id="itdoc-${n}-i"><input type="text" value="${title||''}" placeholder="Título del documento" class="fi-input it-mini-input" style="flex:1" id="itdoc-${n}-t"><input type="text" value="${desc||''}" placeholder="Descripción" class="fi-input it-mini-input" style="flex:1" id="itdoc-${n}-d"><button type="button" onclick="document.getElementById('itdoc-${n}').remove()" class="it-remove-btn">×</button>`;
+  c.appendChild(div);
+}
+
+function addItDay(data){
+  itDayCount++;
+  const n=itDayCount;
+  const c=document.getElementById('it-days-container');
+  const div=document.createElement('div');
+  div.className='it-day-card';
+  div.id='itday-'+n;
+  const typeClass=data?.type==='park'?'park':data?.type==='cruise'?'cruise':data?.type==='travel'?'travel':data?.type==='free'?'free':'';
+  div.innerHTML=`<div class="it-day-header" onclick="this.parentElement.classList.toggle('open')"><div class="it-day-num ${typeClass}"><span style="font-size:10px">DÍA</span><br>${n}</div><div style="flex:1;min-width:0"><input type="text" value="${data?.title||'Nuevo día'}" placeholder="Título del día" class="fi-input it-mini-input" style="font-weight:600" id="itday-${n}-title" onclick="event.stopPropagation()"><div style="display:flex;gap:6px;margin-top:4px"><input type="text" value="${data?.icon||'📍'}" placeholder="🏰" class="fi-input it-mini-input" style="width:40px;text-align:center;padding:4px" id="itday-${n}-icon" onclick="event.stopPropagation()"><select class="fi-select it-mini-input" style="flex:1;padding:4px 24px 4px 8px" id="itday-${n}-type" onclick="event.stopPropagation()"><option value="travel" ${data?.type==='travel'?'selected':''}>✈️ Viaje</option><option value="park" ${data?.type==='park'?'selected':''}>🏰 Parque</option><option value="cruise" ${data?.type==='cruise'?'selected':''}>🚢 Crucero</option><option value="free" ${data?.type==='free'?'selected':''}>🌴 Día libre</option><option value="activity" ${data?.type==='activity'?'selected':''}>🎉 Actividad</option></select></div></div><span class="it-chevron" style="font-size:16px;padding:8px">▾</span></div><div class="it-day-body"><div style="margin-bottom:12px"><label class="fi-label" style="font-size:11px">Actividades</label><div id="itday-${n}-acts"></div><button type="button" onclick="addItActivity(${n})" class="btn-link" style="font-size:11px"><span class="text-lg leading-none">+</span> Agregar actividad</button></div><div style="margin-bottom:8px"><label class="fi-label" style="font-size:11px">💡 Tips</label><div id="itday-${n}-tips"></div><button type="button" onclick="addItTip(${n})" class="btn-link" style="font-size:11px"><span class="text-lg leading-none">+</span> Agregar tip</button></div><div style="text-align:right;padding-top:8px;border-top:1px solid #f0ebe5"><button type="button" onclick="document.getElementById('itday-${n}').remove()" class="btn-link" style="color:#999;font-size:11px">🗑 Eliminar este día</button></div></div>`;
+  c.appendChild(div);
+  const actsC=document.getElementById('itday-'+n+'-acts');
+  const tipsC=document.getElementById('itday-'+n+'-tips');
+  if(data?.acts){data.acts.forEach(a=>addItActivity(n,a.t,a.d))}
+  if(data?.tips){data.tips.forEach(t=>addItTip(n,t))}
+}
+
+let actCount=0;
+function addItActivity(dayN,time,desc){
+  actCount++;
+  const id='ita-'+actCount;
+  const c=document.getElementById('itday-'+dayN+'-acts');
+  const div=document.createElement('div');
+  div.className='it-act-row';
+  div.id=id;
+  div.innerHTML=`<input type="text" value="${time||''}" placeholder="9:00 AM" class="fi-input it-mini-input" style="width:70px;flex-shrink:0;text-align:center" id="${id}-t"><input type="text" value="${(desc||'').replace(/"/g,'&quot;')}" placeholder="Descripción de la actividad" class="fi-input it-mini-input" style="flex:1" id="${id}-d"><button type="button" onclick="document.getElementById('${id}').remove()" class="it-remove-btn">×</button>`;
+  c.appendChild(div);
+}
+
+let tipCount=0;
+function addItTip(dayN,text){
+  tipCount++;
+  const id='itt-'+tipCount;
+  const c=document.getElementById('itday-'+dayN+'-tips');
+  const div=document.createElement('div');
+  div.className='it-tip-row';
+  div.id=id;
+  div.innerHTML=`<span style="font-size:14px;flex-shrink:0;padding-top:4px">💡</span><input type="text" value="${(text||'').replace(/"/g,'&quot;')}" placeholder="Tip para el cliente..." class="fi-input it-mini-input" style="flex:1" id="${id}-v"><button type="button" onclick="document.getElementById('${id}').remove()" class="it-remove-btn">×</button>`;
+  c.appendChild(div);
+}
+
+function updateItDates(){
+  const start=document.getElementById('it-start').value;
+  if(!start)return;
+  const days=document.querySelectorAll('#it-days-container .it-day-card');
+  const startDate=new Date(start+'T12:00:00');
+  const total=days.length;
+  if(total>0){
+    const endDate=new Date(startDate);
+    endDate.setDate(endDate.getDate()+total-1);
+    const y=endDate.getFullYear(),m=String(endDate.getMonth()+1).padStart(2,'0'),d=String(endDate.getDate()).padStart(2,'0');
+    document.getElementById('it-end').value=`${y}-${m}-${d}`;
+  }
+}
+
+function showItForm(){
+  document.getElementById('it-preview-section').style.display='none';
+  document.getElementById('it-form').style.display='';
+  document.getElementById('it-form').scrollIntoView({behavior:'smooth'});
+}
+
+// ══════════════════════════════════════════════════════════════
+// ITINERARY PREVIEW GENERATION
+// ══════════════════════════════════════════════════════════════
+function collectItData(){
+  const data={};
+  data.title=v('it-title')||'Mi Itinerario';
+  data.client=v('it-client')||'';
+  data.start=v('it-start');
+  data.end=v('it-end');
+  data.adults=v('it-adults')||'2';
+  data.kids=v('it-kids')||'';
+  data.hotel=v('it-hotel')||'';
+  data.cover=v('it-cover')||'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1200&h=600&fit=crop&q=80';
+  const tplKey=v('it-template');
+  data.gradient=(IT_TEMPLATES[tplKey]?.gradient)||'linear-gradient(135deg,#E8716D,#D4605C)';
+  data.docs=[];
+  document.querySelectorAll('#it-docs-container .it-doc-row').forEach(row=>{
+    const id=row.id;
+    const icon=document.getElementById(id+'-i')?.value||'📄';
+    const title=document.getElementById(id+'-t')?.value||'';
+    const desc=document.getElementById(id+'-d')?.value||'';
+    if(title)data.docs.push({icon,title,desc});
+  });
+  data.days=[];
+  document.querySelectorAll('#it-days-container .it-day-card').forEach((card,idx)=>{
+    const dayId=card.id;
+    const n=dayId.replace('itday-','');
+    const title=document.getElementById(dayId+'-title')?.value||'Día '+(idx+1);
+    const icon=document.getElementById(dayId+'-icon')?.value||'📍';
+    const type=document.getElementById(dayId+'-type')?.value||'travel';
+    const acts=[];
+    card.querySelectorAll('#'+dayId+'-acts .it-act-row').forEach(ar=>{
+      const aid=ar.id;
+      const t=document.getElementById(aid+'-t')?.value||'';
+      const d=document.getElementById(aid+'-d')?.value||'';
+      if(d)acts.push({t,d});
+    });
+    const tips=[];
+    card.querySelectorAll('#'+dayId+'-tips .it-tip-row').forEach(tr=>{
+      const tid=tr.id;
+      const val=document.getElementById(tid+'-v')?.value||'';
+      if(val)tips.push(val);
+    });
+    data.days.push({title,icon,type,acts,tips});
+  });
+  return data;
+}
+
+function getDayDate(startStr,dayIndex){
+  if(!startStr)return'';
+  const d=new Date(startStr+'T12:00:00');
+  d.setDate(d.getDate()+dayIndex);
+  const dias=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const meses=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  return`${dias[d.getDay()]} ${d.getDate()} ${meses[d.getMonth()]}`;
+}
+
+function generateItPreview(){
+  const data=collectItData();
+  currentItData=data;
+  const container=document.getElementById('it-preview-render');
+  const clientSubtitle=data.client?`<p style="font-size:13px;color:rgba(255,255,255,0.9);font-weight:500;margin-top:2px">Para: ${data.client}</p>`:'';
+  const startFormatted=data.start?formatDateShort(data.start):'';
+  const endFormatted=data.end?formatDateShort(data.end):'';
+  const dateRange=startFormatted&&endFormatted?`${startFormatted} → ${endFormatted}`:'';
+
+  let docsHtml='';
+  if(data.docs.length>0){
+    docsHtml=`<div class="itp-section"><div class="itp-stitle">📎 Información y Documentos</div>`;
+    const docColors=['#E8716D','#7C3AED','#0D9488','#2563EB','#D97706','#059669','#E11D48','#6366F1'];
+    data.docs.forEach((doc,i)=>{
+      const bg=docColors[i%docColors.length]+'20';
+      docsHtml+=`<div class="itp-doc"><div class="itp-doc-icon" style="background:${bg}">${doc.icon}</div><div><div class="itp-doc-text">${doc.title}</div>${doc.desc?`<div class="itp-doc-desc">${doc.desc}</div>`:''}</div></div>`;
+    });
+    docsHtml+=`</div>`;
+  }
+
+  let daysHtml='';
+  data.days.forEach((day,idx)=>{
+    const color=DAY_COLORS[idx%DAY_COLORS.length];
+    const dateStr=getDayDate(data.start,idx);
+    let timelineHtml='';
+    day.acts.forEach((act,ai)=>{
+      timelineHtml+=`<div class="itp-act"><div class="itp-act-time">${act.t||''}</div><div class="itp-act-line"><div class="itp-act-dot" style="background:${color}"></div><div class="itp-act-bar"></div></div><div class="itp-act-desc">${act.d}</div></div>`;
+    });
+    let tipsHtml='';
+    if(day.tips.length>0){
+      tipsHtml=`<div class="itp-tips"><h4>💡 Tips del día</h4><ul style="list-style:none;padding:0;margin:0">`;
+      day.tips.forEach(tip=>{tipsHtml+=`<li>${tip}</li>`});
+      tipsHtml+=`</ul></div>`;
+    }
+    daysHtml+=`<div class="itp-day" data-idx="${idx}"><div class="itp-day-head" onclick="toggleItDay(this)"><div class="itp-day-badge" style="background:${color}"><span class="db-label">Día</span><span class="db-num">${idx+1}</span></div><div class="itp-day-info"><div class="itp-day-date">${dateStr}</div><div class="itp-day-name">${day.icon} ${day.title}</div></div><span class="itp-day-chev">▾</span></div><div class="itp-day-body"><div class="itp-timeline">${timelineHtml}</div>${tipsHtml}</div></div>`;
+  });
+
+  container.innerHTML=`<div class="itp" id="itp-card"><div class="itp-hero" style="background-image:url('${data.cover}')"><div class="itp-hero-ov"><h1>${data.title}</h1>${clientSubtitle}<p>${dateRange}</p></div></div><div class="itp-agent"><div class="itp-agent-avatar">✨</div><div class="itp-agent-info"><h3>Mich Murrieta</h3><p>Tu agente de viajes</p><div class="itp-contact"><span>📞 Llamar</span><span>📧 Email</span><span>🌐 Web</span></div></div></div><div class="itp-travelers"><div>👥 ${data.adults} Adulto${+data.adults!==1?'s':''}</div>${data.kids?`<div>👶 ${data.kids}</div>`:''}<div>🏨 ${data.hotel}</div></div>${docsHtml}<div class="itp-section" style="padding-bottom:0"><div class="itp-stitle">📅 Tu itinerario día por día</div></div>${daysHtml}<div class="itp-footer"><div>✨ Mich Murrieta · Tu agente de viajes</div><div>📲 +52 55 1766 6721</div><div class="sub">michmurrietaviajes.com · 📸 @michmurrieta_viajes</div></div></div>`;
+
+  document.getElementById('it-form').style.display='none';
+  document.getElementById('it-preview-section').style.display='';
+  document.getElementById('it-preview-section').scrollIntoView({behavior:'smooth',block:'start'});
+  setTimeout(()=>{const first=document.querySelector('#itp-card .itp-day');if(first)first.classList.add('open')},300);
+}
+
+function toggleItDay(header){
+  const day=header.closest('.itp-day');
+  day.classList.toggle('open');
+}
+
+// ══════════════════════════════════════════════════════════════
+// PDF EXPORT
+// ══════════════════════════════════════════════════════════════
+function downloadItPDF(){
+  showToast('Generando PDF...');
+  const card=document.getElementById('itp-card');
+  card.classList.add('pdf-mode');
+  document.querySelectorAll('#itp-card .itp-day').forEach(d=>d.classList.add('open'));
+  const opt={
+    margin:[0,0,0,0],
+    filename:`Itinerario_${(v('it-client')||'Cliente').replace(/\s+/g,'_')}.pdf`,
+    image:{type:'jpeg',quality:0.98},
+    html2canvas:{scale:2,useCORS:true,logging:false,scrollY:0},
+    jsPDF:{unit:'mm',format:[120,297],orientation:'portrait'},
+    pagebreak:{mode:['avoid-all','css','legacy']}
+  };
+  html2pdf().set(opt).from(card).save().then(()=>{
+    card.classList.remove('pdf-mode');
+    document.querySelectorAll('#itp-card .itp-day').forEach(d=>d.classList.remove('open'));
+    const first=document.querySelector('#itp-card .itp-day');if(first)first.classList.add('open');
+    showToast('PDF descargado ✅');
+  }).catch(()=>{
+    card.classList.remove('pdf-mode');
+    document.querySelectorAll('#itp-card .itp-day').forEach(d=>d.classList.remove('open'));
+    const first=document.querySelector('#itp-card .itp-day');if(first)first.classList.add('open');
+    showToast('Error al generar PDF');
+  });
+}
+
+// ══════════════════════════════════════════════════════════════
+// SAVED ITINERARIES — localStorage + JSON export/import
+// ══════════════════════════════════════════════════════════════
+const LS_KEY='mich_saved_itineraries';
+
+function getSavedList(){
+  try{return JSON.parse(localStorage.getItem(LS_KEY))||[]}catch(e){return[]}
+}
+function setSavedList(list){
+  localStorage.setItem(LS_KEY,JSON.stringify(list));
+}
+
+function renderSavedList(){
+  const list=getSavedList();
+  const container=document.getElementById('saved-list');
+  const empty=document.getElementById('saved-empty');
+  if(!list.length){container.innerHTML='';empty.style.display='';return}
+  empty.style.display='none';
+  container.innerHTML=list.map((item,i)=>{
+    const date=item.savedAt?new Date(item.savedAt).toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}):'';
+    const daysCount=item.data&&item.data.days?item.data.days.length:0;
+    return `<div class="saved-item">
+      <div class="saved-item-info">
+        <div class="saved-item-title">${item.name||'Sin nombre'}</div>
+        <div class="saved-item-meta">${daysCount} días · ${item.data&&item.data.hotel?item.data.hotel:'Sin hotel'} · ${date}</div>
+      </div>
+      <div class="saved-item-actions">
+        <button class="saved-item-btn" title="Cargar" onclick="loadSavedIt(${i})">📂</button>
+        <button class="saved-item-btn" title="Duplicar" onclick="duplicateSavedIt(${i})">📋</button>
+        <button class="saved-item-btn" title="Exportar JSON" onclick="exportSavedIt(${i})">📤</button>
+        <button class="saved-item-btn danger" title="Eliminar" onclick="deleteSavedIt(${i})">🗑️</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function saveCurrentIt(){
+  const data=collectItData();
+  if(!data.title&&!data.client){showToast('Llena al menos el título o cliente');return}
+  const name=data.title||(data.client?'Itinerario de '+data.client:'Itinerario sin nombre');
+  const list=getSavedList();
+  const existing=list.findIndex(x=>x.name===name);
+  if(existing>=0){
+    list[existing]={name,data,savedAt:Date.now()};
+    showToast('Itinerario actualizado ✅');
+  }else{
+    list.unshift({name,data,savedAt:Date.now()});
+    showToast('Itinerario guardado ✅');
+  }
+  setSavedList(list);
+  renderSavedList();
+}
+
+function loadSavedIt(index){
+  const list=getSavedList();
+  const item=list[index];
+  if(!item||!item.data)return;
+  const d=item.data;
+  document.getElementById('it-form').style.display='';
+  document.getElementById('it-preview-section').style.display='none';
+  document.getElementById('it-template').value='';
+  document.getElementById('it-title').value=d.title||'';
+  document.getElementById('it-client').value=d.client||'';
+  document.getElementById('it-start').value=d.startDate||'';
+  document.getElementById('it-end').value=d.endDate||'';
+  document.getElementById('it-adults').value=d.adults||2;
+  document.getElementById('it-kids').value=d.kids||'';
+  document.getElementById('it-hotel').value=d.hotel||'';
+  document.getElementById('it-cover').value=d.cover||'';
+  itDayCount=0;itDocCount=0;
+  document.getElementById('it-days-container').innerHTML='';
+  document.getElementById('it-docs-container').innerHTML='';
+  if(d.docs)d.docs.forEach(doc=>addItDoc(doc.icon,doc.title,doc.desc));
+  if(d.days)d.days.forEach(day=>{
+    addItDay({title:day.title,icon:day.icon||'📍',type:day.type||'free',acts:day.acts||[],tips:day.tips||[]});
+  });
+  document.getElementById('it-form').scrollIntoView({behavior:'smooth',block:'start'});
+  showToast('Itinerario cargado ✅');
+}
+
+function duplicateSavedIt(index){
+  const list=getSavedList();
+  const item=list[index];
+  if(!item)return;
+  const copy=JSON.parse(JSON.stringify(item));
+  copy.name=copy.name+' (copia)';
+  if(copy.data)copy.data.title=(copy.data.title||'')+' (copia)';
+  copy.savedAt=Date.now();
+  list.splice(index+1,0,copy);
+  setSavedList(list);
+  renderSavedList();
+  showToast('Itinerario duplicado ✅');
+}
+
+function deleteSavedIt(index){
+  if(!confirm('¿Eliminar este itinerario guardado?'))return;
+  const list=getSavedList();
+  list.splice(index,1);
+  setSavedList(list);
+  renderSavedList();
+  showToast('Itinerario eliminado');
+}
+
+function exportSavedIt(index){
+  const list=getSavedList();
+  const item=list[index];
+  if(!item)return;
+  const blob=new Blob([JSON.stringify(item,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`Itinerario_${(item.name||'export').replace(/\s+/g,'_')}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast('JSON exportado ✅');
+}
+
+function exportAllJSON(){
+  const list=getSavedList();
+  if(!list.length){showToast('No hay itinerarios para exportar');return}
+  const blob=new Blob([JSON.stringify(list,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='Mich_Itinerarios_Backup_'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast('Backup exportado ✅');
+}
+
+function importItJSON(){
+  document.getElementById('import-file').click();
+}
+
+function handleImport(event){
+  const file=event.target.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const parsed=JSON.parse(e.target.result);
+      const list=getSavedList();
+      if(Array.isArray(parsed)){
+        parsed.forEach(item=>{
+          if(item.name&&item.data){
+            item.savedAt=item.savedAt||Date.now();
+            list.push(item);
+          }
+        });
+        showToast(parsed.length+' itinerarios importados ✅');
+      }else if(parsed.name&&parsed.data){
+        parsed.savedAt=parsed.savedAt||Date.now();
+        list.unshift(parsed);
+        showToast('Itinerario importado ✅');
+      }else{
+        showToast('Formato JSON no válido');return;
+      }
+      setSavedList(list);
+      renderSavedList();
+    }catch(err){showToast('Error al leer JSON')}
+  };
+  reader.readAsText(file);
+  event.target.value='';
+}
+
+// Initialize saved list on load
+document.addEventListener('DOMContentLoaded',renderSavedList);
 </script>
 </body>
 </html>
