@@ -1,0 +1,53 @@
+destino_id	nombre_hotel	categoria	imagen_url	optgroup	categoria_css
+orlando	Disney's All-Star Movies Resort	Value		⭐ Value Resorts
+orlando	Disney's All-Star Music Resort	Value		⭐ Value Resorts
+orlando	Disney's All-Star Sports Resort	Value		⭐ Value Resorts
+orlando	Disney's Art of Animation Resort	Value		⭐ Value Resorts
+orlando	Disney's Pop Century Resort	Value		⭐ Value Resorts
+orlando	Disney's Caribbean Beach Resort	Moderate		⭐⭐ Moderate Resorts
+orlando	Disney's Coronado Springs Resort	Moderate		⭐⭐ Moderate Resorts
+orlando	Disney's Port Orleans - French Quarter	Moderate		⭐⭐ Moderate Resorts
+orlando	Disney's Port Orleans - Riverside	Moderate		⭐⭐ Moderate Resorts
+orlando	Disney's Fort Wilderness Cabins	Moderate		⭐⭐ Moderate Resorts
+orlando	Disney's Grand Floridian Resort & Spa	Deluxe		⭐⭐⭐ Deluxe Resorts
+orlando	Disney's Contemporary Resort	Deluxe		⭐⭐⭐ Deluxe Resorts
+orlando	Disney's Polynesian Village Resort	Deluxe		⭐⭐⭐ Deluxe Resorts
+orlando	Disney's Animal Kingdom Lodge	Deluxe		⭐⭐⭐ Deluxe Resorts
+orlando	Disney's Wilderness Lodge	Deluxe		⭐⭐⭐ Deluxe Resorts
+orlando	Disney's BoardWalk Inn	Deluxe		⭐⭐⭐ Deluxe Resorts
+orlando	Disney's Beach Club Resort	Deluxe		⭐⭐⭐ Deluxe Resorts
+orlando	Disney's Yacht Club Resort	Deluxe		⭐⭐⭐ Deluxe Resorts
+orlando	Disney's Riviera Resort	Deluxe		⭐⭐⭐ Deluxe Resorts
+orlando	Walt Disney World Swan	On-site		🏨 Otros
+orlando	Walt Disney World Dolphin	On-site		🏨 Otros
+orlando	Four Seasons Resort Orlando	Premier		🏨 Otros
+universal	Universal's Endless Summer - Surfside Inn	Value		⭐ Value
+universal	Universal's Endless Summer - Dockside Inn	Value		⭐ Value
+universal	Universal's Cabana Bay Beach Resort	Prime Value		⭐⭐ Prime Value
+universal	Universal's Aventura Hotel	Prime Value		⭐⭐ Prime Value
+universal	Universal Stella Nova Resort	Prime Value		⭐⭐ Prime Value
+universal	Universal Terra Luna Resort	Prime Value		⭐⭐ Prime Value
+universal	Loews Sapphire Falls Resort	Preferred		⭐⭐⭐ Preferred
+universal	Loews Royal Pacific Resort	Preferred		⭐⭐⭐ Preferred
+universal	Hard Rock Hotel Orlando	Preferred		⭐⭐⭐ Preferred
+universal	Loews Portofino Bay Hotel	Preferred		⭐⭐⭐ Preferred
+universal	Universal's Grand Helios Hotel	Preferred		⭐⭐⭐ Preferred
+california	Disneyland Hotel	Disney		🏰 Hoteles Disney
+california	Disney's Grand Californian Hotel & Spa	Disney		🏰 Hoteles Disney
+california	Pixar Place Hotel	Disney		🏰 Hoteles Disney
+california	JW Marriott Anaheim Resort	Good Neighbor		🏨 Good Neighbor Hotels
+california	Hyatt Regency Orange County	Good Neighbor		🏨 Good Neighbor Hotels
+california	Courtyard by Marriott Anaheim	Good Neighbor		🏨 Good Neighbor Hotels
+california	Howard Johnson by Wyndham Anaheim	Good Neighbor		🏨 Good Neighbor Hotels
+california	Best Western Plus Park Place Inn	Good Neighbor		🏨 Good Neighbor Hotels
+paris	Disneyland Hotel	Deluxe		⭐⭐⭐ Deluxe
+paris	Disney's Hotel New York – The Art of Marvel	Deluxe		⭐⭐⭐ Deluxe
+paris	Disney Newport Bay Club	Premium		⭐⭐ Premium
+paris	Disney Sequoia Lodge	Premium		⭐⭐ Premium
+paris	Disney Hotel Cheyenne	Estándar		⭐ Estándar
+paris	Disney Hotel Santa Fe	Estándar		⭐ Estándar
+paris	Disney's Davy Crockett Ranch	Otros		🏕 Otros
+paris	Explorers Hotel	Otros		🏕 Otros
+xcaret	Hotel Xcaret México	5 Diamantes		🌴 Hoteles Xcaret
+xcaret	Hotel Xcaret Arte	5 Diamantes		🌴 Hoteles Xcaret	cat-premier
+xcaret	La Casa de la Playa	Adults Only		🌴 Hoteles Xcaret

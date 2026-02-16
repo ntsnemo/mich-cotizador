@@ -1,0 +1,9 @@
+id	nombre_mostrar	emoji	imagen_url	gradiente	agente_titulo	orden
+orlando	Disney World · Orlando	🏰	https://images.unsplash.com/photo-1597466599360-3b9775841aec?w=800&h=400&fit=crop&q=80	linear-gradient(135deg,#1a1a6e,#4b2583,#c33f91)	Agente Disney✨	1
+universal	Universal Studios · Orlando	🎢	https://images.unsplash.com/photo-1581084324659-bc65fa92df5c?w=800&h=400&fit=crop&q=80	linear-gradient(135deg,#003366,#0066cc,#00ccff)	Agente Universal✨	2
+california	Disneyland · California	🎡	img/california.png	linear-gradient(135deg,#ff6b35,#ff9a56,#ffd700)	Agente Disney✨	3
+paris	Disneyland · Paris	🗼	https://images.unsplash.com/photo-1595577248023-3ecf7637d6bb?w=800&h=400&fit=crop&q=80	linear-gradient(135deg,#2d1b69,#5b3a8c,#e8716d)	Agente Disney✨	4
+crucero-disney	Crucero Disney	🚢	https://images.unsplash.com/photo-1548574505-5e239809ee19?w=800&h=400&fit=crop&q=80	linear-gradient(135deg,#001a33,#003d66,#0099cc)	Agente Disney✨	5
+crucero-otros	Crucero Otras Navieras	🛳	https://images.unsplash.com/photo-1599640842225-85d111c60e6b?w=800&h=400&fit=crop&q=80	linear-gradient(135deg,#1a3a4a,#2d6b7a,#4fc3c3)	Agente de viajes	6
+nickelodeon	Nickelodeon Resort	🧽	https://images.unsplash.com/photo-1582719508461-905c673771fd?w=800&h=400&fit=crop&q=80	linear-gradient(135deg,#ff6600,#ff9900,#33cc33)	Agente de viajes	7
+xcaret	Xcaret	🌴	https://images.unsplash.com/photo-1552074284-5e88ef1aef18?w=800&h=400&fit=crop&q=80	linear-gradient(135deg,#004d40,#00897b,#4dd0e1)	Agente de viajes	8
