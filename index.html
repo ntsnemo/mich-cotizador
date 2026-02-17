@@ -1065,41 +1065,6 @@ let DEST_GRADIENTS={orlando:'linear-gradient(135deg,#1a1a6e,#4b2583,#c33f91)',un
 
 const SHIP_DATA={'Disney Magic':{y:'1998',d:'El barco original · Rutas clásicas'},'Disney Wonder':{y:'1999',d:'Alaska y Caribe · Frozen Musical'},'Disney Dream':{y:'2011',d:'AquaDuck · Caribe y Bahamas'},'Disney Fantasy':{y:'2012',d:'AquaDuck · Caribe occidental'},'Disney Wish':{y:'2022',d:'AquaMouse · Gran Hall · Lo más nuevo'},'Disney Treasure':{y:'2024',d:'Aventura y exploración · Último barco'}};
 
-const HOTEL_ROOM_TYPES={
-  "Disney's All-Star Movies Resort":["Estándar","Preferente"],"Disney's All-Star Music Resort":["Estándar","Preferente"],"Disney's All-Star Sports Resort":["Estándar","Preferente"],
-  "Disney's Art of Animation Resort":["Estándar","Preferente","Suite Familiar"],"Disney's Pop Century Resort":["Estándar","Preferente"],
-  "Disney's Caribbean Beach Resort":["Estándar","Preferente","Vista al agua"],"Disney's Coronado Springs Resort":["Estándar","Preferente","Vista al agua","Suite"],
-  "Disney's Port Orleans - French Quarter":["Estándar","Preferente"],"Disney's Port Orleans - Riverside":["Estándar","Preferente","Vista al río"],
-  "Disney's Fort Wilderness Cabins":["Cabaña"],"Disney's Grand Floridian Resort & Spa":["Estándar","Vista al parque","Vista a la laguna","Suite"],
-  "Disney's Contemporary Resort":["Estándar","Vista al parque","Vista a la bahía","Suite"],"Disney's Polynesian Village Resort":["Estándar","Vista a la laguna","Vista al parque","Suite"],
-  "Disney's Animal Kingdom Lodge":["Estándar","Vista a la savanna","Vista parcial a la savanna","Suite"],"Disney's Wilderness Lodge":["Estándar","Vista al bosque","Suite"],
-  "Disney's BoardWalk Inn":["Estándar","Vista al BoardWalk","Suite"],"Disney's Beach Club Resort":["Estándar","Vista al lago","Suite"],
-  "Disney's Yacht Club Resort":["Estándar","Vista al lago","Suite"],"Disney's Riviera Resort":["Estándar","Vista","Suite"],
-  "Walt Disney World Swan":["Estándar","Vista al parque","Suite"],"Walt Disney World Dolphin":["Estándar","Vista al parque","Suite"],
-  "Four Seasons Resort Orlando":["Estándar","Vista al parque","Suite"],
-  "Universal's Endless Summer - Surfside Inn":["Estándar","Preferente"],"Universal's Endless Summer - Dockside Inn":["Estándar","Preferente"],
-  "Universal's Cabana Bay Beach Resort":["Estándar","Preferente","Suite Familiar"],"Universal's Aventura Hotel":["Estándar","Preferente"],
-  "Universal Stella Nova Resort":["Estándar","Preferente","Suite"],"Universal Terra Luna Resort":["Estándar","Preferente","Suite"],
-  "Loews Sapphire Falls Resort":["Estándar","Vista al parque","Suite"],"Loews Royal Pacific Resort":["Estándar","Vista al parque","Suite"],
-  "Hard Rock Hotel Orlando":["Estándar","Vista al parque","Suite"],"Loews Portofino Bay Hotel":["Estándar","Vista al puerto","Suite"],
-  "Universal's Grand Helios Hotel":["Estándar","Vista","Suite"],
-  "Disneyland Hotel":["Estándar","Vista al parque","Suite"],"Disney's Grand Californian Hotel & Spa":["Estándar","Vista al parque","Vista a Downtown Disney","Suite"],
-  "Pixar Place Hotel":["Estándar","Vista","Suite"],"Disney's Hotel New York – The Art of Marvel":["Estándar","Vista al parque","Suite"],
-  "Disney Newport Bay Club":["Estándar","Preferente","Vista al lago"],"Disney Sequoia Lodge":["Estándar","Preferente"],
-  "Disney Hotel Cheyenne":["Estándar"],"Disney Hotel Santa Fe":["Estándar"],
-  "Hotel Xcaret México":["Estándar","Vista al mar","Suite"],"Hotel Xcaret Arte":["Estándar","Vista al mar","Suite"],
-  "La Casa de la Playa":["Suite","Vista al mar"],"Hilton Los Angeles/Universal City":["Estándar","Vista","Suite"],
-  "Sheraton Universal Hotel":["Estándar","Vista"],"Marriott Burbank Airport":["Estándar"],"Hotel Amarano Burbank":["Estándar"],
-  "The Garland":["Estándar","Suite"],"Kimpton Everly Hotel":["Estándar","Vista","Suite"],"W Hollywood":["Estándar","Vista","Suite"]
-};
-const ROOM_TYPES_DEFAULT=["Estándar","Preferente","Suite Familiar","Vista al parque","Vista a la savanna","Vista al mar","Suite"];
-const CRUISE_CABIN_TYPES={
-  "Disney Magic":["Interior","Vista al mar","Balcón","Suite","Concierge"],"Disney Wonder":["Interior","Vista al mar","Balcón","Suite","Concierge"],
-  "Disney Dream":["Interior","Vista al mar","Balcón","Suite","Concierge"],"Disney Fantasy":["Interior","Vista al mar","Balcón","Suite","Concierge"],
-  "Disney Wish":["Interior","Vista al mar","Balcón","Suite","Concierge"],"Disney Treasure":["Interior","Vista al mar","Balcón","Suite","Concierge"],
-  "default":["Interior","Vista al mar","Balcón","Suite"]
-};
-
 const UNI_TICKET_DESC={'3base':'Visita 1 parque por día a elegir entre Universal Studios Florida, Islands of Adventure o Epic Universe.','3ptp':'Acceso ilimitado a Universal Studios, Islands of Adventure y Epic Universe todos los días. Puedes saltar entre parques.','4ptp':'4 días de acceso ilimitado park-to-park a los 3 parques. Opción de agregar Volcano Bay.','5ptp':'5 días de acceso ilimitado park-to-park a los 3 parques incluyendo Epic Universe.'};
 
 let itCounts={crd:0,cro:0},pgCount=0;
@@ -1182,8 +1147,8 @@ function ck(id){return document.getElementById(id)?.checked||false}
 function showToast(t){const el=$('#toast');el.textContent=t;el.classList.remove('opacity-0','pointer-events-none');setTimeout(()=>el.classList.add('opacity-0','pointer-events-none'),2000)}
 
 // ── HOTEL/SHIP PREVIEW ──
-function showHotelPreview(pfx){const sel=document.getElementById(`${pfx}-hotel`),prev=document.getElementById(`${pfx}-hotel-preview`),h=sel.value;if(!h){prev.innerHTML='';return}const d=HOTEL_CATS[h],imgUrl=HOTEL_IMAGES[h];if(!d){prev.innerHTML='';return}if(imgUrl){prev.innerHTML=`<div style="background:#FFF8F0;border:1.5px solid #FFE8CC;border-radius:14px;overflow:hidden"><img src="${imgUrl}" alt="" style="width:100%;height:120px;object-fit:cover;display:block" onerror="this.style.display='none'"><div style="padding:12px;display:flex;align-items:center;gap:10px"><span class="hotel-cat ${d.c}">${d.cat}</span><span style="font-size:13px;font-weight:500;color:#1B2A4A">${h}</span></div></div>`}else{prev.innerHTML=`<div style="background:#FFF8F0;border:1.5px solid #FFE8CC;border-radius:14px;padding:12px;display:flex;align-items:center;gap:10px"><span class="hotel-cat ${d.c}">${d.cat}</span><span style="font-size:13px;font-weight:500;color:#1B2A4A">${h}</span></div>`}if(isGroupMode())updateGroupRoomTypeOptions();}
-function showShipPreview(){const b=v('crd-barco'),d=SHIP_DATA[b],prev=$('#crd-ship-preview');if(!d){prev.innerHTML='';return}prev.innerHTML=`<div style="background:linear-gradient(135deg,#1B2A4A,#2C4570);border-radius:14px;padding:16px;color:#fff"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span style="font-size:15px;font-weight:700">🚢 ${b}</span><span style="font-size:11px;opacity:.6">${d.y}</span></div><div style="font-size:12px;opacity:.8">${d.d}</div></div>`;if(isGroupMode())updateGroupRoomTypeOptions();}
+function showHotelPreview(pfx){const sel=document.getElementById(`${pfx}-hotel`),prev=document.getElementById(`${pfx}-hotel-preview`),h=sel.value;if(!h){prev.innerHTML='';return}const d=HOTEL_CATS[h],imgUrl=HOTEL_IMAGES[h];if(!d){prev.innerHTML='';return}if(imgUrl){prev.innerHTML=`<div style="background:#FFF8F0;border:1.5px solid #FFE8CC;border-radius:14px;overflow:hidden"><img src="${imgUrl}" alt="" style="width:100%;height:120px;object-fit:cover;display:block" onerror="this.style.display='none'"><div style="padding:12px;display:flex;align-items:center;gap:10px"><span class="hotel-cat ${d.c}">${d.cat}</span><span style="font-size:13px;font-weight:500;color:#1B2A4A">${h}</span></div></div>`}else{prev.innerHTML=`<div style="background:#FFF8F0;border:1.5px solid #FFE8CC;border-radius:14px;padding:12px;display:flex;align-items:center;gap:10px"><span class="hotel-cat ${d.c}">${d.cat}</span><span style="font-size:13px;font-weight:500;color:#1B2A4A">${h}</span></div>`}}
+function showShipPreview(){const b=v('crd-barco'),d=SHIP_DATA[b],prev=$('#crd-ship-preview');if(!d){prev.innerHTML='';return}prev.innerHTML=`<div style="background:linear-gradient(135deg,#1B2A4A,#2C4570);border-radius:14px;padding:16px;color:#fff"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span style="font-size:15px;font-weight:700">🚢 ${b}</span><span style="font-size:11px;opacity:.6">${d.y}</span></div><div style="font-size:12px;opacity:.8">${d.d}</div></div>`}
 
 // ── UNIVERSAL TICKET DESC ──
 function updateUniDesc(){const t=v('uni-modalidad'),desc=UNI_TICKET_DESC[t]||'';$('#uni-desc').innerHTML=desc?`<p>ℹ️ ${desc}</p>`:'';}
@@ -1332,7 +1297,6 @@ function genCombinado(d1,d2,gens){
     gd.forEach((r,i)=>{
       const p=parseFloat((r.price1||'0').replace(/,/g,''))||0;sub1+=p;
       m+=`\n\n🏷 *Habitación ${i+1} — ${r.name}*\n${r.adults} Adulto${r.adults!==1?'s':''}${r.minors>0?', '+r.minors+' Menor'+(r.minors!==1?'es':''):''}`;
-      if(r.roomType1)m+=`\n🛏 Tipo: ${r.roomType1}`;
       m+=`\n*💸 $${r.price1} USD*`;
       if(r.notes)m+=`\n_${r.notes}_`;
     });
@@ -1342,7 +1306,6 @@ function genCombinado(d1,d2,gens){
     gd.forEach((r,i)=>{
       const p=parseFloat((r.price2||'0').replace(/,/g,''))||0;sub2+=p;
       m+=`\n\n🏷 *Habitación ${i+1} — ${r.name}*\n${r.adults} Adulto${r.adults!==1?'s':''}${r.minors>0?', '+r.minors+' Menor'+(r.minors!==1?'es':''):''}`;
-      if(r.roomType2)m+=`\n🛏 Tipo: ${r.roomType2}`;
       m+=`\n*💸 $${r.price2} USD*`;
     });
     if(gd.length>1)m+=`\n\n💰 *Subtotal ${(DEST_NAMES[d2]||d2).replace(/^[^\s]+\s/,'')}: $${formatUSD(sub2)} USD*`;
@@ -1384,8 +1347,6 @@ function genGroupMessage(dest,baseFn){
   gd.forEach((r,i)=>{
     const p=parseFloat((r.price||'0').replace(/,/g,''))||0;totalGrp+=p;
     blocks+=`\n\n🏷 *Reservación ${i+1}*\n👤 ${r.name}\n${r.adults} Adulto${r.adults!==1?'s':''}${r.minors>0?', '+r.minors+' Menor'+(r.minors!==1?'es':''):''}`;
-    if(r.roomType)blocks+=`\n🛏 Tipo habitación: ${r.roomType}`;
-    if(r.cabinType)blocks+=`\n🛏 Tipo camarote: ${r.cabinType}`;
     blocks+=`\n*💸 $${r.price} USD*`;
     if(r.notes)blocks+=`\n_${r.notes}_`;
   });
@@ -1434,12 +1395,10 @@ function generateCard(dest){
     let totalGrp=0;
     groupData.forEach((r,i)=>{
       const p=parseFloat((r.price||'0').replace(/,/g,''))||0;totalGrp+=p;
-      const typeLine=r.roomType?`<div style="font-size:11px;color:#555;margin-top:2px">🛏 Tipo habitación: <span contenteditable="true" class="card-editable-dark">${r.roomType}</span></div>`:(r.cabinType?`<div style="font-size:11px;color:#555;margin-top:2px">🛏 Camarote: <span contenteditable="true" class="card-editable-dark">${r.cabinType}</span></div>`:'');
       priceHtml+=`<div style="background:#F0F4FF;border-radius:12px;padding:12px 16px;margin-bottom:10px;border-left:4px solid #1B2A4A">
         <div style="font-size:11px;font-weight:700;color:#1B2A4A;margin-bottom:4px">🏷 Reservación ${i+1}</div>
         <div style="font-size:12px;color:#333;margin-bottom:2px" contenteditable="true">${r.name}</div>
         <div style="font-size:11px;color:#666">${r.adults} Adulto${r.adults!==1?'s':''}${r.minors>0?' · '+r.minors+' Menor'+(r.minors!==1?'es':''):''}</div>
-        ${typeLine}
         <div style="font-size:15px;font-weight:700;color:#1B2A4A;margin-top:4px">$<span contenteditable="true" class="card-editable-dark">${r.price||'0'}</span> USD</div>
         ${r.notes?'<div style="font-size:10px;color:#888;margin-top:2px">'+r.notes+'</div>':''}
       </div>`;
@@ -1532,15 +1491,13 @@ function generateCardCombo(d1,d2){
     let rooms1='';
     gd.forEach((r,i)=>{
       const p=parseFloat((r.price1||'0').replace(/,/g,''))||0;sub1+=p;
-      const t1=r.roomType1?`<div style="font-size:10px;color:#555;margin-top:2px">🛏 <span contenteditable="true" class="card-editable-dark">${r.roomType1}</span></div>`:'';
       rooms1+=`<div style="background:rgba(255,255,255,.7);border-radius:8px;padding:8px 10px;margin-top:6px">
         <div style="font-size:10px;font-weight:700;color:#1B2A4A">🏷 Hab. ${i+1} · <span contenteditable="true" class="card-editable-dark">${r.name}</span></div>
         <div style="font-size:10px;color:#666">${r.adults} Adulto${r.adults!==1?'s':''}${r.minors>0?' · '+r.minors+' Menor'+(r.minors!==1?'es':''):''}</div>
-        ${t1}
         <div style="font-size:12px;font-weight:700;color:#1B2A4A;margin-top:2px">$<span contenteditable="true" class="card-editable-dark">${r.price1||'0'}</span> USD</div>
       </div>`;
     });
-    if(gd.length>1)rooms1+=`<div style="font-size:11px;font-weight:700;color:${color1};margin-top:6px;text-align:right">Subtotal: $<span contenteditable="true" class="card-editable-dark">${formatUSD(sub1)}</span> USD</div>`;
+    if(gd.length>1)rooms1+=`<div style="font-size:11px;font-weight:700;color:${color1};margin-top:6px;text-align:right">Subtotal: $${formatUSD(sub1)} USD</div>`;
     park1Html=`<div style="background:#f8f4ff;border-radius:12px;padding:12px 14px;margin-bottom:10px;border-left:3px solid ${color1}">
 <div style="font-size:11px;font-weight:700;color:#1B2A4A;margin-bottom:6px">${n1}</div>
 <div style="display:flex;flex-direction:column;gap:5px;font-size:11px;color:#333">${det1}</div>
@@ -1549,11 +1506,9 @@ ${rooms1}</div>`;
     let rooms2='';
     gd.forEach((r,i)=>{
       const p=parseFloat((r.price2||'0').replace(/,/g,''))||0;sub2+=p;
-      const t2=r.roomType2?`<div style="font-size:10px;color:#555;margin-top:2px">🛏 <span contenteditable="true" class="card-editable-dark">${r.roomType2}</span></div>`:'';
       rooms2+=`<div style="background:rgba(255,255,255,.7);border-radius:8px;padding:8px 10px;margin-top:6px">
         <div style="font-size:10px;font-weight:700;color:#1B2A4A">🏷 Hab. ${i+1} · <span contenteditable="true" class="card-editable-dark">${r.name}</span></div>
         <div style="font-size:10px;color:#666">${r.adults} Adulto${r.adults!==1?'s':''}${r.minors>0?' · '+r.minors+' Menor'+(r.minors!==1?'es':''):''}</div>
-        ${t2}
         <div style="font-size:12px;font-weight:700;color:#1B2A4A;margin-top:2px">$<span contenteditable="true" class="card-editable-dark">${r.price2||'0'}</span> USD</div>
       </div>`;
     });
@@ -1635,53 +1590,6 @@ function getHotelCleaningNote(dest){
 }
 
 // ── GROUP RESERVATIONS ──
-function getRoomTypesForHotel(hotelName){
-  if(!hotelName)return ROOM_TYPES_DEFAULT;
-  return HOTEL_ROOM_TYPES[hotelName]||ROOM_TYPES_DEFAULT;
-}
-function getCabinTypesForShip(shipName){
-  if(!shipName)return CRUISE_CABIN_TYPES.default||['Interior','Vista al mar','Balcón','Suite'];
-  return CRUISE_CABIN_TYPES[shipName]||CRUISE_CABIN_TYPES.default||['Interior','Vista al mar','Balcón','Suite'];
-}
-function updateGroupRoomTypeOptions(){
-  const n=parseInt(v('habitaciones'))||1;
-  const combo=isCombo();
-  const hotelSelMap={orlando:'orl-hotel',universal:'uni-hotel',california:'cal-hotel',paris:'par-hotel',xcaret:'xca-hotel',hollywood:'hwd-hotel'};
-  if(combo){
-    const d1=v('destino'),d2=v('destino-2');
-    const isCr1=d1==='crucero-disney'||d1==='crucero-otros';
-    const hotel1=hotelSelMap[d1]?v(hotelSelMap[d1]):'';
-    const ship1=d1==='crucero-disney'?v('crd-barco'):'';
-    const types1=isCr1?getCabinTypesForShip(ship1):getRoomTypesForHotel(hotel1);
-    const isCr2=d2==='crucero-disney'||d2==='crucero-otros';
-    const hotel2=hotelSelMap[d2]?v(hotelSelMap[d2]):'';
-    const ship2=d2==='crucero-disney'?v('crd-barco'):'';
-    const types2=isCr2?getCabinTypesForShip(ship2):getRoomTypesForHotel(hotel2);
-    const opt1='<option value="">— Tipo —</option>'+types1.map(t=>`<option value="${t}">${t}</option>`).join('');
-    const opt2='<option value="">— Tipo —</option>'+types2.map(t=>`<option value="${t}">${t}</option>`).join('');
-    for(let i=1;i<=n;i++){
-      const s1=document.getElementById('grp-room-type1-'+i);
-      const s2=document.getElementById('grp-room-type2-'+i);
-      if(s1){const v1=s1.value;s1.innerHTML=opt1;if(types1.includes(v1))s1.value=v1;}
-      if(s2){const v2=s2.value;s2.innerHTML=opt2;if(types2.includes(v2))s2.value=v2;}
-    }
-  }else{
-    const d=v('destino');
-    const isCruise=d==='crucero-disney'||d==='crucero-otros';
-    const hotel=hotelSelMap[d]?v(hotelSelMap[d]):'';
-    const ship=v('crd-barco');
-    const types=isCruise?getCabinTypesForShip(ship):getRoomTypesForHotel(hotel);
-    const opt='<option value="">— Tipo —</option>'+types.map(t=>`<option value="${t}">${t}</option>`).join('');
-    for(let i=1;i<=n;i++){
-      const sel=document.getElementById(isCruise?'grp-cabin-'+i:'grp-room-type-'+i);
-      if(!sel)continue;
-      const cur=sel.value;
-      sel.innerHTML=opt;
-      if(types.includes(cur))sel.value=cur;
-    }
-  }
-}
-
 function isGroupMode(){return(parseInt(v('habitaciones'))||1)>1}
 
 function updateGroupReservations(){
@@ -1696,30 +1604,8 @@ function updateGroupReservations(){
   const d1=v('destino'),d2=v('destino-2');
   const lbl1=combo?(DEST_NAMES[d1]||'Tramo 1').replace(/^[^\s]+\s/,''):'';
   const lbl2=combo?(DEST_NAMES[d2]||'Tramo 2').replace(/^[^\s]+\s/,''):'';
-  const hotelSelMap={orlando:'orl-hotel',universal:'uni-hotel',california:'cal-hotel',paris:'par-hotel',xcaret:'xca-hotel',hollywood:'hwd-hotel'};
-  const isCruise1=d1==='crucero-disney'||d1==='crucero-otros';
-  const hotel1=hotelSelMap[d1]?v(hotelSelMap[d1]):'';
-  const ship1=d1==='crucero-disney'?v('crd-barco'):'';
-  const types1=isCruise1?getCabinTypesForShip(ship1):getRoomTypesForHotel(hotel1);
-  let types2=[],isCruise2=false,hotel2='',ship2='';
-  if(combo&&d2){
-    isCruise2=d2==='crucero-disney'||d2==='crucero-otros';
-    hotel2=hotelSelMap[d2]?v(hotelSelMap[d2]):'';
-    ship2=d2==='crucero-disney'?v('crd-barco'):'';
-    types2=isCruise2?getCabinTypesForShip(ship2):getRoomTypesForHotel(hotel2);
-  }
-  const opt1=types1.map(t=>`<option value="${t}">${t}</option>`).join('');
-  const opt2=types2.length?types2.map(t=>`<option value="${t}">${t}</option>`).join(''):'';
   let html='';
   for(let i=1;i<=n;i++){
-    const typeRow=combo
-     ?`<div class="grid grid-cols-2 gap-2 mb-2">
-          <div><label class="text-[11px] text-gray-400">🛏 ${lbl1}</label><select id="grp-room-type1-${i}" class="fi-select"><option value="">— Tipo —</option>${opt1}</select></div>
-          <div><label class="text-[11px] text-gray-400">🛏 ${lbl2}</label><select id="grp-room-type2-${i}" class="fi-select"><option value="">— Tipo —</option>${opt2}</select></div>
-        </div>`
-      :isCruise1
-        ?`<div class="mb-2"><label class="text-[11px] text-gray-400">🛏 Tipo de camarote</label><select id="grp-cabin-${i}" class="fi-select"><option value="">— Tipo —</option>${opt1}</select></div>`
-        :`<div class="mb-2"><label class="text-[11px] text-gray-400">🛏 Tipo de habitación</label><select id="grp-room-type-${i}" class="fi-select"><option value="">— Tipo —</option>${opt1}</select></div>`;
     html+=`<div class="group-res-block" style="background:#FFF8F0;border-radius:14px;padding:16px;margin-bottom:12px;border:1.5px solid #FFE8CC">
       <div style="font-weight:700;color:#1B2A4A;font-size:14px;margin-bottom:10px">🏷 Reservación ${i}</div>
       <input id="grp-name-${i}" type="text" placeholder="Nombre(s) de viajeros" class="fi-input mb-2" value="${i===1?(v('nombre')||''):''}">
@@ -1727,7 +1613,6 @@ function updateGroupReservations(){
         <div><label class="text-[11px] text-gray-400">Adultos</label><input id="grp-adults-${i}" type="number" min="1" value="${i===1?(v('adultos')||2):2}" class="fi-input"></div>
         <div><label class="text-[11px] text-gray-400">Menores</label><input id="grp-minors-${i}" type="number" min="0" value="0" class="fi-input"></div>
       </div>
-      ${typeRow}
       ${combo?`<div class="grid grid-cols-2 gap-2 mb-2">
         <div><label class="text-[11px] text-gray-400">💰 ${lbl1}</label><input id="grp-price1-${i}" type="text" placeholder="0" class="fi-input" oninput="updateGroupComboTotal()"></div>
         <div><label class="text-[11px] text-gray-400">💰 ${lbl2}</label><input id="grp-price2-${i}" type="text" placeholder="0" class="fi-input" oninput="updateGroupComboTotal()"></div>
@@ -1749,8 +1634,6 @@ function updateGroupComboTotal(){
 
 function getGroupData(){
   const n=parseInt(v('habitaciones'))||1;const res=[];const combo=isCombo();
-  const d=v('destino');
-  const isCruise=d==='crucero-disney'||d==='crucero-otros';
   for(let i=1;i<=n;i++){
     const r={
       name:(document.getElementById('grp-name-'+i)||{}).value?.trim()||'Reservación '+i,
@@ -1759,16 +1642,12 @@ function getGroupData(){
       notes:(document.getElementById('grp-notes-'+i)||{}).value?.trim()||''
     };
     if(combo){
-      r.roomType1=(document.getElementById('grp-room-type1-'+i)||{}).value?.trim()||'';
-      r.roomType2=(document.getElementById('grp-room-type2-'+i)||{}).value?.trim()||'';
       r.price1=(document.getElementById('grp-price1-'+i)||{}).value?.trim()||'0';
       r.price2=(document.getElementById('grp-price2-'+i)||{}).value?.trim()||'0';
       const p1=parseFloat(r.price1.replace(/,/g,''))||0;
       const p2=parseFloat(r.price2.replace(/,/g,''))||0;
       r.price=(p1+p2).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:2});
     }else{
-      r.roomType=(document.getElementById('grp-room-type-'+i)||{}).value?.trim()||'';
-      r.cabinType=(document.getElementById('grp-cabin-'+i)||{}).value?.trim()||'';
       r.price=(document.getElementById('grp-price-'+i)||{}).value?.trim()||'0';
     }
     res.push(r);
