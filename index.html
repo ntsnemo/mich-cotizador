@@ -349,7 +349,7 @@
       <img id="dest-image" src="" alt="" style="width:100%;height:150px;object-fit:cover" onerror="this.parentElement.style.display='none'">
     </div>
     <label class="fi-label mt-3">URL de imagen de la tarjeta (opcional)</label>
-    <input id="card-image-url" type="url" placeholder="https://… — para cambiar la foto del encabezado de la cotización" class="fi-input mt-1">
+    <input id="card-image-url" type="text" placeholder="https://… — para cambiar la foto del encabezado de la cotización" class="fi-input mt-1" oninput="if(v('destino')&&$('#card-render').innerHTML)generateCard(v('destino'))">
   </div>
 
   <!-- ═══════════════ FORM ═══════════════ -->
@@ -416,11 +416,18 @@
             <option>Disney's Beach Club Resort</option>
             <option>Disney's Yacht Club Resort</option>
             <option>Disney's Riviera Resort</option>
+            <option>Disney's Old Key West Resort</option>
+            <option>Disney's Saratoga Springs Resort &amp; Spa</option>
+            <option>Disney's Copper Creek Villas &amp; Cabins</option>
           </optgroup>
           <optgroup label="🏨 Otros">
             <option>Walt Disney World Swan</option>
             <option>Walt Disney World Dolphin</option>
+            <option>Walt Disney World Swan Reserve</option>
             <option>Four Seasons Resort Orlando</option>
+            <option>Signia by Hilton Bonnet Creek</option>
+            <option>JW Marriott Orlando Grande Lakes</option>
+            <option>Hilton Orlando Bonnet Creek</option>
           </optgroup>
         </select>
         <div id="orl-hotel-preview" class="hotel-preview"></div>
@@ -529,6 +536,11 @@
             <option>Courtyard by Marriott Anaheim</option>
             <option>Howard Johnson by Wyndham Anaheim</option>
             <option>Best Western Plus Park Place Inn</option>
+            <option>Hilton Anaheim</option>
+            <option>Residence Inn Anaheim Resort</option>
+            <option>SpringHill Suites Anaheim</option>
+            <option>Fairfield Inn Anaheim Resort</option>
+            <option>Hampton Inn Anaheim</option>
           </optgroup>
         </select>
         <div id="cal-hotel-preview" class="hotel-preview"></div>
@@ -570,7 +582,7 @@
           <optgroup label="⭐⭐⭐ Deluxe"><option>Disneyland Hotel</option><option>Disney's Hotel New York – The Art of Marvel</option></optgroup>
           <optgroup label="⭐⭐ Premium"><option>Disney Newport Bay Club</option><option>Disney Sequoia Lodge</option></optgroup>
           <optgroup label="⭐ Estándar"><option>Disney Hotel Cheyenne</option><option>Disney Hotel Santa Fe</option></optgroup>
-          <optgroup label="🏕 Otros"><option>Disney's Davy Crockett Ranch</option><option>Explorers Hotel</option></optgroup>
+          <optgroup label="🏕 Otros"><option>Disney's Davy Crockett Ranch</option><option>Explorers Hotel</option><option>Disney Hotel l'Etoile</option><option>Villages Nature Paris</option></optgroup>
         </select>
         <div id="par-hotel-preview" class="hotel-preview"></div>
         <p class="text-[11px] text-gray-400 italic mt-3">* Entradas por toda la estancia y desayuno se agregan automáticamente</p>
@@ -633,7 +645,7 @@
         <h2>🌴 Detalles Xcaret</h2>
         <label class="fi-label">Hotel</label>
         <select id="xca-hotel" class="fi-select mb-2" onchange="showHotelPreview('xca')">
-          <option>Hotel Xcaret México</option><option>Hotel Xcaret Arte</option><option>La Casa de la Playa</option>
+          <option>Hotel Xcaret México</option><option>Hotel Xcaret Arte</option><option>La Casa de la Playa</option><option>Fiesta Americana Condesa Cancún</option><option>Dreams Playa Mujeres</option>
         </select>
         <div id="xca-hotel-preview" class="hotel-preview"></div>
       </div>
@@ -939,11 +951,11 @@ else if(dest==='crucero-otros'){if(v('cro-barco'))details+=`<div style="display:
 else if(dest==='nickelodeon'){details+=`<div style="display:flex;align-items:center;gap:8px"><span>🏨</span><span>Nickelodeon Resort · Riviera Maya</span></div><div style="display:flex;align-items:center;gap:8px"><span>✅</span><span>TODO INCLUIDO</span></div>`}
 else if(dest==='xcaret'){details+=`<div style="display:flex;align-items:center;gap:8px"><span>🏨</span><span class="card-editable-dark" contenteditable="true">${v('xca-hotel')}</span></div><div style="display:flex;align-items:center;gap:8px"><span>✅</span><span>TODO INCLUIDO</span></div>`}
 
-const isCr=dest.startsWith('crucero'),dateLabel=isCr?`${formatDate(checkin)} al ${formatDate(checkout)}`:`${formatDateShort(checkin)} → ${formatDateShort(checkout)}`,hasPrice=dest!=='crucero-otros',grad=DEST_GRADIENTS[dest]||'linear-gradient(135deg,#E8716D,#D4605C)',imgUrl=(v('card-image-url')||DEST_IMAGES[dest]||'').trim();
+const isCr=dest.startsWith('crucero'),dateLabel=isCr?`${formatDate(checkin)} al ${formatDate(checkout)}`:`${formatDateShort(checkin)} → ${formatDateShort(checkout)}`,hasPrice=dest!=='crucero-otros',grad=DEST_GRADIENTS[dest]||'linear-gradient(135deg,#E8716D,#D4605C)',imgUrl=((v('card-image-url')||'').trim()||DEST_IMAGES[dest]||'').trim();
 const condMap={orlando:'✅ Aparta con $200 USD · Liquida 1 mes antes',california:'✅ Aparta con $200 USD · Liquida 1 mes antes',universal:'✅ Aparta con $50 USD/persona · Liquida 45 días antes','crucero-disney':'✅ Aparta con 10% · Liquida 3 meses antes','crucero-otros':'✅ Aparta con 20% · Liquida 3 meses antes',nickelodeon:'✅ Aparta con $200 USD',xcaret:'✅ Aparta con $200 USD',paris:''};
 
 $('#card-render').innerHTML=`<div style="width:100%;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 4px 30px rgba(0,0,0,.12);font-family:'Poppins',sans-serif">
-<div style="position:relative;height:130px;background:${grad};overflow:hidden">${imgUrl?`<img src="${imgUrl}" style="width:100%;height:100%;object-fit:cover;opacity:.45" onerror="this.style.display='none'" crossorigin="anonymous">`:''}
+<div style="position:relative;height:130px;background:${grad};overflow:hidden">${imgUrl?`<img src="${imgUrl}" style="width:100%;height:100%;object-fit:cover;opacity:.45" onerror="this.style.display='none'">`:''}
 <div style="position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:14px 20px;background:linear-gradient(to top,rgba(0,0,0,.55),transparent)">
 <div style="font-size:17px;font-weight:800;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.3)">${names[dest]||dest}</div></div></div>
 <div style="background:#1B2A4A;color:#fff;padding:9px 20px;display:flex;justify-content:space-between;align-items:center">
@@ -955,7 +967,10 @@ ${getMinorsTotal()>0?`<div style="text-align:center;flex:1"><div style="font-siz
 <div style="background:#FFF8F0;border-radius:12px;padding:10px 16px;margin-bottom:14px;text-align:center">
 <div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">📅 Fechas</div>
 <div style="font-size:13px;font-weight:600;color:#1B2A4A">${dateLabel}</div></div>
-<div style="display:flex;flex-direction:column;gap:7px;margin-bottom:14px;font-size:12px;color:#333">${details}</div>
+<div style="display:flex;flex-direction:column;gap:7px;margin-bottom:14px;font-size:12px;color:#333">${details}
+<div id="card-details-extras"></div>
+</div>
+<button type="button" onclick="addCardDetailLine()" style="font-size:11px;color:#E8716D;font-weight:600;background:none;border:none;cursor:pointer;padding:2px 0 8px;text-align:left">+ Agregar línea</button>
 ${hasPrice?`<div style="background:linear-gradient(135deg,#1B2A4A,#2C4570);border-radius:14px;padding:14px;text-align:center;margin-bottom:14px">
 <div style="font-size:10px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Precio total</div>
 <div style="font-size:26px;font-weight:800;color:#fff">$<span class="card-editable" contenteditable="true">${precio}</span></div>
@@ -967,14 +982,16 @@ ${hasPrice?`<div style="background:linear-gradient(135deg,#1B2A4A,#2C4570);borde
 </div>
 <button type="button" onclick="addCardNote()" style="font-size:11px;color:#E8716D;font-weight:600;background:none;border:none;cursor:pointer;padding:4px 0;text-align:left">+ Agregar otra nota</button>
 </div>
-<div style="background:#FFF8F0;padding:12px 20px;text-align:center;border-top:1px solid #f0e8dc">
-<div style="font-size:11px;color:#1B2A4A;font-weight:600">📸 @michmurrieta_viajes</div></div></div>`}
+<div style="background:#FFF8F0;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid #f0e8dc">
+<div><div style="font-size:11px;color:#1B2A4A;font-weight:600">📲 +52 55 1766 6721</div><div style="font-size:9px;color:#888">michmurrietaviajes.com</div></div>
+<div style="font-size:9px;color:#888;text-align:right">📸 @michmurrieta_viajes</div></div></div>`}
 
 // ── TABS ──
 function switchTab(t){$('#tab-texto').classList.toggle('active',t==='texto');$('#tab-tarjeta').classList.toggle('active',t==='tarjeta');$('#panel-texto').style.display=t==='texto'?'':'none';$('#panel-tarjeta').style.display=t==='tarjeta'?'':'none'}
 
 // ── ACTIONS ──
 function addCardNote(){const c=$('#card-notes-container');if(!c)return;const d=document.createElement('div');d.contentEditable='true';d.className='card-note-line';d.style.cssText='font-size:11px;color:#555;min-height:16px;outline:none;border-bottom:1px dashed #eee;padding-bottom:4px';d.setAttribute('data-placeholder','+ Agregar nota aquí...');c.appendChild(d);d.focus();}
+function addCardDetailLine(){const c=$('#card-details-extras');if(!c)return;const d=document.createElement('div');d.style.cssText='display:flex;align-items:center;gap:8px';d.innerHTML=`<span>•</span><span class="card-editable-dark" contenteditable="true" style="flex:1;min-width:0;min-height:1em" data-placeholder="Park Hopper, Lightning Lane, etc."></span>`;c.appendChild(d);d.querySelector('[contenteditable]').focus();}
 function copiarTexto(){const raw=waHtmlToText($('#wa-preview'));navigator.clipboard.writeText(raw).then(()=>showToast('Copiado al portapapeles ✅'))}
 function descargarImagen(){const card=$('#card-render');showToast('Generando imagen...');html2canvas(card,{scale:2,backgroundColor:null,useCORS:true,logging:false}).then(canvas=>{const a=document.createElement('a');a.download=`Cotizacion_${(v('nombre')||'cliente').replace(/\s+/g,'_')}_${v('destino')}.png`;a.href=canvas.toDataURL('image/png');a.click();showToast('Imagen descargada ✅')})}
 
@@ -1815,7 +1832,7 @@ function generateItPreview(){
     daysHtml+=`<div class="itp-day" data-idx="${idx}"><div class="itp-day-head" onclick="toggleItDay(this)"><div class="itp-day-badge" style="background:${color}"><span class="db-label">Día</span><span class="db-num">${idx+1}</span></div><div class="itp-day-info"><div class="itp-day-date">${dateStr}</div><div class="itp-day-name">${day.icon} ${day.title}</div></div><span class="itp-day-chev">▾</span></div><div class="itp-day-body"><div class="itp-timeline">${timelineHtml}</div>${tipsHtml}</div></div>`;
   });
 
-  container.innerHTML=`<div class="itp" id="itp-card"><div class="itp-hero" style="background-image:url('${data.cover}')"><div class="itp-hero-ov"><h1>${data.title}</h1>${clientSubtitle}<p>${dateRange}</p></div></div><div class="itp-agent"><div class="itp-agent-avatar">✨</div><div class="itp-agent-info"><h3>Mich Murrieta</h3><p>Tu agente de viajes</p><div class="itp-contact">📸 @michmurrieta_viajes</div></div></div><div class="itp-travelers"><div>👥 ${data.adults} Adulto${+data.adults!==1?'s':''}</div>${data.kids?`<div>👶 ${data.kids}</div>`:''}<div>🏨 ${data.hotel}</div></div>${docsHtml}<div class="itp-section" style="padding-bottom:0"><div class="itp-stitle">📅 Tu itinerario día por día</div></div>${daysHtml}<div class="itp-footer"><div>✨ Mich Murrieta · Tu agente de viajes</div><div class="sub">📸 @michmurrieta_viajes</div></div></div>`;
+  container.innerHTML=`<div class="itp" id="itp-card"><div class="itp-hero" style="background-image:url('${data.cover}')"><div class="itp-hero-ov"><h1>${data.title}</h1>${clientSubtitle}<p>${dateRange}</p></div></div><div class="itp-agent"><div class="itp-agent-avatar">✨</div><div class="itp-agent-info"><h3>Mich Murrieta</h3><p>Tu agente de viajes</p><div class="itp-contact">📸 @michmurrieta_viajes</div></div></div><div class="itp-travelers"><div>👥 ${data.adults} Adulto${+data.adults!==1?'s':''}</div>${data.kids?`<div>👶 ${data.kids}</div>`:''}<div>🏨 ${data.hotel}</div></div>${docsHtml}<div class="itp-section" style="padding-bottom:0"><div class="itp-stitle">📅 Tu itinerario día por día</div></div>${daysHtml}<div class="itp-footer"><div>✨ Mich Murrieta · Tu agente de viajes</div><div>📲 +52 55 1766 6721</div><div class="sub">michmurrietaviajes.com · 📸 @michmurrieta_viajes</div></div></div>`;
 
   document.getElementById('it-form').style.display='none';
   document.getElementById('it-preview-section').style.display='';
