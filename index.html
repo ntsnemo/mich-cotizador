@@ -190,9 +190,108 @@
     .saved-item-btn{width:32px;height:32px;border-radius:10px;border:1px solid #e8e0d4;background:#faf8f4;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;transition:all .15s}
     .saved-item-btn:hover{background:#E8716D;color:#fff;border-color:#E8716D}
     .saved-item-btn.danger:hover{background:#dc2626;border-color:#dc2626}
+
+    /* ── Security overlay (welcome + PIN) ── */
+    #security-overlay{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;background:linear-gradient(160deg,#1B2A4A 0%,#2C4570 35%,#E8716D 100%);transition:opacity .4s ease,visibility .4s}
+    #security-overlay.hidden{opacity:0;visibility:hidden;pointer-events:none}
+    .security-title{color:#fff;font-size:clamp(1.1rem,4vw,1.5rem);font-weight:700;text-align:center;max-width:320px;line-height:1.4;text-shadow:0 2px 12px rgba(0,0,0,0.2);margin-bottom:8px}
+    .security-sub{color:rgba(255,255,255,0.85);font-size:13px;margin-bottom:24px}
+    .security-dots{display:flex;gap:12px;justify-content:center;margin-bottom:28px}
+    .security-dot{width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,0.35);border:2px solid rgba(255,255,255,0.5);transition:all .2s}
+    .security-dot.filled{background:#fff;border-color:#fff;box-shadow:0 0 12px rgba(255,255,255,0.5)}
+    .security-err{color:#ffcccb;font-size:12px;font-weight:600;min-height:18px;margin-bottom:8px;text-align:center}
+    .numpad-wrap{display:grid;grid-template-columns:repeat(3,64px);gap:10px;margin-bottom:12px}
+    .numpad-btn{width:64px;height:56px;border-radius:16px;border:2px solid rgba(255,255,255,0.4);background:rgba(255,255,255,0.15);backdrop-filter:blur(8px);color:#fff;font-size:22px;font-weight:700;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center}
+    .numpad-btn:hover{background:rgba(255,255,255,0.3);border-color:rgba(255,255,255,0.6);transform:scale(1.03)}
+    .numpad-btn:active{transform:scale(0.97)}
+    .numpad-btn.del{font-size:14px;font-weight:600}
+    @media(max-width:400px){.numpad-wrap{grid-template-columns:repeat(3,56px);gap:8px}.numpad-btn{width:56px;height:50px;font-size:20px}}
   </style>
 </head>
 <body class="bg-cream-100 min-h-screen">
+
+<!-- ═══════════════ SECURITY OVERLAY (welcome + PIN) ═══════════════ -->
+<div id="security-overlay">
+  <p class="security-title">Bienvenido al mundo de Mich Murrieta Viajes</p>
+  <p class="security-sub">Ingresa el código de acceso</p>
+  <div class="security-dots" id="security-dots">
+    <span class="security-dot" data-i="0"></span>
+    <span class="security-dot" data-i="1"></span>
+    <span class="security-dot" data-i="2"></span>
+    <span class="security-dot" data-i="3"></span>
+  </div>
+  <p class="security-err" id="security-err" aria-live="polite"></p>
+  <div class="numpad-wrap">
+    <button type="button" class="numpad-btn" data-n="1">1</button>
+    <button type="button" class="numpad-btn" data-n="2">2</button>
+    <button type="button" class="numpad-btn" data-n="3">3</button>
+    <button type="button" class="numpad-btn" data-n="4">4</button>
+    <button type="button" class="numpad-btn" data-n="5">5</button>
+    <button type="button" class="numpad-btn" data-n="6">6</button>
+    <button type="button" class="numpad-btn" data-n="7">7</button>
+    <button type="button" class="numpad-btn" data-n="8">8</button>
+    <button type="button" class="numpad-btn" data-n="9">9</button>
+    <button type="button" class="numpad-btn del" id="numpad-del">⌫</button>
+    <button type="button" class="numpad-btn" data-n="0">0</button>
+    <button type="button" class="numpad-btn" id="numpad-ok">OK</button>
+  </div>
+</div>
+<script>
+(function(){
+  var PIN = '1234'; // Cambia aquí el código de acceso numérico
+  var SECRET = 'michUnlocked';
+  var overlay = document.getElementById('security-overlay');
+  var dots = document.getElementById('security-dots');
+  var errEl = document.getElementById('security-err');
+  var input = '';
+
+  function updateDots(){
+    var children = dots.querySelectorAll('.security-dot');
+    children.forEach(function(dot, i){ dot.classList.toggle('filled', i < input.length); });
+  }
+  function clearError(){ errEl.textContent = ''; }
+  function showError(msg){ errEl.textContent = msg; }
+
+  function unlock(){
+    try { sessionStorage.setItem(SECRET, '1'); } catch(e){}
+    overlay.classList.add('hidden');
+  }
+
+  function checkPin(){
+    if (input.length !== 4) return;
+    if (input === PIN) {
+      clearError();
+      unlock();
+    } else {
+      showError('Código incorrecto');
+      input = '';
+      updateDots();
+      setTimeout(clearError, 2000);
+    }
+  }
+
+  if (sessionStorage.getItem(SECRET) === '1') {
+    overlay.classList.add('hidden');
+    return;
+  }
+
+  document.querySelectorAll('.numpad-btn[data-n]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      if (input.length >= 4) return;
+      input += this.getAttribute('data-n');
+      updateDots();
+      clearError();
+      if (input.length === 4) checkPin();
+    });
+  });
+  document.getElementById('numpad-del').addEventListener('click', function(){
+    input = input.slice(0, -1);
+    updateDots();
+    clearError();
+  });
+  document.getElementById('numpad-ok').addEventListener('click', checkPin);
+})();
+</script>
 
 <!-- ═══════════════ HEADER ═══════════════ -->
 <header style="background:linear-gradient(135deg,#E8716D 0%,#D4605C 100%)" class="text-white py-4 px-5 shadow-lg sticky top-0 z-40">
