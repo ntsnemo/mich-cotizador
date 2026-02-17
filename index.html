@@ -339,6 +339,7 @@
       <option value="orlando">🏰 Disney World · Orlando</option>
       <option value="universal">🎢 Universal Studios · Orlando</option>
       <option value="california">🎡 Disneyland · California</option>
+      <option value="hollywood">🎬 Universal Studios · Hollywood</option>
       <option value="paris">🗼 Disneyland · Paris</option>
       <option value="crucero-disney">🚢 Crucero Disney</option>
       <option value="crucero-otros">🛳 Crucero Otras Navieras</option>
@@ -350,6 +351,23 @@
     </div>
     <label class="fi-label mt-3">URL de imagen de la tarjeta (opcional)</label>
     <input id="card-image-url" type="url" placeholder="https://… — para cambiar la foto del encabezado de la cotización" class="fi-input mt-1">
+
+    <!-- Viaje Combinado Toggle -->
+    <div id="combo-toggle-wrap" class="mt-4" style="display:none">
+      <label class="toggle-wrap" for="viaje-combinado">
+        <input type="checkbox" id="viaje-combinado" onchange="onCombinadoChange()">
+        <div class="toggle-track"></div>
+        <span class="toggle-text">🔀 Viaje Combinado (ej. Disney + Universal, Parque + Crucero)</span>
+      </label>
+    </div>
+
+    <!-- Second destination selector (for combined trips) -->
+    <div id="combo-dest2-wrap" class="mt-3" style="display:none">
+      <label class="fi-label">✈️ Segundo destino</label>
+      <select id="destino-2" class="fi-select text-base font-semibold" onchange="onDestino2Change()">
+        <option value="">— Selecciona segundo destino —</option>
+      </select>
+    </div>
   </div>
 
   <!-- ═══════════════ FORM ═══════════════ -->
@@ -380,9 +398,10 @@
     <div class="s-card">
       <h2>📅 Fechas</h2>
       <div class="grid grid-cols-2 gap-3">
-        <div><label class="fi-label" id="label-checkin">Check in</label><input id="checkin" type="date" class="fi-input"></div>
-        <div><label class="fi-label" id="label-checkout">Check out</label><input id="checkout" type="date" class="fi-input"></div>
+        <div><label class="fi-label" id="label-checkin">Check in</label><input id="checkin" type="date" class="fi-input" onchange="updateNightsDisplay()"></div>
+        <div><label class="fi-label" id="label-checkout">Check out</label><input id="checkout" type="date" class="fi-input" onchange="updateNightsDisplay()"></div>
       </div>
+      <div id="nights-display" style="display:none;margin-top:8px;text-align:center;font-size:13px;font-weight:600;color:#E8716D;background:#FFF1F0;border-radius:10px;padding:8px 12px"></div>
     </div>
 
     <!-- ═══════════ DISNEY WORLD ORLANDO ═══════════ -->
@@ -560,6 +579,53 @@
       </div>
     </div>
 
+    <!-- ═══════════ UNIVERSAL STUDIOS HOLLYWOOD ═══════════ -->
+    <div id="campos-hollywood" class="dest-section">
+      <div class="s-card">
+        <h2>🎬 Detalles Universal Studios Hollywood</h2>
+        <label class="fi-label">Hotel / Hospedaje</label>
+        <select id="hwd-hotel" class="fi-select mb-2" onchange="showHotelPreview('hwd')">
+          <option value="">— Selecciona un hotel —</option>
+          <optgroup label="🏨 Hoteles cercanos">
+            <option>Hilton Los Angeles/Universal City</option>
+            <option>Sheraton Universal Hotel</option>
+            <option>Marriott Burbank Airport</option>
+            <option>Hotel Amarano Burbank</option>
+          </optgroup>
+          <optgroup label="⭐ Hoteles Premium">
+            <option>The Garland</option>
+            <option>Kimpton Everly Hotel</option>
+            <option>W Hollywood</option>
+          </optgroup>
+        </select>
+        <div id="hwd-hotel-preview" class="hotel-preview"></div>
+
+        <div class="grid grid-cols-2 gap-3 my-4">
+          <div>
+            <label class="fi-label">Tipo de entrada</label>
+            <select id="hwd-ticket" class="fi-select">
+              <option value="general">General Admission (1 día)</option>
+              <option value="express">Universal Express (skip-the-line 1x)</option>
+              <option value="express-unl">Universal Express Unlimited</option>
+            </select>
+          </div>
+          <div><label class="fi-label">Días de entradas</label><input id="hwd-dias" type="number" min="1" value="1" class="fi-input"></div>
+        </div>
+
+        <label class="toggle-wrap mb-3" for="hwd-vip">
+          <input type="checkbox" id="hwd-vip">
+          <div class="toggle-track"></div>
+          <span class="toggle-text">🌟 VIP Experience</span>
+        </label>
+
+        <label class="toggle-wrap" for="hwd-nintendo">
+          <input type="checkbox" id="hwd-nintendo">
+          <div class="toggle-track"></div>
+          <span class="toggle-text">🎮 Super Nintendo World (reserva incluida)</span>
+        </label>
+      </div>
+    </div>
+
     <!-- ═══════════ DISNEYLAND PARIS ═══════════ -->
     <div id="campos-paris" class="dest-section">
       <div class="s-card">
@@ -642,13 +708,145 @@
     <!-- ═══════════ PRICE ═══════════ -->
     <div id="price-section" class="s-card">
       <h2>💰 Precio</h2>
+
+      <!-- Combined trip pricing (hidden by default) -->
+      <div id="combo-pricing" style="display:none">
+        <label class="fi-label" id="combo-price1-label">Precio Tramo 1 USD</label>
+        <div class="relative mb-3">
+          <span class="absolute left-4 top-1/2 -translate-y-1/2 text-coral-400 font-bold text-lg">$</span>
+          <input id="precio-tramo1" type="text" placeholder="1,500.00" class="fi-input pl-10 text-base font-bold" style="letter-spacing:0.02em" oninput="updateComboTotal()">
+          <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-semibold">USD</span>
+        </div>
+        <label class="fi-label" id="combo-price2-label">Precio Tramo 2 USD</label>
+        <div class="relative mb-3">
+          <span class="absolute left-4 top-1/2 -translate-y-1/2 text-coral-400 font-bold text-lg">$</span>
+          <input id="precio-tramo2" type="text" placeholder="1,200.00" class="fi-input pl-10 text-base font-bold" style="letter-spacing:0.02em" oninput="updateComboTotal()">
+          <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-semibold">USD</span>
+        </div>
+      </div>
+
       <label class="fi-label">Precio total USD</label>
       <div class="relative mb-3">
         <span class="absolute left-4 top-1/2 -translate-y-1/2 text-coral-400 font-bold text-lg">$</span>
         <input id="precio" type="text" placeholder="2,717.38" class="fi-input pl-10 text-lg font-bold" style="letter-spacing:0.02em">
         <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-semibold">USD</span>
       </div>
-      <label class="fi-label">Notas adicionales (opcional)</label>
+      <!-- Enhanced Notes Section -->
+      <div class="mt-4" style="border-top:1px solid #f0e8dc;padding-top:16px">
+        <h2 style="font-size:14px;font-weight:700;color:#1B2A4A;margin-bottom:12px">📋 Notas importantes</h2>
+        <div class="grid grid-cols-1 gap-2 mb-3">
+          <label class="toggle-wrap" for="nota-visa">
+            <input type="checkbox" id="nota-visa" class="nota-check">
+            <div class="toggle-track"></div>
+            <span class="toggle-text">🛂 Visa americana vigente requerida</span>
+          </label>
+          <label class="toggle-wrap" for="nota-pasaporte">
+            <input type="checkbox" id="nota-pasaporte" class="nota-check">
+            <div class="toggle-track"></div>
+            <span class="toggle-text">📘 Se requiere pasaporte vigente</span>
+          </label>
+          <label class="toggle-wrap" for="nota-seguro">
+            <input type="checkbox" id="nota-seguro" class="nota-check">
+            <div class="toggle-track"></div>
+            <span class="toggle-text">🛡 Seguro de viaje recomendado</span>
+          </label>
+          <label class="toggle-wrap" for="nota-tipocambio">
+            <input type="checkbox" id="nota-tipocambio" class="nota-check">
+            <div class="toggle-track"></div>
+            <span class="toggle-text">💱 Tipo de cambio sujeto a variaciones</span>
+          </label>
+          <label class="toggle-wrap" for="nota-disponibilidad">
+            <input type="checkbox" id="nota-disponibilidad" class="nota-check">
+            <div class="toggle-track"></div>
+            <span class="toggle-text">📌 Precios sujetos a disponibilidad</span>
+          </label>
+          <label class="toggle-wrap" for="nota-transporte">
+            <input type="checkbox" id="nota-transporte" class="nota-check">
+            <div class="toggle-track"></div>
+            <span class="toggle-text">🚗 Transportación aeropuerto-hotel no incluida</span>
+          </label>
+          <label class="toggle-wrap" for="nota-vuelos">
+            <input type="checkbox" id="nota-vuelos" class="nota-check">
+            <div class="toggle-track"></div>
+            <span class="toggle-text">✈️ Vuelos no incluidos en la cotización</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Special Park Options -->
+      <div id="special-park-options" style="display:none;border-top:1px solid #f0e8dc;padding-top:16px;margin-top:8px">
+        <h2 style="font-size:14px;font-weight:700;color:#1B2A4A;margin-bottom:12px">🎪 Opciones especiales</h2>
+        <div id="special-options-orlando" class="special-opts" style="display:none">
+          <label class="toggle-wrap mb-2" for="sp-orl-halloween">
+            <input type="checkbox" id="sp-orl-halloween" class="special-check">
+            <div class="toggle-track"></div>
+            <span class="toggle-text">🎃 Mickey's Not-So-Scary Halloween Party</span>
+          </label>
+          <label class="toggle-wrap mb-2" for="sp-orl-christmas">
+            <input type="checkbox" id="sp-orl-christmas" class="special-check">
+            <div class="toggle-track"></div>
+            <span class="toggle-text">🎄 Mickey's Very Merry Christmas Party</span>
+          </label>
+          <label class="toggle-wrap mb-2" for="sp-orl-epcot">
+            <input type="checkbox" id="sp-orl-epcot" class="special-check">
+            <div class="toggle-track"></div>
+            <span class="toggle-text">🌎 EPCOT Festival (Food & Wine / Flower & Garden)</span>
+          </label>
+          <label class="toggle-wrap mb-2" for="sp-orl-dining">
+            <input type="checkbox" id="sp-orl-dining" class="special-check">
+            <div class="toggle-track"></div>
+            <span class="toggle-text">🍽 Reservaciones de restaurantes especiales</span>
+          </label>
+        </div>
+        <div id="special-options-universal" class="special-opts" style="display:none">
+          <label class="toggle-wrap mb-2" for="sp-uni-hhn">
+            <input type="checkbox" id="sp-uni-hhn" class="special-check">
+            <div class="toggle-track"></div>
+            <span class="toggle-text">👻 Halloween Horror Nights</span>
+          </label>
+          <label class="toggle-wrap mb-2" for="sp-uni-early">
+            <input type="checkbox" id="sp-uni-early" class="special-check">
+            <div class="toggle-track"></div>
+            <span class="toggle-text">🌅 Early Park Admission</span>
+          </label>
+          <label class="toggle-wrap mb-2" for="sp-uni-express">
+            <input type="checkbox" id="sp-uni-express" class="special-check">
+            <div class="toggle-track"></div>
+            <span class="toggle-text">⚡ Universal Express Pass</span>
+          </label>
+        </div>
+        <div id="special-options-california" class="special-opts" style="display:none">
+          <label class="toggle-wrap mb-2" for="sp-cal-oogie">
+            <input type="checkbox" id="sp-cal-oogie" class="special-check">
+            <div class="toggle-track"></div>
+            <span class="toggle-text">🎃 Oogie Boogie Bash</span>
+          </label>
+          <label class="toggle-wrap mb-2" for="sp-cal-worldcolor">
+            <input type="checkbox" id="sp-cal-worldcolor" class="special-check">
+            <div class="toggle-track"></div>
+            <span class="toggle-text">🌈 World of Color Dining Package</span>
+          </label>
+          <label class="toggle-wrap mb-2" for="sp-cal-fantasmic">
+            <input type="checkbox" id="sp-cal-fantasmic" class="special-check">
+            <div class="toggle-track"></div>
+            <span class="toggle-text">✨ Fantasmic! Dining Package</span>
+          </label>
+        </div>
+        <div id="special-options-hollywood" class="special-opts" style="display:none">
+          <label class="toggle-wrap mb-2" for="sp-hwd-hhn">
+            <input type="checkbox" id="sp-hwd-hhn" class="special-check">
+            <div class="toggle-track"></div>
+            <span class="toggle-text">👻 Halloween Horror Nights Hollywood</span>
+          </label>
+          <label class="toggle-wrap mb-2" for="sp-hwd-studio">
+            <input type="checkbox" id="sp-hwd-studio" class="special-check">
+            <div class="toggle-track"></div>
+            <span class="toggle-text">🎥 Studio Tour VIP</span>
+          </label>
+        </div>
+      </div>
+
+      <label class="fi-label mt-4">Notas adicionales personalizadas (opcional)</label>
       <textarea id="notas" rows="2" placeholder="Información extra..." class="fi-input"></textarea>
     </div>
 
@@ -817,12 +1015,13 @@
 <!-- ═══════════════════════════════════════════════════════════ -->
 <script>
 // ── CONFIG (valores por defecto; se sobrescriben si se cargan data/*.tsv) ──
-let AGENT_TITLES={orlando:'Agente Disney✨',universal:'Agente Universal✨',california:'Agente Disney✨',paris:'Agente Disney✨','crucero-disney':'Agente Disney✨','crucero-otros':'Agente de viajes',nickelodeon:'Agente de viajes',xcaret:'Agente de viajes'};
+let AGENT_TITLES={orlando:'Agente Disney✨',universal:'Agente Universal✨',california:'Agente Disney✨',hollywood:'Agente Universal✨',paris:'Agente Disney✨','crucero-disney':'Agente Disney✨','crucero-otros':'Agente de viajes',nickelodeon:'Agente de viajes',xcaret:'Agente de viajes'};
 
 let CONDITIONS={
   orlando:'✅ El paquete se aparta con $200 USD y el resto se puede ir pagando poco a poco hasta liquidarlo 1 mes antes de la fecha del check in. Cualquier modificación o cancelación al paquete se puede realizar antes de la fecha límite de pago.',
   universal:'✅ El paquete se aparta con $50 USD x persona y el resto se puede ir pagando poco a poco hasta liquidarlo 45 días antes de la fecha del check in. Cualquier modificación o cancelación al paquete se puede realizar antes de la fecha límite de pago.',
   california:'✅ El paquete se aparta con $200 USD y el resto se puede ir pagando poco a poco hasta liquidarlo 1 mes antes de la fecha del check in. Cualquier modificación o cancelación al paquete se puede realizar antes de la fecha límite de pago.',
+  hollywood:'✅ Los boletos se compran directamente. Precios sujetos a disponibilidad y fecha.',
   paris:'',
   'crucero-disney':'✅ El apartado de cada camarote se hace realizando un pago por el 10% del total y el resto se puede ir pagando poco a poco hasta liquidarlo 3 meses antes de la fecha de embarque.\n🛂 El cliente se debe de hacer responsable de tener todos sus papeles en tiempo y forma para poder viajar. Favor de verificar que tengan su visa americana vigente y si es el caso, cualquier otro documento necesario para entrar al país destino.',
   'crucero-otros':'✅ El apartado de cada camarote se hace realizando un pago por el 20% del total y el resto se puede ir pagando poco a poco hasta liquidarlo 3 meses antes de la fecha de embarque.\n🛂 El cliente se debe de hacer responsable de tener todos sus papeles en tiempo y forma para poder viajar. Favor de verificar que tengan su visa americana vigente y si es el caso, cualquier otro documento necesario para entrar al país destino.',
@@ -836,10 +1035,10 @@ const INCLUSIONS_XCARET=`*Tu tarifa incluye*\n🍔 Alimentos\n🍹 Bebidas\n🍽
 const INCLUSIONS_CRUISE=`*🌊 Tu tarifa incluye:*\n\n🍽️ Comidas ilimitadas\nRestaurantes temáticos y servicio a la habitación\nSnacks, cafeterías y helado 24/7\n\n🥤Bebidas básicas\nSodas, Café, Jugo, Té\n\n🎭 Entretenimiento diario\nShows estilo Broadway\nCine a bordo (películas Disney, Marvel, Pixar, Star Wars)\nFiestas en cubierta y fuegos artificiales\n\n👸 Encuentros con personajes\nPrincesas, Mickey y sus amigos, Marvel y más\n\n🏊 Diversión en el agua\nToboganes, piscinas para niños, familias y adultos\nSplash zones y AquaDuck (en barcos selectos)\n\n🎨 Clubes infantiles y juveniles\nActividades guiadas por edades (niños, tweens y teens)\nPersonal capacitado y espacios mágicos\n\n🥂 Zonas solo para adultos\nPiscina, jacuzzis, bares, discoteca, spa y restaurantes exclusivos\n\n🏝️ Paradas en islas privadas\nCastaway Cay o Lookout Cay at Lighthouse Point\nTodo incluido en la isla: comida, actividades y playa\n\n💫 Magia y servicio Disney en todo momento\nAtención de lujo, limpieza impecable y detalles encantadores`;
 
 const CAT_TO_CSS={'Value':'cat-value','Moderate':'cat-moderate','Deluxe':'cat-deluxe','On-site':'cat-onsite','Premier':'cat-premier','Prime Value':'cat-prime','Preferred':'cat-preferred','Disney':'cat-disney','Premium':'cat-moderate','Estándar':'cat-value','5 Diamantes':'cat-deluxe','Adults Only':'cat-preferred','Good Neighbor':'cat-moderate','Otros':'cat-value'};
-let HOTEL_CATS={"Disney's All-Star Movies Resort":{cat:'Value',c:'cat-value'},"Disney's All-Star Music Resort":{cat:'Value',c:'cat-value'},"Disney's All-Star Sports Resort":{cat:'Value',c:'cat-value'},"Disney's Art of Animation Resort":{cat:'Value',c:'cat-value'},"Disney's Pop Century Resort":{cat:'Value',c:'cat-value'},"Disney's Caribbean Beach Resort":{cat:'Moderate',c:'cat-moderate'},"Disney's Coronado Springs Resort":{cat:'Moderate',c:'cat-moderate'},"Disney's Port Orleans - French Quarter":{cat:'Moderate',c:'cat-moderate'},"Disney's Port Orleans - Riverside":{cat:'Moderate',c:'cat-moderate'},"Disney's Fort Wilderness Cabins":{cat:'Moderate',c:'cat-moderate'},"Disney's Grand Floridian Resort & Spa":{cat:'Deluxe',c:'cat-deluxe'},"Disney's Contemporary Resort":{cat:'Deluxe',c:'cat-deluxe'},"Disney's Polynesian Village Resort":{cat:'Deluxe',c:'cat-deluxe'},"Disney's Animal Kingdom Lodge":{cat:'Deluxe',c:'cat-deluxe'},"Disney's Wilderness Lodge":{cat:'Deluxe',c:'cat-deluxe'},"Disney's BoardWalk Inn":{cat:'Deluxe',c:'cat-deluxe'},"Disney's Beach Club Resort":{cat:'Deluxe',c:'cat-deluxe'},"Disney's Yacht Club Resort":{cat:'Deluxe',c:'cat-deluxe'},"Disney's Riviera Resort":{cat:'Deluxe',c:'cat-deluxe'},"Walt Disney World Swan":{cat:'On-site',c:'cat-onsite'},"Walt Disney World Dolphin":{cat:'On-site',c:'cat-onsite'},"Four Seasons Resort Orlando":{cat:'Premier',c:'cat-premier'},"Universal's Endless Summer - Surfside Inn":{cat:'Value',c:'cat-value'},"Universal's Endless Summer - Dockside Inn":{cat:'Value',c:'cat-value'},"Universal's Cabana Bay Beach Resort":{cat:'Prime Value',c:'cat-prime'},"Universal's Aventura Hotel":{cat:'Prime Value',c:'cat-prime'},"Universal Stella Nova Resort":{cat:'Prime Value',c:'cat-prime'},"Universal Terra Luna Resort":{cat:'Prime Value',c:'cat-prime'},"Loews Sapphire Falls Resort":{cat:'Preferred',c:'cat-preferred'},"Loews Royal Pacific Resort":{cat:'Preferred',c:'cat-preferred'},"Hard Rock Hotel Orlando":{cat:'Preferred',c:'cat-preferred'},"Loews Portofino Bay Hotel":{cat:'Preferred',c:'cat-preferred'},"Universal's Grand Helios Hotel":{cat:'Preferred',c:'cat-preferred'},"Disneyland Hotel":{cat:'Disney',c:'cat-disney'},"Disney's Grand Californian Hotel & Spa":{cat:'Disney',c:'cat-disney'},"Pixar Place Hotel":{cat:'Disney',c:'cat-disney'},"Disney's Hotel New York – The Art of Marvel":{cat:'Deluxe',c:'cat-deluxe'},"Disney Newport Bay Club":{cat:'Premium',c:'cat-moderate'},"Disney Sequoia Lodge":{cat:'Premium',c:'cat-moderate'},"Disney Hotel Cheyenne":{cat:'Estándar',c:'cat-value'},"Disney Hotel Santa Fe":{cat:'Estándar',c:'cat-value'},"Hotel Xcaret México":{cat:'5 Diamantes',c:'cat-deluxe'},"Hotel Xcaret Arte":{cat:'5 Diamantes',c:'cat-premier'},"La Casa de la Playa":{cat:'Adults Only',c:'cat-preferred'}};
+let HOTEL_CATS={"Disney's All-Star Movies Resort":{cat:'Value',c:'cat-value'},"Disney's All-Star Music Resort":{cat:'Value',c:'cat-value'},"Disney's All-Star Sports Resort":{cat:'Value',c:'cat-value'},"Disney's Art of Animation Resort":{cat:'Value',c:'cat-value'},"Disney's Pop Century Resort":{cat:'Value',c:'cat-value'},"Disney's Caribbean Beach Resort":{cat:'Moderate',c:'cat-moderate'},"Disney's Coronado Springs Resort":{cat:'Moderate',c:'cat-moderate'},"Disney's Port Orleans - French Quarter":{cat:'Moderate',c:'cat-moderate'},"Disney's Port Orleans - Riverside":{cat:'Moderate',c:'cat-moderate'},"Disney's Fort Wilderness Cabins":{cat:'Moderate',c:'cat-moderate'},"Disney's Grand Floridian Resort & Spa":{cat:'Deluxe',c:'cat-deluxe'},"Disney's Contemporary Resort":{cat:'Deluxe',c:'cat-deluxe'},"Disney's Polynesian Village Resort":{cat:'Deluxe',c:'cat-deluxe'},"Disney's Animal Kingdom Lodge":{cat:'Deluxe',c:'cat-deluxe'},"Disney's Wilderness Lodge":{cat:'Deluxe',c:'cat-deluxe'},"Disney's BoardWalk Inn":{cat:'Deluxe',c:'cat-deluxe'},"Disney's Beach Club Resort":{cat:'Deluxe',c:'cat-deluxe'},"Disney's Yacht Club Resort":{cat:'Deluxe',c:'cat-deluxe'},"Disney's Riviera Resort":{cat:'Deluxe',c:'cat-deluxe'},"Walt Disney World Swan":{cat:'On-site',c:'cat-onsite'},"Walt Disney World Dolphin":{cat:'On-site',c:'cat-onsite'},"Four Seasons Resort Orlando":{cat:'Premier',c:'cat-premier'},"Universal's Endless Summer - Surfside Inn":{cat:'Value',c:'cat-value'},"Universal's Endless Summer - Dockside Inn":{cat:'Value',c:'cat-value'},"Universal's Cabana Bay Beach Resort":{cat:'Prime Value',c:'cat-prime'},"Universal's Aventura Hotel":{cat:'Prime Value',c:'cat-prime'},"Universal Stella Nova Resort":{cat:'Prime Value',c:'cat-prime'},"Universal Terra Luna Resort":{cat:'Prime Value',c:'cat-prime'},"Loews Sapphire Falls Resort":{cat:'Preferred',c:'cat-preferred'},"Loews Royal Pacific Resort":{cat:'Preferred',c:'cat-preferred'},"Hard Rock Hotel Orlando":{cat:'Preferred',c:'cat-preferred'},"Loews Portofino Bay Hotel":{cat:'Preferred',c:'cat-preferred'},"Universal's Grand Helios Hotel":{cat:'Preferred',c:'cat-preferred'},"Disneyland Hotel":{cat:'Disney',c:'cat-disney'},"Disney's Grand Californian Hotel & Spa":{cat:'Disney',c:'cat-disney'},"Pixar Place Hotel":{cat:'Disney',c:'cat-disney'},"Disney's Hotel New York – The Art of Marvel":{cat:'Deluxe',c:'cat-deluxe'},"Disney Newport Bay Club":{cat:'Premium',c:'cat-moderate'},"Disney Sequoia Lodge":{cat:'Premium',c:'cat-moderate'},"Disney Hotel Cheyenne":{cat:'Estándar',c:'cat-value'},"Disney Hotel Santa Fe":{cat:'Estándar',c:'cat-value'},"Hotel Xcaret México":{cat:'5 Diamantes',c:'cat-deluxe'},"Hotel Xcaret Arte":{cat:'5 Diamantes',c:'cat-premier'},"La Casa de la Playa":{cat:'Adults Only',c:'cat-preferred'},"Hilton Los Angeles/Universal City":{cat:'Preferred',c:'cat-preferred'},"Sheraton Universal Hotel":{cat:'Moderate',c:'cat-moderate'},"Marriott Burbank Airport":{cat:'Moderate',c:'cat-moderate'},"Hotel Amarano Burbank":{cat:'Moderate',c:'cat-moderate'},"The Garland":{cat:'Premier',c:'cat-premier'},"Kimpton Everly Hotel":{cat:'Deluxe',c:'cat-deluxe'},"W Hollywood":{cat:'Deluxe',c:'cat-deluxe'}};
 let HOTEL_IMAGES={};
-let DEST_IMAGES={orlando:'https://images.unsplash.com/photo-1597466599360-3b9775841aec?w=800&h=400&fit=crop&q=80',universal:'https://images.unsplash.com/photo-1581084324659-bc65fa92df5c?w=800&h=400&fit=crop&q=80',california:'img/california.png',paris:'https://images.unsplash.com/photo-1595577248023-3ecf7637d6bb?w=800&h=400&fit=crop&q=80','crucero-disney':'https://images.unsplash.com/photo-1548574505-5e239809ee19?w=800&h=400&fit=crop&q=80','crucero-otros':'https://images.unsplash.com/photo-1599640842225-85d111c60e6b?w=800&h=400&fit=crop&q=80',nickelodeon:'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=800&h=400&fit=crop&q=80',xcaret:'https://images.unsplash.com/photo-1552074284-5e88ef1aef18?w=800&h=400&fit=crop&q=80'};
-let DEST_GRADIENTS={orlando:'linear-gradient(135deg,#1a1a6e,#4b2583,#c33f91)',universal:'linear-gradient(135deg,#003366,#0066cc,#00ccff)',california:'linear-gradient(135deg,#ff6b35,#ff9a56,#ffd700)',paris:'linear-gradient(135deg,#2d1b69,#5b3a8c,#e8716d)','crucero-disney':'linear-gradient(135deg,#001a33,#003d66,#0099cc)','crucero-otros':'linear-gradient(135deg,#1a3a4a,#2d6b7a,#4fc3c3)',nickelodeon:'linear-gradient(135deg,#ff6600,#ff9900,#33cc33)',xcaret:'linear-gradient(135deg,#004d40,#00897b,#4dd0e1)'};
+let DEST_IMAGES={orlando:'https://images.unsplash.com/photo-1597466599360-3b9775841aec?w=800&h=400&fit=crop&q=80',universal:'https://images.unsplash.com/photo-1581084324659-bc65fa92df5c?w=800&h=400&fit=crop&q=80',california:'img/california.png',hollywood:'https://images.unsplash.com/photo-1568572933382-74d440642117?w=800&h=400&fit=crop&q=80',paris:'https://images.unsplash.com/photo-1595577248023-3ecf7637d6bb?w=800&h=400&fit=crop&q=80','crucero-disney':'https://images.unsplash.com/photo-1548574505-5e239809ee19?w=800&h=400&fit=crop&q=80','crucero-otros':'https://images.unsplash.com/photo-1599640842225-85d111c60e6b?w=800&h=400&fit=crop&q=80',nickelodeon:'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=800&h=400&fit=crop&q=80',xcaret:'https://images.unsplash.com/photo-1552074284-5e88ef1aef18?w=800&h=400&fit=crop&q=80'};
+let DEST_GRADIENTS={orlando:'linear-gradient(135deg,#1a1a6e,#4b2583,#c33f91)',universal:'linear-gradient(135deg,#003366,#0066cc,#00ccff)',california:'linear-gradient(135deg,#ff6b35,#ff9a56,#ffd700)',hollywood:'linear-gradient(135deg,#1a1a2e,#16213e,#0f3460)',paris:'linear-gradient(135deg,#2d1b69,#5b3a8c,#e8716d)','crucero-disney':'linear-gradient(135deg,#001a33,#003d66,#0099cc)','crucero-otros':'linear-gradient(135deg,#1a3a4a,#2d6b7a,#4fc3c3)',nickelodeon:'linear-gradient(135deg,#ff6600,#ff9900,#33cc33)',xcaret:'linear-gradient(135deg,#004d40,#00897b,#4dd0e1)'};
 
 const SHIP_DATA={'Disney Magic':{y:'1998',d:'El barco original · Rutas clásicas'},'Disney Wonder':{y:'1999',d:'Alaska y Caribe · Frozen Musical'},'Disney Dream':{y:'2011',d:'AquaDuck · Caribe y Bahamas'},'Disney Fantasy':{y:'2012',d:'AquaDuck · Caribe occidental'},'Disney Wish':{y:'2022',d:'AquaMouse · Gran Hall · Lo más nuevo'},'Disney Treasure':{y:'2024',d:'Aventura y exploración · Último barco'}};
 
@@ -853,7 +1052,7 @@ const SHEET_CONFIG={
   id:'1A7lT22FucvTIDOTQB9Xuua0rXwQxIH_MOEcgQx38mIo',
   gids:{ destinos:'0', condiciones:'1889365118', hoteles:'1598531904' }
 };
-const DESTINO_IDS=['orlando','universal','california','paris','crucero-disney','crucero-otros','nickelodeon','xcaret'];
+const DESTINO_IDS=['orlando','universal','california','hollywood','paris','crucero-disney','crucero-otros','nickelodeon','xcaret'];
 
 function parseCSV(text){text=(text||'').replace(/^\ufeff/,'');const rows=[];let row=[],field='',i=0,inQuotes=false,len=text.length;while(i<len){const c=text[i];if(inQuotes){if(c==='"'){if(text[i+1]==='"'){field+='"';i++;}else inQuotes=false;}else field+=c;i++;}else{if(c==='"'){inQuotes=true;i++;}else if(c===','){row.push(field.replace(/\\n/g,'\n'));field='';i++;}else if(c==='\n'||c==='\r'){row.push(field.replace(/\\n/g,'\n'));field='';if(row.length||row.some(x=>x.trim()))rows.push(row);row=[];if(c==='\r'&&text[i+1]==='\n')i++;i++;}else{field+=c;i++;}}}if(field||row.length){row.push(field.replace(/\\n/g,'\n'));rows.push(row);}const headers=(rows[0]||[]).map(h=>(h||'').trim());return rows.slice(1).map(r=>{const o={};headers.forEach((h,i)=>{o[h]=(r[i]!==undefined?r[i]:'').replace(/\\n/g,'\n').trim();});return o;});}
 
@@ -869,6 +1068,52 @@ async function loadCotizacionData(){try{let destinosTxt='',condicionesTxt='',hot
 // ── UTILS ──
 function formatDate(s){if(!s)return'';const m=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];const[y,mo,d]=s.split('-');return`${+d} de ${m[+mo-1]} ${y}`}
 function formatDateShort(s){if(!s)return'';const m=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];const[y,mo,d]=s.split('-');return`${+d} ${m[+mo-1]} ${y}`}
+function calcNights(){const ci=new Date(v('checkin')),co=new Date(v('checkout'));if(isNaN(ci)||isNaN(co))return 0;return Math.round((co-ci)/86400000)}
+function updateNightsDisplay(){const n=calcNights();const el=$('#nights-display');if(n>0){el.textContent=`${n} noches · ${n+1} días`;el.style.display=''}else{el.style.display='none'}}
+
+function updateSpecialOptions(){
+  const d=v('destino'),d2=v('destino-2');
+  const parkDests=['orlando','universal','california','hollywood'];
+  const activeDests=[d];if(isCombo()&&d2)activeDests.push(d2);
+  const hasPark=activeDests.some(x=>parkDests.includes(x));
+  $('#special-park-options').style.display=hasPark?'':'none';
+  $$('.special-opts').forEach(el=>el.style.display='none');
+  activeDests.forEach(dd=>{
+    const el=document.getElementById('special-options-'+dd);
+    if(el)el.style.display='';
+  });
+}
+
+function getNotasText(){
+  const lines=[];
+  const notaMap={
+    'nota-visa':'🛂 Visa americana vigente requerida',
+    'nota-pasaporte':'📘 Se requiere pasaporte vigente',
+    'nota-seguro':'🛡 Seguro de viaje recomendado',
+    'nota-tipocambio':'💱 Tipo de cambio sujeto a variaciones',
+    'nota-disponibilidad':'📌 Precios sujetos a disponibilidad',
+    'nota-transporte':'🚗 Transportación aeropuerto-hotel no incluida',
+    'nota-vuelos':'✈️ Vuelos no incluidos en la cotización'
+  };
+  Object.keys(notaMap).forEach(id=>{if(ck(id))lines.push(notaMap[id])});
+  const specialMap={
+    'sp-orl-halloween':'🎃 Mickey\'s Not-So-Scary Halloween Party (evento especial, boleto adicional)',
+    'sp-orl-christmas':'🎄 Mickey\'s Very Merry Christmas Party (evento especial, boleto adicional)',
+    'sp-orl-epcot':'🌎 EPCOT Festival incluido con entrada regular',
+    'sp-orl-dining':'🍽 Reservaciones de restaurantes especiales recomendadas',
+    'sp-uni-hhn':'👻 Halloween Horror Nights (evento especial, boleto adicional)',
+    'sp-uni-early':'🌅 Early Park Admission incluido con hotel Universal',
+    'sp-uni-express':'⚡ Universal Express Pass (acceso rápido a atracciones)',
+    'sp-cal-oogie':'🎃 Oogie Boogie Bash (evento especial, boleto adicional)',
+    'sp-cal-worldcolor':'🌈 World of Color Dining Package disponible',
+    'sp-cal-fantasmic':'✨ Fantasmic! Dining Package disponible',
+    'sp-hwd-hhn':'👻 Halloween Horror Nights Hollywood (evento especial)',
+    'sp-hwd-studio':'🎥 Studio Tour VIP Experience'
+  };
+  Object.keys(specialMap).forEach(id=>{const el=document.getElementById(id);if(el&&el.checked)lines.push(specialMap[id])});
+  const custom=v('notas');if(custom)lines.push(custom);
+  return lines.join('\n');
+}
 function getMinorsText(){const a=+$('#menores02').value||0,b=+$('#menores39').value||0,c=+$('#menores1017').value||0,t=a+b+c;if(!t)return'';let p=[];if(a)p.push('(0-2 años)');if(b)p.push('(3-9 años)');if(c)p.push('(10-17 años)');return`${t} ${p.join(' ')}`}
 function getMinorsCardText(){const a=+$('#menores02').value||0,b=+$('#menores39').value||0,c=+$('#menores1017').value||0,t=a+b+c;if(!t)return'';let d=[];if(a)d.push(`${a} de 0-2`);if(b)d.push(`${b} de 3-9`);if(c)d.push(`${c} de 10-17`);return`${t} Menor${t>1?'es':''} (${d.join(', ')})`}
 function getMinorsTotal(){return(+$('#menores02').value||0)+(+$('#menores39').value||0)+(+$('#menores1017').value||0)}
@@ -889,7 +1134,78 @@ function updateUniDesc(){const t=v('uni-modalidad'),desc=UNI_TICKET_DESC[t]||'';
 function toggleComidaDetail(){const plan=v('orl-comidas'),det=$('#orl-comidas-detail'),info=$('#orl-comidas-info');if(!plan){det.style.display='none';return}det.style.display='';if(plan==='quick')info.innerHTML='<b>Quick-Service:</b> 2 comidas rápidas + 1 snack + mug recargable por persona por noche ($60.50 USD/adulto)';else info.innerHTML='<b>Standard:</b> 1 comida de mesa + 1 rápida + 1 snack + mug recargable por persona por noche ($98.50 USD/adulto)'}
 
 // ── FORM MANAGEMENT ──
-function onDestinoChange(){const d=v('destino'),c=$('#form-container');if(!d){c.style.display='none';$('#dest-image-preview').style.display='none';return}c.style.display='';const img=$('#dest-image'),imgC=$('#dest-image-preview');if(DEST_IMAGES[d]){img.src=DEST_IMAGES[d];imgC.style.display=''}else{imgC.style.display='none'}$$('.dest-section').forEach(el=>el.classList.remove('active'));const map={orlando:'campos-orlando',universal:'campos-universal',california:'campos-california',paris:'campos-paris','crucero-disney':'campos-crucero-disney','crucero-otros':'campos-crucero-otros',nickelodeon:'campos-nickelodeon',xcaret:'campos-xcaret'};if(map[d])document.getElementById(map[d]).classList.add('active');const cr=d.startsWith('crucero');$('#label-habitaciones').textContent=cr?'Camarotes':'Habitaciones';$('#label-checkin').textContent=cr?'Embarque':'Check in';$('#label-checkout').textContent=cr?'Desembarque':'Check out';$('#price-section').style.display=d==='crucero-otros'?'none':'';if(d==='crucero-disney'&&!itCounts.crd){for(let i=0;i<5;i++)addItineraryDay('crd');showShipPreview()}if(d==='crucero-otros'&&!itCounts.cro){for(let i=0;i<5;i++)addItineraryDay('cro');if(!pgCount)addPriceGroup()}if(d==='universal')updateUniDesc();$('#preview-section')&&($('#preview-section').style.display='none')}
+// ── COMBINED TRIP LOGIC ──
+const COMBO_MAP={
+  orlando:['universal','crucero-disney','crucero-otros'],
+  universal:['orlando','crucero-disney','crucero-otros'],
+  california:['hollywood','crucero-disney','crucero-otros'],
+  hollywood:['california','crucero-disney','crucero-otros'],
+  paris:['crucero-disney','crucero-otros'],
+  'crucero-disney':['orlando','universal','california','hollywood','paris'],
+  'crucero-otros':['orlando','universal','california','hollywood','paris']
+};
+const DEST_NAMES={orlando:'🏰 Disney World · Orlando',universal:'🎢 Universal Studios · Orlando',california:'🎡 Disneyland · California',hollywood:'🎬 Universal Studios · Hollywood',paris:'🗼 Disneyland · Paris','crucero-disney':'🚢 Crucero Disney','crucero-otros':'🛳 Crucero Otras Navieras',nickelodeon:'🧽 Nickelodeon Resort',xcaret:'🌴 Xcaret'};
+const DEST_MAP={orlando:'campos-orlando',universal:'campos-universal',california:'campos-california',hollywood:'campos-hollywood',paris:'campos-paris','crucero-disney':'campos-crucero-disney','crucero-otros':'campos-crucero-otros',nickelodeon:'campos-nickelodeon',xcaret:'campos-xcaret'};
+
+function onCombinadoChange(){
+  const on=ck('viaje-combinado');
+  $('#combo-dest2-wrap').style.display=on?'':'none';
+  if(!on){
+    $('#destino-2').value='';
+    onDestino2Change();
+    $('#combo-pricing').style.display='none';
+  }else{
+    populateDestino2();
+    $('#combo-pricing').style.display='';
+    updateComboPriceLabels();
+  }
+}
+
+function populateDestino2(){
+  const d1=v('destino'),sel=$('#destino-2');
+  const opts=COMBO_MAP[d1]||[];
+  sel.innerHTML='<option value="">— Selecciona segundo destino —</option>';
+  opts.forEach(id=>{
+    const o=document.createElement('option');
+    o.value=id;o.textContent=DEST_NAMES[id]||id;
+    sel.appendChild(o);
+  });
+}
+
+function onDestino2Change(){
+  const d2=v('destino-2');
+  $$('.dest-section').forEach(el=>{
+    if(!el.classList.contains('active-combo'))return;
+    el.classList.remove('active');el.classList.remove('active-combo');
+  });
+  if(d2&&DEST_MAP[d2]){
+    const el=document.getElementById(DEST_MAP[d2]);
+    el.classList.add('active');el.classList.add('active-combo');
+  }
+  updateComboPriceLabels();
+  if(d2==='crucero-disney'&&!itCounts.crd){for(let i=0;i<5;i++)addItineraryDay('crd');showShipPreview()}
+  if(d2==='crucero-otros'&&!itCounts.cro){for(let i=0;i<5;i++)addItineraryDay('cro');if(!pgCount)addPriceGroup()}
+  if(d2==='universal')updateUniDesc();
+  updateSpecialOptions();
+}
+
+function updateComboPriceLabels(){
+  const d1=v('destino'),d2=v('destino-2');
+  const n1=(DEST_NAMES[d1]||'Tramo 1').replace(/^[^\s]+\s/,'');
+  const n2=(DEST_NAMES[d2]||'Tramo 2').replace(/^[^\s]+\s/,'');
+  $('#combo-price1-label').textContent=`Precio ${n1} USD`;
+  $('#combo-price2-label').textContent=`Precio ${n2} USD`;
+}
+
+function updateComboTotal(){
+  const p1=parseFloat((v('precio-tramo1')||'0').replace(/,/g,''))||0;
+  const p2=parseFloat((v('precio-tramo2')||'0').replace(/,/g,''))||0;
+  if(p1||p2){$('#precio').value=(p1+p2).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}
+}
+
+function isCombo(){return ck('viaje-combinado')&&v('destino-2')}
+
+function onDestinoChange(){const d=v('destino'),c=$('#form-container');if(!d){c.style.display='none';$('#dest-image-preview').style.display='none';$('#combo-toggle-wrap').style.display='none';return}c.style.display='';const img=$('#dest-image'),imgC=$('#dest-image-preview');if(DEST_IMAGES[d]){img.src=DEST_IMAGES[d];imgC.style.display=''}else{imgC.style.display='none'}$$('.dest-section').forEach(el=>{el.classList.remove('active');el.classList.remove('active-combo')});if(DEST_MAP[d])document.getElementById(DEST_MAP[d]).classList.add('active');const cr=d.startsWith('crucero');$('#label-habitaciones').textContent=cr?'Camarotes':'Habitaciones';$('#label-checkin').textContent=cr?'Embarque':'Check in';$('#label-checkout').textContent=cr?'Desembarque':'Check out';$('#price-section').style.display=d==='crucero-otros'?'none':'';if(d==='crucero-disney'&&!itCounts.crd){for(let i=0;i<5;i++)addItineraryDay('crd');showShipPreview()}if(d==='crucero-otros'&&!itCounts.cro){for(let i=0;i<5;i++)addItineraryDay('cro');if(!pgCount)addPriceGroup()}if(d==='universal')updateUniDesc();$('#preview-section')&&($('#preview-section').style.display='none');const hasCombo=!!COMBO_MAP[d];$('#combo-toggle-wrap').style.display=hasCombo?'':'none';if(!hasCombo){$('#viaje-combinado').checked=false;onCombinadoChange()}else if(ck('viaje-combinado')){populateDestino2();$('#destino-2').value='';onDestino2Change()}updateSpecialOptions()}
 
 // ── ITINERARY ──
 function addItineraryDay(p){itCounts[p]++;const n=itCounts[p],c=document.getElementById(`${p}-itinerario-container`),r=document.createElement('div');r.className='it-row';r.id=`${p}-d-${n}`;r.innerHTML=`<span style="font-size:11px;font-weight:600;color:#999;width:44px;flex-shrink:0">Día ${n}</span><input type="text" placeholder="Puerto Cañaveral, Florida" class="fi-input" style="flex:1;padding:10px 14px;font-size:13px" id="${p}-d-${n}-v"><button type="button" onclick="document.getElementById('${p}-d-${n}').remove()" style="color:#E8716D;font-size:18px;font-weight:700;width:32px;height:32px;border:none;background:none;cursor:pointer">×</button>`;c.appendChild(r)}
@@ -904,35 +1220,67 @@ function greet(d){const n=v('nombre'),t=AGENT_TITLES[d]||'Agente de viajes';retu
 function travelers(){const a=v('adultos'),m=getMinorsText();let t=`\n*Adultos:* ${a}`;if(m)t+=`\n*Menores:* ${m}`;return t}
 function closing(){return'Cualquier duda estoy a tus órdenes ✨'}
 
-function genOrlando(){const h=v('orl-hotel'),mod=v('orl-modalidad'),dias=v('orl-dias'),p=v('precio'),plan=v('orl-comidas'),kf=ck('orl-kidsfree'),mm=ck('orl-memory');let m=greet('orlando')+'\n'+travelers();if(h)m+=`\n*Hospedaje:* ${h}`;m+=`\n\nCheck in: ${formatDate(v('checkin'))}\nCheck out: ${formatDate(v('checkout'))}`;const modText=mod.includes('Base')?'1 parque x día':mod;m+=`\n\n🎟 Entradas a los parques con modalidad "${modText}" válido por ${dias} días`;if(plan==='quick')m+=`\n🍔 Plan de comidas Quick-Service (2 comidas rápidas + 1 snack x persona x noche)`;else if(plan==='standard')m+=`\n🍽 Plan de comidas Standard (1 mesa + 1 rápida + 1 snack x persona x noche)`;if(kf)m+=`\n🎉 *Promoción Kids Eat Free 2026* - Niños de 3 a 9 años comen gratis con plan de comidas de adulto`;m+=`\n\n*💸$${p} USD*`;if(mm)m+=`\n\n📸Agrega el paquete de fotos "Memory Maker" por *$185 USD* adicionales`;m+=`\n\n${CONDITIONS.orlando}`;const n=v('notas');if(n)m+=`\n\n${n}`;m+=`\n\n${closing()}`;return m}
+function genOrlando(){const h=v('orl-hotel'),mod=v('orl-modalidad'),dias=v('orl-dias'),p=v('precio'),plan=v('orl-comidas'),kf=ck('orl-kidsfree'),mm=ck('orl-memory'),nights=calcNights();let m=greet('orlando')+'\n'+travelers();if(h)m+=`\n*Hospedaje:* ${h}`;m+=`\n\nCheck in: ${formatDate(v('checkin'))}\nCheck out: ${formatDate(v('checkout'))}`;if(nights>0)m+=`\n📅 *${nights} noches*`;const modText=mod.includes('Base')?'1 parque x día':mod;m+=`\n\n🎟 Entradas a los parques con modalidad "${modText}" válido por ${dias} días`;if(plan==='quick')m+=`\n🍔 Plan de comidas Quick-Service (2 comidas rápidas + 1 snack x persona x noche)`;else if(plan==='standard')m+=`\n🍽 Plan de comidas Standard (1 mesa + 1 rápida + 1 snack x persona x noche)`;if(kf)m+=`\n🎉 *Promoción Kids Eat Free 2026* - Niños de 3 a 9 años comen gratis con plan de comidas de adulto`;m+=`\n\n*💸$${p} USD*`;if(mm)m+=`\n\n📸Agrega el paquete de fotos "Memory Maker" por *$185 USD* adicionales`;m+=`\n\n${CONDITIONS.orlando}`;const n=getNotasText();if(n)m+=`\n\n${n}`;m+=`\n\n${closing()}`;return m}
 
-function genUniversal(){const h=v('uni-hotel'),ticket=v('uni-modalidad'),dias=v('uni-dias'),p=v('precio'),vol=ck('uni-volcano');const ticketNames={'3base':'Base (1 parque por día)','3ptp':'Park-to-Park','4ptp':'Park-to-Park','5ptp':'Park-to-Park'};let m=greet('universal')+'\n'+travelers();if(h)m+=`\n\nHospedaje: ${h}`;m+=`\n\nCheck in: ${formatDate(v('checkin'))}\nCheck out: ${formatDate(v('checkout'))}`;m+=`\n\n🎟 Entradas con modalidad "${ticketNames[ticket]||ticket}" válido por ${dias} días`;m+=`\n que te permite entrar a:\n•⁠  ⁠Universal Studios Florida\n•⁠  ⁠Islands of Adventure\n•⁠  ⁠Universal Epic Universe`;if(vol)m+=`\n•⁠  ⁠Volcano Bay`;m+=`\n\n💸 *$${p} USD*\n\n${CONDITIONS.universal}`;const n=v('notas');if(n)m+=`\n\n${n}`;m+=`\n\n${closing()}`;return m}
+function genUniversal(){const h=v('uni-hotel'),ticket=v('uni-modalidad'),dias=v('uni-dias'),p=v('precio'),vol=ck('uni-volcano'),nights=calcNights();const ticketNames={'3base':'Base (1 parque por día)','3ptp':'Park-to-Park','4ptp':'Park-to-Park','5ptp':'Park-to-Park'};let m=greet('universal')+'\n'+travelers();if(h)m+=`\n\nHospedaje: ${h}`;m+=`\n\nCheck in: ${formatDate(v('checkin'))}\nCheck out: ${formatDate(v('checkout'))}`;if(nights>0)m+=`\n📅 *${nights} noches*`;m+=`\n\n🎟 Entradas con modalidad "${ticketNames[ticket]||ticket}" válido por ${dias} días`;m+=`\n que te permite entrar a:\n•⁠  ⁠Universal Studios Florida\n•⁠  ⁠Islands of Adventure\n•⁠  ⁠Universal Epic Universe`;if(vol)m+=`\n•⁠  ⁠Volcano Bay`;m+=`\n\n💸 *$${p} USD*\n\n${CONDITIONS.universal}`;const n=getNotasText();if(n)m+=`\n\n${n}`;m+=`\n\n${closing()}`;return m}
 
-function genCalifornia(){const h=v('cal-hotel'),ticket=v('cal-ticket'),dias=v('cal-dias'),ll=v('cal-lightning'),p=v('precio'),sw=ck('cal-starwars');let m=greet('california')+'\n'+travelers();if(h)m+=`\n*Hospedaje:* ${h}`;m+=`\n\nCheck in: ${formatDate(v('checkin'))}\nCheck out: ${formatDate(v('checkout'))}`;m+=`\n\n🎟 Entradas a los parques con modalidad "${ticket}" válido por ${dias} días`;if(ll==='multi')m+=`\n⚡ Lightning Lane Multi Pass incluido`;else if(ll==='single')m+=`\n⚡ Lightning Lane Single Pass (atracciones selectas)`;else if(ll==='premier')m+=`\n⚡ Lightning Lane Premier Pass (todas las atracciones, sin ventana de horario)`;m+=`\n\n*💸$${p} USD*\n\n${CONDITIONS.california}`;if(sw){const ev=CONDITIONES_EVENTOS['california'];m+=`\n\n${ev||'*STAR WARS NITE🪐* La entrada a este evento es adicional y costaría aproximadamente $200 USD x persona. Aún no tenemos los precios, pero yo les avisaría en cuanto estén disponibles'}`;}const n=v('notas');if(n)m+=`\n\n${n}`;m+=`\n\n${closing()}`;return m}
+function genCalifornia(){const h=v('cal-hotel'),ticket=v('cal-ticket'),dias=v('cal-dias'),ll=v('cal-lightning'),p=v('precio'),sw=ck('cal-starwars'),nights=calcNights();let m=greet('california')+'\n'+travelers();if(h)m+=`\n*Hospedaje:* ${h}`;m+=`\n\nCheck in: ${formatDate(v('checkin'))}\nCheck out: ${formatDate(v('checkout'))}`;if(nights>0)m+=`\n📅 *${nights} noches*`;m+=`\n\n🎟 Entradas a los parques con modalidad "${ticket}" válido por ${dias} días`;if(ll==='multi')m+=`\n⚡ Lightning Lane Multi Pass incluido`;else if(ll==='single')m+=`\n⚡ Lightning Lane Single Pass (atracciones selectas)`;else if(ll==='premier')m+=`\n⚡ Lightning Lane Premier Pass (todas las atracciones, sin ventana de horario)`;m+=`\n\n*💸$${p} USD*\n\n${CONDITIONS.california}`;if(sw){const ev=CONDITIONES_EVENTOS['california'];m+=`\n\n${ev||'*STAR WARS NITE🪐* La entrada a este evento es adicional y costaría aproximadamente $200 USD x persona. Aún no tenemos los precios, pero yo les avisaría en cuanto estén disponibles'}`;}const n=getNotasText();if(n)m+=`\n\n${n}`;m+=`\n\n${closing()}`;return m}
 
-function genParis(){const h=v('par-hotel'),p=v('precio');let m=greet('paris')+'\n'+travelers();if(h)m+=`\n*Hospedaje:* ${h}`;m+=`\n\nCheck in: ${formatDate(v('checkin'))}\nCheck out: ${formatDate(v('checkout'))}\n\n🎟 Entradas válidas por toda su estancia\n🍽 Desayuno incluido\n\n*💸$${p} USD*`;const n=v('notas');if(n)m+=`\n\n${n}`;m+=`\n\n${closing()}`;return m}
+function genHollywood(){const h=v('hwd-hotel'),ticket=v('hwd-ticket'),dias=v('hwd-dias'),p=v('precio'),vip=ck('hwd-vip'),nin=ck('hwd-nintendo'),nights=calcNights();const ticketNames={general:'General Admission',express:'Universal Express',['express-unl']:'Universal Express Unlimited'};let m=greet('hollywood')+'\n'+travelers();if(h)m+=`\n*Hospedaje:* ${h}`;m+=`\n\nCheck in: ${formatDate(v('checkin'))}\nCheck out: ${formatDate(v('checkout'))}`;if(nights>0)m+=`\n📅 *${nights} noches*`;m+=`\n\n🎟 Entradas con modalidad "${ticketNames[ticket]||ticket}" válido por ${dias} día${+dias!==1?'s':''}`;if(nin)m+=`\n🎮 Acceso a Super Nintendo World incluido`;if(vip)m+=`\n🌟 *VIP Experience* - Tour guiado con acceso prioritario`;m+=`\n\n*💸$${p} USD*\n\n${CONDITIONS.hollywood}`;const n=getNotasText();if(n)m+=`\n\n${n}`;m+=`\n\n${closing()}`;return m}
 
-function genCruceroDisney(){const b=v('crd-barco'),cam=v('crd-camarote').toLowerCase(),p=v('precio'),promo=v('crd-promo'),it=getItinerary('crd');let m=greet('crucero-disney')+'\n'+travelers();m+=`\n\n🛳Barco: *${b}*`;if(it)m+=`\n\n📍Itinerario\n${it}`;m+=`\n\n🗓*Fechas*\n${formatDate(v('checkin'))} al ${formatDate(v('checkout'))}\n\n💸Precios\n• Camarote con ${cam}: *Desde $${p} USD*`;if(promo)m+=`\n\n*PROMOCIÓN: ${promo}✨🤩*`;m+=`\n\n${CONDITIONS['crucero-disney']}\n\n${INCLUSIONS_CRUISE}`;const n=v('notas');if(n)m+=`\n\n${n}`;m+=`\n\n${closing()}`;return m}
+function genParis(){const h=v('par-hotel'),p=v('precio'),nights=calcNights();let m=greet('paris')+'\n'+travelers();if(h)m+=`\n*Hospedaje:* ${h}`;m+=`\n\nCheck in: ${formatDate(v('checkin'))}\nCheck out: ${formatDate(v('checkout'))}`;if(nights>0)m+=`\n📅 *${nights} noches*`;m+=`\n\n🎟 Entradas válidas por toda su estancia\n🍽 Desayuno incluido\n\n*💸$${p} USD*`;const n=getNotasText();if(n)m+=`\n\n${n}`;m+=`\n\n${closing()}`;return m}
 
-function genCruceroOtros(){const b=v('cro-barco'),it=getItinerary('cro'),pg=getPriceGroups();let m=greet('crucero-otros')+'\n'+travelers();if(b)m+=`\n\n🛳Barco: ${b}`;if(it)m+=`\n\n📍Itinerario\n${it}`;m+=`\n\n🗓Fechas\n${formatDate(v('checkin'))} al ${formatDate(v('checkout'))}`;if(pg)m+=`\n\n${pg}`;m+=`\n\n${CONDITIONS['crucero-otros']}`;const n=v('notas');if(n)m+=`\n\n${n}`;m+=`\n\n${closing()}`;return m}
+function genCruceroDisney(){const b=v('crd-barco'),cam=v('crd-camarote').toLowerCase(),p=v('precio'),promo=v('crd-promo'),it=getItinerary('crd'),nights=calcNights();let m=greet('crucero-disney')+'\n'+travelers();m+=`\n\n🛳Barco: *${b}*`;if(it)m+=`\n\n📍Itinerario\n${it}`;m+=`\n\n🗓*Fechas*\n${formatDate(v('checkin'))} al ${formatDate(v('checkout'))}`;if(nights>0)m+=`\n📅 *${nights} noches*`;m+=`\n\n💸Precios\n• Camarote con ${cam}: *Desde $${p} USD*`;if(promo)m+=`\n\n*PROMOCIÓN: ${promo}✨🤩*`;m+=`\n\n${CONDITIONS['crucero-disney']}\n\n${INCLUSIONS_CRUISE}`;const n=getNotasText();if(n)m+=`\n\n${n}`;m+=`\n\n${closing()}`;return m}
 
-function genNickelodeon(){const p=v('precio');let m=greet('nickelodeon')+'\n'+travelers();m+=`\n*Hospedaje:* Nickelodeon Resort - Riviera Maya - TODO INCLUIDO\n\nCheck in: ${formatDate(v('checkin'))}\nCheck out: ${formatDate(v('checkout'))}\n\n*💸$${p} USD*\n${CONDITIONS.nickelodeon}\n\n${INCLUSIONS_NICK}`;const n=v('notas');if(n)m+=`\n\n${n}`;m+=`\n\n${closing()}`;return m}
+function genCruceroOtros(){const b=v('cro-barco'),it=getItinerary('cro'),pg=getPriceGroups(),nights=calcNights();let m=greet('crucero-otros')+'\n'+travelers();if(b)m+=`\n\n🛳Barco: ${b}`;if(it)m+=`\n\n📍Itinerario\n${it}`;m+=`\n\n🗓Fechas\n${formatDate(v('checkin'))} al ${formatDate(v('checkout'))}`;if(nights>0)m+=`\n📅 *${nights} noches*`;if(pg)m+=`\n\n${pg}`;m+=`\n\n${CONDITIONS['crucero-otros']}`;const n=getNotasText();if(n)m+=`\n\n${n}`;m+=`\n\n${closing()}`;return m}
 
-function genXcaret(){const h=v('xca-hotel'),p=v('precio');let m=greet('xcaret')+'\n'+travelers();m+=`\n*Hospedaje:* ${h}\n\nCheck in: ${formatDate(v('checkin'))}\nCheck out: ${formatDate(v('checkout'))}\n\n*💸$${p} USD*\n${CONDITIONS.xcaret}\n\n${INCLUSIONS_XCARET}`;const n=v('notas');if(n)m+=`\n\n${n}`;m+=`\n\n${closing()}`;return m}
+function genNickelodeon(){const p=v('precio'),nights=calcNights();let m=greet('nickelodeon')+'\n'+travelers();m+=`\n*Hospedaje:* Nickelodeon Resort - Riviera Maya - TODO INCLUIDO\n\nCheck in: ${formatDate(v('checkin'))}\nCheck out: ${formatDate(v('checkout'))}`;if(nights>0)m+=`\n📅 *${nights} noches*`;m+=`\n\n*💸$${p} USD*\n${CONDITIONS.nickelodeon}\n\n${INCLUSIONS_NICK}`;const n=getNotasText();if(n)m+=`\n\n${n}`;m+=`\n\n${closing()}`;return m}
+
+function genXcaret(){const h=v('xca-hotel'),p=v('precio'),nights=calcNights();let m=greet('xcaret')+'\n'+travelers();m+=`\n*Hospedaje:* ${h}\n\nCheck in: ${formatDate(v('checkin'))}\nCheck out: ${formatDate(v('checkout'))}`;if(nights>0)m+=`\n📅 *${nights} noches*`;m+=`\n\n*💸$${p} USD*\n${CONDITIONS.xcaret}\n\n${INCLUSIONS_XCARET}`;const n=getNotasText();if(n)m+=`\n\n${n}`;m+=`\n\n${closing()}`;return m}
 
 // ── WHATSAPP PREVIEW (formatted) ──
 function textToWAHtml(text){return text.replace(/\*(.*?)\*/g,'<b>$1</b>').replace(/\n/g,'<br>')}
 function waHtmlToText(el){let t=el.innerHTML;t=t.replace(/<b>(.*?)<\/b>/gi,'*$1*');t=t.replace(/<br\s*\/?>/gi,'\n');t=t.replace(/<div>/gi,'\n');t=t.replace(/<\/div>/gi,'');t=t.replace(/&amp;/g,'&');t=t.replace(/&lt;/g,'<');t=t.replace(/&gt;/g,'>');t=t.replace(/&nbsp;/g,' ');return t}
 
+// ── COMBINED TRIP MESSAGE ──
+function getDestDetails(d){
+  if(d==='orlando'){const h=v('orl-hotel'),mod=v('orl-modalidad'),dias=v('orl-dias'),plan=v('orl-comidas'),kf=ck('orl-kidsfree'),mm=ck('orl-memory');let t='';if(h)t+=`*Hospedaje:* ${h}\n`;const modText=mod.includes('Base')?'1 parque x día':mod;t+=`🎟 Entradas "${modText}" por ${dias} días`;if(plan==='quick')t+=`\n🍔 Plan Quick-Service`;else if(plan==='standard')t+=`\n🍽 Plan Standard`;if(kf)t+=`\n🎉 *Kids Eat Free 2026*`;if(mm)t+=`\n📸 Memory Maker ($185 USD)`;return t}
+  if(d==='universal'){const h=v('uni-hotel'),ticket=v('uni-modalidad'),dias=v('uni-dias'),vol=ck('uni-volcano');const tn={'3base':'Base','3ptp':'Park-to-Park','4ptp':'Park-to-Park','5ptp':'Park-to-Park'};let t='';if(h)t+=`*Hospedaje:* ${h}\n`;t+=`🎟 Entradas "${tn[ticket]||ticket}" por ${dias} días\n• Universal Studios Florida\n• Islands of Adventure\n• Epic Universe`;if(vol)t+=`\n• Volcano Bay`;return t}
+  if(d==='california'){const h=v('cal-hotel'),ticket=v('cal-ticket'),dias=v('cal-dias'),ll=v('cal-lightning'),sw=ck('cal-starwars');let t='';if(h)t+=`*Hospedaje:* ${h}\n`;t+=`🎟 Entradas "${ticket}" por ${dias} días`;if(ll==='multi')t+=`\n⚡ Lightning Lane Multi Pass`;else if(ll==='single')t+=`\n⚡ Lightning Lane Single Pass`;else if(ll==='premier')t+=`\n⚡ Lightning Lane Premier Pass`;return t}
+  if(d==='hollywood'){const h=v('hwd-hotel'),ticket=v('hwd-ticket'),dias=v('hwd-dias'),vip=ck('hwd-vip'),nin=ck('hwd-nintendo');const tn={general:'General Admission',express:'Express',['express-unl']:'Express Unlimited'};let t='';if(h)t+=`*Hospedaje:* ${h}\n`;t+=`🎟 Entradas "${tn[ticket]||ticket}" por ${dias} día${+dias!==1?'s':''}`;if(nin)t+=`\n🎮 Super Nintendo World`;if(vip)t+=`\n🌟 VIP Experience`;return t}
+  if(d==='crucero-disney'){const b=v('crd-barco'),cam=v('crd-camarote').toLowerCase(),it=getItinerary('crd');let t=`🛳 Barco: *${b}*`;if(it)t+=`\n📍 Itinerario:\n${it}`;t+=`\n🛏 Camarote ${cam}`;if(v('crd-promo'))t+=`\n🎉 *${v('crd-promo')}*`;return t}
+  if(d==='crucero-otros'){const b=v('cro-barco'),it=getItinerary('cro');let t='';if(b)t+=`🛳 ${b}`;if(it)t+=`\n📍 Itinerario:\n${it}`;return t}
+  return'';
+}
+
+function genCombinado(d1,d2,gens){
+  const n1=DEST_NAMES[d1]||d1,n2=DEST_NAMES[d2]||d2;
+  const p1=v('precio-tramo1'),p2=v('precio-tramo2'),pt=v('precio');
+  const nights=calcNights();
+  let m=greet(d1)+'\n'+travelers();
+  m+=`\n\nCheck in: ${formatDate(v('checkin'))}\nCheck out: ${formatDate(v('checkout'))}`;
+  if(nights>0)m+=`\n📅 *${nights} noches*`;
+  m+=`\n\n━━━━━━━━━━━━━━━━━━━━\n*${n1}*\n━━━━━━━━━━━━━━━━━━━━\n${getDestDetails(d1)}`;
+  if(p1)m+=`\n\n💸 *$${p1} USD*`;
+  m+=`\n\n━━━━━━━━━━━━━━━━━━━━\n*${n2}*\n━━━━━━━━━━━━━━━━━━━━\n${getDestDetails(d2)}`;
+  if(p2)m+=`\n\n💸 *$${p2} USD*`;
+  if(pt)m+=`\n\n━━━━━━━━━━━━━━━━━━━━\n*💸 TOTAL: $${pt} USD*`;
+  const conds=[];if(CONDITIONS[d1])conds.push(CONDITIONS[d1]);if(CONDITIONS[d2]&&CONDITIONS[d2]!==CONDITIONS[d1])conds.push(CONDITIONS[d2]);
+  if(conds.length)m+=`\n\n${conds.join('\n\n')}`;
+  const n=getNotasText();if(n)m+=`\n\n${n}`;
+  m+=`\n\n${closing()}`;return m;
+}
+
 // ── MAIN GENERATE ──
-function generarMensaje(){const d=v('destino');if(!d)return;const gens={orlando:genOrlando,universal:genUniversal,california:genCalifornia,paris:genParis,'crucero-disney':genCruceroDisney,'crucero-otros':genCruceroOtros,nickelodeon:genNickelodeon,xcaret:genXcaret};const msg=gens[d]();$('#wa-preview').innerHTML=textToWAHtml(msg);generateCard(d);$('#preview-section').style.display='';switchTab('texto');$('#preview-section').scrollIntoView({behavior:'smooth',block:'start'})}
+function generarMensaje(){const d=v('destino');if(!d)return;const gens={orlando:genOrlando,universal:genUniversal,california:genCalifornia,hollywood:genHollywood,paris:genParis,'crucero-disney':genCruceroDisney,'crucero-otros':genCruceroOtros,nickelodeon:genNickelodeon,xcaret:genXcaret};let msg;if(isCombo()){msg=genCombinado(d,v('destino-2'),gens);generateCardCombo(d,v('destino-2'))}else{msg=gens[d]();generateCard(d)}$('#wa-preview').innerHTML=textToWAHtml(msg);$('#preview-section').style.display='';switchTab('texto');$('#preview-section').scrollIntoView({behavior:'smooth',block:'start'})}
 
 // ── CARD GENERATION ──
-function generateCard(dest){const nombre=v('nombre')||'Cliente',adultos=v('adultos'),minors=getMinorsCardText(),checkin=v('checkin'),checkout=v('checkout'),precio=v('precio');const names={orlando:'🏰 Disney World · Orlando',universal:'🎢 Universal Studios · Orlando',california:'🎡 Disneyland · California',paris:'🗼 Disneyland · Paris','crucero-disney':'🚢 Crucero Disney','crucero-otros':'🛳 Crucero',nickelodeon:'🧽 Nickelodeon Resort',xcaret:'🌴 Xcaret'};
+function generateCard(dest){const nombre=v('nombre')||'Cliente',adultos=v('adultos'),minors=getMinorsCardText(),checkin=v('checkin'),checkout=v('checkout'),precio=v('precio');const names={orlando:'🏰 Disney World · Orlando',universal:'🎢 Universal Studios · Orlando',california:'🎡 Disneyland · California',hollywood:'🎬 Universal Studios · Hollywood',paris:'🗼 Disneyland · Paris','crucero-disney':'🚢 Crucero Disney','crucero-otros':'🛳 Crucero',nickelodeon:'🧽 Nickelodeon Resort',xcaret:'🌴 Xcaret'};
 let details='';
 if(dest==='orlando'){const h=v('orl-hotel');if(h)details+=`<div style="display:flex;align-items:center;gap:8px"><span>🏨</span><span class="card-editable-dark" contenteditable="true">${h}</span></div>`;details+=`<div style="display:flex;align-items:center;gap:8px"><span>🎟</span><span>${v('orl-modalidad')} · ${v('orl-dias')} días</span></div>`;if(v('orl-comidas'))details+=`<div style="display:flex;align-items:center;gap:8px"><span>🍽</span><span>Plan de comidas incluido</span></div>`;if(ck('orl-kidsfree'))details+=`<div style="display:flex;align-items:center;gap:8px;color:#22c55e;font-weight:600"><span>🎉</span><span>Kids Eat Free 2026</span></div>`}
 else if(dest==='universal'){const h=v('uni-hotel');if(h)details+=`<div style="display:flex;align-items:center;gap:8px"><span>🏨</span><span class="card-editable-dark" contenteditable="true">${h}</span></div>`;details+=`<div style="display:flex;align-items:center;gap:8px"><span>🎟</span><span>Epic Universe + Universal + Islands</span></div>`;if(ck('uni-volcano'))details+=`<div style="display:flex;align-items:center;gap:8px"><span>🌋</span><span>Volcano Bay incluido</span></div>`}
 else if(dest==='california'){const h=v('cal-hotel');if(h)details+=`<div style="display:flex;align-items:center;gap:8px"><span>🏨</span><span class="card-editable-dark" contenteditable="true">${h}</span></div>`;details+=`<div style="display:flex;align-items:center;gap:8px"><span>🎟</span><span>${v('cal-ticket')} · ${v('cal-dias')} días</span></div>`;const ll=v('cal-lightning');if(ll)details+=`<div style="display:flex;align-items:center;gap:8px"><span>⚡</span><span>Lightning Lane</span></div>`}
+else if(dest==='hollywood'){const h=v('hwd-hotel');if(h)details+=`<div style="display:flex;align-items:center;gap:8px"><span>🏨</span><span class="card-editable-dark" contenteditable="true">${h}</span></div>`;const tn={general:'General Admission',express:'Express',['express-unl']:'Express Unlimited'};details+=`<div style="display:flex;align-items:center;gap:8px"><span>🎟</span><span>${tn[v('hwd-ticket')]||v('hwd-ticket')} · ${v('hwd-dias')} día${+v('hwd-dias')!==1?'s':''}</span></div>`;if(ck('hwd-nintendo'))details+=`<div style="display:flex;align-items:center;gap:8px"><span>🎮</span><span>Super Nintendo World</span></div>`;if(ck('hwd-vip'))details+=`<div style="display:flex;align-items:center;gap:8px;color:#f59e0b;font-weight:600"><span>🌟</span><span>VIP Experience</span></div>`}
 else if(dest==='paris'){const h=v('par-hotel');if(h)details+=`<div style="display:flex;align-items:center;gap:8px"><span>🏨</span><span class="card-editable-dark" contenteditable="true">${h}</span></div>`;details+=`<div style="display:flex;align-items:center;gap:8px"><span>🎟</span><span>Entradas toda la estancia</span></div><div style="display:flex;align-items:center;gap:8px"><span>🍽</span><span>Desayuno incluido</span></div>`}
 else if(dest==='crucero-disney'){details+=`<div style="display:flex;align-items:center;gap:8px"><span>🚢</span><span class="card-editable-dark" contenteditable="true">${v('crd-barco')}</span></div><div style="display:flex;align-items:center;gap:8px"><span>🛏</span><span>Camarote ${v('crd-camarote').toLowerCase()}</span></div>`;if(v('crd-promo'))details+=`<div style="display:flex;align-items:center;gap:8px;color:#E8716D;font-weight:600"><span>🎉</span><span class="card-editable-dark" contenteditable="true">${v('crd-promo')}</span></div>`}
 else if(dest==='crucero-otros'){if(v('cro-barco'))details+=`<div style="display:flex;align-items:center;gap:8px"><span>🚢</span><span class="card-editable-dark" contenteditable="true">${v('cro-barco')}</span></div>`}
@@ -940,27 +1288,95 @@ else if(dest==='nickelodeon'){details+=`<div style="display:flex;align-items:cen
 else if(dest==='xcaret'){details+=`<div style="display:flex;align-items:center;gap:8px"><span>🏨</span><span class="card-editable-dark" contenteditable="true">${v('xca-hotel')}</span></div><div style="display:flex;align-items:center;gap:8px"><span>✅</span><span>TODO INCLUIDO</span></div>`}
 
 const isCr=dest.startsWith('crucero'),dateLabel=isCr?`${formatDate(checkin)} al ${formatDate(checkout)}`:`${formatDateShort(checkin)} → ${formatDateShort(checkout)}`,hasPrice=dest!=='crucero-otros',grad=DEST_GRADIENTS[dest]||'linear-gradient(135deg,#E8716D,#D4605C)',imgUrl=(v('card-image-url')||DEST_IMAGES[dest]||'').trim();
-const condMap={orlando:'✅ Aparta con $200 USD · Liquida 1 mes antes',california:'✅ Aparta con $200 USD · Liquida 1 mes antes',universal:'✅ Aparta con $50 USD/persona · Liquida 45 días antes','crucero-disney':'✅ Aparta con 10% · Liquida 3 meses antes','crucero-otros':'✅ Aparta con 20% · Liquida 3 meses antes',nickelodeon:'✅ Aparta con $200 USD',xcaret:'✅ Aparta con $200 USD',paris:''};
+const condMap={orlando:'✅ Aparta con $200 USD · Liquida 1 mes antes',california:'✅ Aparta con $200 USD · Liquida 1 mes antes',universal:'✅ Aparta con $50 USD/persona · Liquida 45 días antes',hollywood:'✅ Precios sujetos a disponibilidad','crucero-disney':'✅ Aparta con 10% · Liquida 3 meses antes','crucero-otros':'✅ Aparta con 20% · Liquida 3 meses antes',nickelodeon:'✅ Aparta con $200 USD',xcaret:'✅ Aparta con $200 USD',paris:''};
 
 $('#card-render').innerHTML=`<div style="width:100%;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 4px 30px rgba(0,0,0,.12);font-family:'Poppins',sans-serif">
 <div style="position:relative;height:130px;background:${grad};overflow:hidden">${imgUrl?`<img src="${imgUrl}" style="width:100%;height:100%;object-fit:cover;opacity:.45" onerror="this.style.display='none'" crossorigin="anonymous">`:''}
 <div style="position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:14px 20px;background:linear-gradient(to top,rgba(0,0,0,.55),transparent)">
 <div style="font-size:17px;font-weight:800;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.3)">${names[dest]||dest}</div></div></div>
 <div style="background:#1B2A4A;color:#fff;padding:9px 20px;display:flex;justify-content:space-between;align-items:center">
-<div><span style="font-size:13px;font-weight:700">✨ Mich Murrieta</span><span style="font-size:10px;opacity:.6;margin-left:8px">${AGENT_TITLES[dest]||''}</span></div></div>
+<div><span style="font-size:13px;font-weight:700">✨ Mich Murrieta</span><span style="font-size:10px;opacity:.6;margin-left:8px">${AGENT_TITLES[dest]||''}</span></div><div><span style="font-size:9px;opacity:.5">michmurrietaviajes.com</span></div></div>
 <div style="padding:20px">
 <div style="display:flex;gap:16px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid #f0f0f0">
 <div style="text-align:center;flex:1"><div style="font-size:22px">👥</div><div style="font-size:12px;font-weight:600;color:#1B2A4A">${adultos} Adulto${+adultos!==1?'s':''}</div></div>
 ${getMinorsTotal()>0?`<div style="text-align:center;flex:1"><div style="font-size:22px">👶</div><div style="font-size:11px;font-weight:600;color:#1B2A4A">${minors}</div></div>`:''}</div>
 <div style="background:#FFF8F0;border-radius:12px;padding:10px 16px;margin-bottom:14px;text-align:center">
 <div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">📅 Fechas</div>
-<div style="font-size:13px;font-weight:600;color:#1B2A4A">${dateLabel}</div></div>
+<div style="font-size:13px;font-weight:600;color:#1B2A4A">${dateLabel}</div>
+${calcNights()>0?`<div style="font-size:11px;color:#E8716D;font-weight:600;margin-top:2px">${calcNights()} noches</div>`:''}</div>
 <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:14px;font-size:12px;color:#333">${details}</div>
 ${hasPrice?`<div style="background:linear-gradient(135deg,#1B2A4A,#2C4570);border-radius:14px;padding:14px;text-align:center;margin-bottom:14px">
 <div style="font-size:10px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Precio total</div>
 <div style="font-size:26px;font-weight:800;color:#fff">$<span class="card-editable" contenteditable="true">${precio}</span></div>
 <div style="font-size:11px;color:rgba(255,255,255,.6)">USD</div></div>`:''}
 <div style="font-size:10px;color:#888;line-height:1.5;margin-bottom:4px">${condMap[dest]||''}</div>
+<div style="font-size:10px;color:#888;margin-bottom:6px">Notas adicionales</div>
+<div id="card-notes-container" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px">
+<div contenteditable="true" class="card-note-line" style="font-size:11px;color:#555;min-height:16px;outline:none;border-bottom:1px dashed #eee;padding-bottom:4px" data-placeholder="+ Agregar nota aquí..."></div>
+</div>
+<button type="button" onclick="addCardNote()" style="font-size:11px;color:#E8716D;font-weight:600;background:none;border:none;cursor:pointer;padding:4px 0;text-align:left">+ Agregar otra nota</button>
+</div>
+<div style="background:#FFF8F0;padding:12px 20px;text-align:center;border-top:1px solid #f0e8dc">
+<div style="font-size:11px;color:#1B2A4A;font-weight:600">📸 @michmurrieta_viajes</div></div></div>`}
+
+// ── CARD: get details for a specific dest (reusable) ──
+function getCardDetailsFor(dest){
+  let d='';
+  if(dest==='orlando'){const h=v('orl-hotel');if(h)d+=`<div style="display:flex;align-items:center;gap:8px"><span>🏨</span><span>${h}</span></div>`;d+=`<div style="display:flex;align-items:center;gap:8px"><span>🎟</span><span>${v('orl-modalidad')} · ${v('orl-dias')} días</span></div>`;if(v('orl-comidas'))d+=`<div style="display:flex;align-items:center;gap:8px"><span>🍽</span><span>Plan de comidas</span></div>`;if(ck('orl-kidsfree'))d+=`<div style="display:flex;align-items:center;gap:8px;color:#22c55e;font-weight:600"><span>🎉</span><span>Kids Eat Free 2026</span></div>`}
+  else if(dest==='universal'){const h=v('uni-hotel');if(h)d+=`<div style="display:flex;align-items:center;gap:8px"><span>🏨</span><span>${h}</span></div>`;d+=`<div style="display:flex;align-items:center;gap:8px"><span>🎟</span><span>Epic Universe + Universal + Islands</span></div>`;if(ck('uni-volcano'))d+=`<div style="display:flex;align-items:center;gap:8px"><span>🌋</span><span>Volcano Bay</span></div>`}
+  else if(dest==='california'){const h=v('cal-hotel');if(h)d+=`<div style="display:flex;align-items:center;gap:8px"><span>🏨</span><span>${h}</span></div>`;d+=`<div style="display:flex;align-items:center;gap:8px"><span>🎟</span><span>${v('cal-ticket')} · ${v('cal-dias')} días</span></div>`;if(v('cal-lightning'))d+=`<div style="display:flex;align-items:center;gap:8px"><span>⚡</span><span>Lightning Lane</span></div>`}
+  else if(dest==='hollywood'){const h=v('hwd-hotel');if(h)d+=`<div style="display:flex;align-items:center;gap:8px"><span>🏨</span><span>${h}</span></div>`;const tn={general:'General Admission',express:'Express',['express-unl']:'Express Unlimited'};d+=`<div style="display:flex;align-items:center;gap:8px"><span>🎟</span><span>${tn[v('hwd-ticket')]||''} · ${v('hwd-dias')} día${+v('hwd-dias')!==1?'s':''}</span></div>`;if(ck('hwd-nintendo'))d+=`<div style="display:flex;align-items:center;gap:8px"><span>🎮</span><span>Super Nintendo World</span></div>`;if(ck('hwd-vip'))d+=`<div style="display:flex;align-items:center;gap:8px;color:#f59e0b;font-weight:600"><span>🌟</span><span>VIP Experience</span></div>`}
+  else if(dest==='crucero-disney'){d+=`<div style="display:flex;align-items:center;gap:8px"><span>🚢</span><span>${v('crd-barco')}</span></div><div style="display:flex;align-items:center;gap:8px"><span>🛏</span><span>Camarote ${v('crd-camarote').toLowerCase()}</span></div>`;if(v('crd-promo'))d+=`<div style="display:flex;align-items:center;gap:8px;color:#E8716D;font-weight:600"><span>🎉</span><span>${v('crd-promo')}</span></div>`}
+  else if(dest==='crucero-otros'){if(v('cro-barco'))d+=`<div style="display:flex;align-items:center;gap:8px"><span>🚢</span><span>${v('cro-barco')}</span></div>`}
+  return d;
+}
+
+// ── COMBINED CARD GENERATION ──
+function generateCardCombo(d1,d2){
+  const nombre=v('nombre')||'Cliente',adultos=v('adultos'),minors=getMinorsCardText(),checkin=v('checkin'),checkout=v('checkout'),precio=v('precio');
+  const p1=v('precio-tramo1'),p2=v('precio-tramo2');
+  const n1=DEST_NAMES[d1]||d1,n2=DEST_NAMES[d2]||d2;
+  const nights=calcNights();
+  const dateLabel=`${formatDateShort(checkin)} → ${formatDateShort(checkout)}`;
+  const grad1=DEST_GRADIENTS[d1]||'linear-gradient(135deg,#E8716D,#D4605C)';
+  const imgUrl=(v('card-image-url')||DEST_IMAGES[d1]||'').trim();
+  const det1=getCardDetailsFor(d1),det2=getCardDetailsFor(d2);
+  const condMap={orlando:'✅ Aparta con $200 USD · Liquida 1 mes antes',california:'✅ Aparta con $200 USD · Liquida 1 mes antes',universal:'✅ Aparta con $50 USD/persona · Liquida 45 días antes',hollywood:'✅ Precios sujetos a disponibilidad','crucero-disney':'✅ Aparta con 10% · Liquida 3 meses antes','crucero-otros':'✅ Aparta con 20% · Liquida 3 meses antes',nickelodeon:'✅ Aparta con $200 USD',xcaret:'✅ Aparta con $200 USD',paris:''};
+
+  $('#card-render').innerHTML=`<div style="width:100%;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 4px 30px rgba(0,0,0,.12);font-family:'Poppins',sans-serif">
+<div style="position:relative;height:130px;background:${grad1};overflow:hidden">${imgUrl?`<img src="${imgUrl}" style="width:100%;height:100%;object-fit:cover;opacity:.45" onerror="this.style.display='none'" crossorigin="anonymous">`:''}
+<div style="position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:14px 20px;background:linear-gradient(to top,rgba(0,0,0,.55),transparent)">
+<div style="font-size:15px;font-weight:800;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.3)">🔀 Viaje Combinado</div>
+<div style="font-size:11px;color:rgba(255,255,255,.8);margin-top:2px">${n1} + ${n2}</div></div></div>
+<div style="background:#1B2A4A;color:#fff;padding:9px 20px;display:flex;justify-content:space-between;align-items:center">
+<div><span style="font-size:13px;font-weight:700">✨ Mich Murrieta</span><span style="font-size:10px;opacity:.6;margin-left:8px">${AGENT_TITLES[d1]||''}</span></div><div><span style="font-size:9px;opacity:.5">michmurrietaviajes.com</span></div></div>
+<div style="padding:20px">
+<div style="display:flex;gap:16px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid #f0f0f0">
+<div style="text-align:center;flex:1"><div style="font-size:22px">👥</div><div style="font-size:12px;font-weight:600;color:#1B2A4A">${adultos} Adulto${+adultos!==1?'s':''}</div></div>
+${getMinorsTotal()>0?`<div style="text-align:center;flex:1"><div style="font-size:22px">👶</div><div style="font-size:11px;font-weight:600;color:#1B2A4A">${minors}</div></div>`:''}</div>
+<div style="background:#FFF8F0;border-radius:12px;padding:10px 16px;margin-bottom:14px;text-align:center">
+<div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">📅 Fechas</div>
+<div style="font-size:13px;font-weight:600;color:#1B2A4A">${dateLabel}</div>
+${nights>0?`<div style="font-size:11px;color:#E8716D;font-weight:600;margin-top:2px">${nights} noches</div>`:''}</div>
+
+<div style="background:#f8f4ff;border-radius:12px;padding:12px 14px;margin-bottom:10px;border-left:3px solid ${(DEST_GRADIENTS[d1]||'#E8716D').match(/#[0-9a-fA-F]{6}/)?.[0]||'#E8716D'}">
+<div style="font-size:11px;font-weight:700;color:#1B2A4A;margin-bottom:6px">${n1}</div>
+<div style="display:flex;flex-direction:column;gap:5px;font-size:11px;color:#333">${det1}</div>
+${p1?`<div style="font-size:12px;font-weight:700;color:#1B2A4A;margin-top:6px">💸 $${p1} USD</div>`:''}
+</div>
+
+<div style="background:#f0f8ff;border-radius:12px;padding:12px 14px;margin-bottom:14px;border-left:3px solid ${(DEST_GRADIENTS[d2]||'#0066cc').match(/#[0-9a-fA-F]{6}/)?.[0]||'#0066cc'}">
+<div style="font-size:11px;font-weight:700;color:#1B2A4A;margin-bottom:6px">${n2}</div>
+<div style="display:flex;flex-direction:column;gap:5px;font-size:11px;color:#333">${det2}</div>
+${p2?`<div style="font-size:12px;font-weight:700;color:#1B2A4A;margin-top:6px">💸 $${p2} USD</div>`:''}
+</div>
+
+${precio?`<div style="background:linear-gradient(135deg,#1B2A4A,#2C4570);border-radius:14px;padding:14px;text-align:center;margin-bottom:14px">
+<div style="font-size:10px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Precio total</div>
+<div style="font-size:26px;font-weight:800;color:#fff">$<span class="card-editable" contenteditable="true">${precio}</span></div>
+<div style="font-size:11px;color:rgba(255,255,255,.6)">USD</div></div>`:''}
+<div style="font-size:10px;color:#888;line-height:1.5;margin-bottom:4px">${condMap[d1]||''}</div>
+${condMap[d2]&&condMap[d2]!==condMap[d1]?`<div style="font-size:10px;color:#888;line-height:1.5;margin-bottom:4px">${condMap[d2]}</div>`:''}
 <div style="font-size:10px;color:#888;margin-bottom:6px">Notas adicionales</div>
 <div id="card-notes-container" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px">
 <div contenteditable="true" class="card-note-line" style="font-size:11px;color:#555;min-height:16px;outline:none;border-bottom:1px dashed #eee;padding-bottom:4px" data-placeholder="+ Agregar nota aquí..."></div>
