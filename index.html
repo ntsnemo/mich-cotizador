@@ -246,16 +246,16 @@
   var input = '';
 
   var frasesSatira = [
-    'Código incorrecto. ¿Seguro que eres de Mich Murrieta Viajes?',
-    'Nope. Ese no es. Intenta recordar… o preguntarle a Mich.',
-    'Ese código no abre nada. Ni la puerta de tu casa.',
-    'Incorrecto. Aquí no entran códigos de la suegra.',
-    'Error. El sistema detecta que no sabes el código.',
-    'Código equivocado. La próxima será la vencida… o no.',
-    'Nada. Sigue intentando, la paciencia es clave en los viajes.',
-    'Incorrecto. Este no es el PIN del cajero automático.',
-    'Ese número no está en la lista de destinos. Otro.',
-    'Código erróneo. Ni con mapa y brújula.'
+    'Código incorrecto. ¿Seguro que eres del equipo de Mich Murrieta Viajes? Porque este no es.',
+    'Nope. Ese no es. Intenta recordar… o preguntarle a Mich, que ella sí sabe.',
+    'Ese código no abre nada. Ni la puerta de tu casa. Prueba otro.',
+    'Incorrecto. Aquí no entran códigos de la suegra ni de la lotería.',
+    'Error. El sistema detecta que no sabes el código. Lo sentimos por ti.',
+    'Código equivocado. La próxima será la vencida… o no. Quién sabe.',
+    'Nada. Sigue intentando; la paciencia es clave en los viajes. Y en los códigos.',
+    'Incorrecto. Este no es el PIN del cajero automático. Busca otro.',
+    'Ese número no está en la lista de destinos. Ni en la de códigos válidos. Otro.',
+    'Código erróneo. Ni con mapa, brújula y GPS lo vas a adivinar así.'
   ];
 
   function updateDots(){
@@ -283,7 +283,7 @@
       showError(fraseAleatoria());
       input = '';
       updateDots();
-      setTimeout(clearError, 3500);
+      setTimeout(clearError, 6000);
     }
   }
 
@@ -348,6 +348,8 @@
     <div id="dest-image-preview" class="mt-3 rounded-2xl overflow-hidden" style="display:none">
       <img id="dest-image" src="" alt="" style="width:100%;height:150px;object-fit:cover" onerror="this.parentElement.style.display='none'">
     </div>
+    <label class="fi-label mt-3">URL de imagen de la tarjeta (opcional)</label>
+    <input id="card-image-url" type="url" placeholder="https://… — para cambiar la foto del encabezado de la cotización" class="fi-input mt-1">
   </div>
 
   <!-- ═══════════════ FORM ═══════════════ -->
@@ -860,7 +862,7 @@ function parseTSV(text){const lines=text.trim().split(/\r?\n/);if(!lines.length)
 function normDestinoId(v){const s=(v||'').toString().trim();if(!s)return'';const n=parseInt(s,10);if(!isNaN(n)&&n>=1&&n<=DESTINO_IDS.length)return DESTINO_IDS[n-1];return s.toLowerCase().replace(/\s+/g,'-');}
 function applyDestinos(rows){rows.forEach(r=>{const id=normDestinoId(r.id);if(!id)return;if(r.imagen_url)DEST_IMAGES[id]=r.imagen_url;if(r.gradiente)DEST_GRADIENTS[id]=r.gradiente;if(r.agente_titulo)AGENT_TITLES[id]=r.agente_titulo;});}
 function applyCondiciones(rows){rows.forEach(r=>{const id=normDestinoId(r.destino_id);if(!id)return;CONDITIONS[id]=r.condiciones!==undefined&&r.condiciones!==''?r.condiciones:CONDITIONS[id];if(r.condiciones_eventos_especiales)CONDITIONES_EVENTOS[id]=r.condiciones_eventos_especiales;});}
-function applyHoteles(rows){const byDest={};rows.forEach(r=>{const destId=normDestinoId(r.destino_id),nombre=(r.nombre_hotel||'').trim();if(!destId||!nombre)return;const cat=r.categoria||'Value',c=(r.categoria_css&&r.categoria_css.trim())?r.categoria_css.trim():(CAT_TO_CSS[cat]||'cat-value');HOTEL_CATS[nombre]={cat,c};if(r.imagen_url&&r.imagen_url.trim())HOTEL_IMAGES[nombre]=r.imagen_url.trim();if(!byDest[destId])byDest[destId]=[];byDest[destId].push({nombre,optgroup:(r.optgroup||'').trim()});});HOTELES_POR_DESTINO=byDest;const selMap={orlando:'orl-hotel',universal:'uni-hotel',california:'cal-hotel',paris:'par-hotel',xcaret:'xca-hotel'};Object.keys(selMap).forEach(destId=>{const sel=document.getElementById(selMap[destId]);if(!sel||!HOTELES_POR_DESTINO[destId])return;const list=HOTELES_POR_DESTINO[destId];let html='<option value="">— Selecciona un hotel —</option>',curGrp=null;list.forEach(h=>{const g=h.optgroup||'';if(g!==curGrp){if(curGrp!==null)html+='</optgroup>';curGrp=g;if(g)html+=`<optgroup label="${g.replace(/"/g,'&quot;')}">`;}html+=`<option>${(h.nombre||'').replace(/&/g,'&amp;').replace(/</g,'&lt;')}</option>`;});if(curGrp!==null)html+='</optgroup>';sel.innerHTML=html;});}
+function applyHoteles(rows){const byDest={};rows.forEach(r=>{const destId=normDestinoId(r.destino_id),nombre=(r.nombre_hotel||'').trim();if(!destId||!nombre)return;const cat=r.categoria||'Value',c=(r.categoria_css&&r.categoria_css.trim())?r.categoria_css.trim():(CAT_TO_CSS[cat]||'cat-value');HOTEL_CATS[nombre]={cat,c};if(r.imagen_url&&r.imagen_url.trim())HOTEL_IMAGES[nombre]=r.imagen_url.trim();if(!byDest[destId])byDest[destId]=[];byDest[destId].push({nombre,optgroup:(r.optgroup||'').trim()});});HOTELES_POR_DESTINO=byDest;const selMap={orlando:'orl-hotel',universal:'uni-hotel',california:'cal-hotel',paris:'par-hotel',xcaret:'xca-hotel'};Object.keys(selMap).forEach(destId=>{const sel=document.getElementById(selMap[destId]);if(!sel||!HOTELES_POR_DESTINO[destId])return;const list=HOTELES_POR_DESTINO[destId];if(!list.length)return;let html='<option value="">— Selecciona un hotel —</option>',curGrp=null;list.forEach(h=>{const g=h.optgroup||'';if(g!==curGrp){if(curGrp!==null)html+='</optgroup>';curGrp=g;if(g)html+=`<optgroup label="${g.replace(/"/g,'&quot;')}">`;}html+=`<option>${(h.nombre||'').replace(/&/g,'&amp;').replace(/</g,'&lt;')}</option>`;});if(curGrp!==null)html+='</optgroup>';sel.innerHTML=html;});}
 
 async function loadCotizacionData(){try{let destinosTxt='',condicionesTxt='',hotelesTxt='',fromSheet=false;if(SHEET_CONFIG.id){const base=`https://docs.google.com/spreadsheets/d/${SHEET_CONFIG.id}/export?format=csv&gid=`,g=SHEET_CONFIG.gids;[destinosTxt,condicionesTxt,hotelesTxt]=await Promise.all([fetch(base+g.destinos).then(r=>r.ok?r.text():''),fetch(base+g.condiciones).then(r=>r.ok?r.text():''),fetch(base+g.hoteles).then(r=>r.ok?r.text():'')]);if(destinosTxt&&condicionesTxt&&hotelesTxt)fromSheet=true;}if(!fromSheet){[destinosTxt,condicionesTxt,hotelesTxt]=await Promise.all([fetch('data/destinos.tsv').then(r=>r.ok?r.text():''),fetch('data/condiciones.tsv').then(r=>r.ok?r.text():''),fetch('data/hoteles.tsv').then(r=>r.ok?r.text():'')]);}const parse=fromSheet?parseCSV:parseTSV;if(destinosTxt){const rows=parse(destinosTxt);if(rows.length)applyDestinos(rows);}if(condicionesTxt){const rows=parse(condicionesTxt);if(rows.length)applyCondiciones(rows);}if(hotelesTxt){const rows=parse(hotelesTxt);if(rows.length)applyHoteles(rows);}}catch(e){console.warn('No se cargaron datos de cotizaciones:',e);}}
 
@@ -937,7 +939,7 @@ else if(dest==='crucero-otros'){if(v('cro-barco'))details+=`<div style="display:
 else if(dest==='nickelodeon'){details+=`<div style="display:flex;align-items:center;gap:8px"><span>🏨</span><span>Nickelodeon Resort · Riviera Maya</span></div><div style="display:flex;align-items:center;gap:8px"><span>✅</span><span>TODO INCLUIDO</span></div>`}
 else if(dest==='xcaret'){details+=`<div style="display:flex;align-items:center;gap:8px"><span>🏨</span><span class="card-editable-dark" contenteditable="true">${v('xca-hotel')}</span></div><div style="display:flex;align-items:center;gap:8px"><span>✅</span><span>TODO INCLUIDO</span></div>`}
 
-const isCr=dest.startsWith('crucero'),dateLabel=isCr?`${formatDate(checkin)} al ${formatDate(checkout)}`:`${formatDateShort(checkin)} → ${formatDateShort(checkout)}`,hasPrice=dest!=='crucero-otros',grad=DEST_GRADIENTS[dest]||'linear-gradient(135deg,#E8716D,#D4605C)',imgUrl=DEST_IMAGES[dest]||'';
+const isCr=dest.startsWith('crucero'),dateLabel=isCr?`${formatDate(checkin)} al ${formatDate(checkout)}`:`${formatDateShort(checkin)} → ${formatDateShort(checkout)}`,hasPrice=dest!=='crucero-otros',grad=DEST_GRADIENTS[dest]||'linear-gradient(135deg,#E8716D,#D4605C)',imgUrl=(v('card-image-url')||DEST_IMAGES[dest]||'').trim();
 const condMap={orlando:'✅ Aparta con $200 USD · Liquida 1 mes antes',california:'✅ Aparta con $200 USD · Liquida 1 mes antes',universal:'✅ Aparta con $50 USD/persona · Liquida 45 días antes','crucero-disney':'✅ Aparta con 10% · Liquida 3 meses antes','crucero-otros':'✅ Aparta con 20% · Liquida 3 meses antes',nickelodeon:'✅ Aparta con $200 USD',xcaret:'✅ Aparta con $200 USD',paris:''};
 
 $('#card-render').innerHTML=`<div style="width:100%;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 4px 30px rgba(0,0,0,.12);font-family:'Poppins',sans-serif">
@@ -959,16 +961,20 @@ ${hasPrice?`<div style="background:linear-gradient(135deg,#1B2A4A,#2C4570);borde
 <div style="font-size:26px;font-weight:800;color:#fff">$<span class="card-editable" contenteditable="true">${precio}</span></div>
 <div style="font-size:11px;color:rgba(255,255,255,.6)">USD</div></div>`:''}
 <div style="font-size:10px;color:#888;line-height:1.5;margin-bottom:4px">${condMap[dest]||''}</div>
-<div contenteditable="true" style="font-size:11px;color:#999;font-style:italic;min-height:16px;outline:none;border-bottom:1px dashed #eee;padding-bottom:4px" data-placeholder="+ Agregar nota aquí..."></div>
+<div style="font-size:10px;color:#888;margin-bottom:6px">Notas adicionales</div>
+<div id="card-notes-container" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px">
+<div contenteditable="true" class="card-note-line" style="font-size:11px;color:#555;min-height:16px;outline:none;border-bottom:1px dashed #eee;padding-bottom:4px" data-placeholder="+ Agregar nota aquí..."></div>
 </div>
-<div style="background:#FFF8F0;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid #f0e8dc">
-<div><div style="font-size:11px;color:#1B2A4A;font-weight:600">📲 +52 55 1766 6721</div><div style="font-size:9px;color:#888">michmurrietaviajes.com</div></div>
-<div style="font-size:9px;color:#888;text-align:right">📸 @michmurrieta_viajes</div></div></div>`}
+<button type="button" onclick="addCardNote()" style="font-size:11px;color:#E8716D;font-weight:600;background:none;border:none;cursor:pointer;padding:4px 0;text-align:left">+ Agregar otra nota</button>
+</div>
+<div style="background:#FFF8F0;padding:12px 20px;text-align:center;border-top:1px solid #f0e8dc">
+<div style="font-size:11px;color:#1B2A4A;font-weight:600">📸 @michmurrieta_viajes</div></div></div>`}
 
 // ── TABS ──
 function switchTab(t){$('#tab-texto').classList.toggle('active',t==='texto');$('#tab-tarjeta').classList.toggle('active',t==='tarjeta');$('#panel-texto').style.display=t==='texto'?'':'none';$('#panel-tarjeta').style.display=t==='tarjeta'?'':'none'}
 
 // ── ACTIONS ──
+function addCardNote(){const c=$('#card-notes-container');if(!c)return;const d=document.createElement('div');d.contentEditable='true';d.className='card-note-line';d.style.cssText='font-size:11px;color:#555;min-height:16px;outline:none;border-bottom:1px dashed #eee;padding-bottom:4px';d.setAttribute('data-placeholder','+ Agregar nota aquí...');c.appendChild(d);d.focus();}
 function copiarTexto(){const raw=waHtmlToText($('#wa-preview'));navigator.clipboard.writeText(raw).then(()=>showToast('Copiado al portapapeles ✅'))}
 function descargarImagen(){const card=$('#card-render');showToast('Generando imagen...');html2canvas(card,{scale:2,backgroundColor:null,useCORS:true,logging:false}).then(canvas=>{const a=document.createElement('a');a.download=`Cotizacion_${(v('nombre')||'cliente').replace(/\s+/g,'_')}_${v('destino')}.png`;a.href=canvas.toDataURL('image/png');a.click();showToast('Imagen descargada ✅')})}
 
@@ -1809,7 +1815,7 @@ function generateItPreview(){
     daysHtml+=`<div class="itp-day" data-idx="${idx}"><div class="itp-day-head" onclick="toggleItDay(this)"><div class="itp-day-badge" style="background:${color}"><span class="db-label">Día</span><span class="db-num">${idx+1}</span></div><div class="itp-day-info"><div class="itp-day-date">${dateStr}</div><div class="itp-day-name">${day.icon} ${day.title}</div></div><span class="itp-day-chev">▾</span></div><div class="itp-day-body"><div class="itp-timeline">${timelineHtml}</div>${tipsHtml}</div></div>`;
   });
 
-  container.innerHTML=`<div class="itp" id="itp-card"><div class="itp-hero" style="background-image:url('${data.cover}')"><div class="itp-hero-ov"><h1>${data.title}</h1>${clientSubtitle}<p>${dateRange}</p></div></div><div class="itp-agent"><div class="itp-agent-avatar">✨</div><div class="itp-agent-info"><h3>Mich Murrieta</h3><p>Tu agente de viajes</p><div class="itp-contact"><span>📞 Llamar</span><span>📧 Email</span><span>🌐 Web</span></div></div></div><div class="itp-travelers"><div>👥 ${data.adults} Adulto${+data.adults!==1?'s':''}</div>${data.kids?`<div>👶 ${data.kids}</div>`:''}<div>🏨 ${data.hotel}</div></div>${docsHtml}<div class="itp-section" style="padding-bottom:0"><div class="itp-stitle">📅 Tu itinerario día por día</div></div>${daysHtml}<div class="itp-footer"><div>✨ Mich Murrieta · Tu agente de viajes</div><div>📲 +52 55 1766 6721</div><div class="sub">michmurrietaviajes.com · 📸 @michmurrieta_viajes</div></div></div>`;
+  container.innerHTML=`<div class="itp" id="itp-card"><div class="itp-hero" style="background-image:url('${data.cover}')"><div class="itp-hero-ov"><h1>${data.title}</h1>${clientSubtitle}<p>${dateRange}</p></div></div><div class="itp-agent"><div class="itp-agent-avatar">✨</div><div class="itp-agent-info"><h3>Mich Murrieta</h3><p>Tu agente de viajes</p><div class="itp-contact">📸 @michmurrieta_viajes</div></div></div><div class="itp-travelers"><div>👥 ${data.adults} Adulto${+data.adults!==1?'s':''}</div>${data.kids?`<div>👶 ${data.kids}</div>`:''}<div>🏨 ${data.hotel}</div></div>${docsHtml}<div class="itp-section" style="padding-bottom:0"><div class="itp-stitle">📅 Tu itinerario día por día</div></div>${daysHtml}<div class="itp-footer"><div>✨ Mich Murrieta · Tu agente de viajes</div><div class="sub">📸 @michmurrieta_viajes</div></div></div>`;
 
   document.getElementById('it-form').style.display='none';
   document.getElementById('it-preview-section').style.display='';
