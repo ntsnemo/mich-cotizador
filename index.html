@@ -1181,9 +1181,9 @@ function onCombinadoChange(){
     $('#combo-pricing').style.display='none';
   }else{
     populateDestino2();
-    $('#combo-pricing').style.display='';
-    updateComboPriceLabels();
+    if(!isGroupMode()){$('#combo-pricing').style.display='';updateComboPriceLabels()}
   }
+  if(isGroupMode())updateGroupReservations();
 }
 
 function populateDestino2(){
@@ -1212,6 +1212,7 @@ function onDestino2Change(){
   if(d2==='crucero-otros'&&!itCounts.cro){for(let i=0;i<5;i++)addItineraryDay('cro');if(!pgCount)addPriceGroup()}
   if(d2==='universal')updateUniDesc();
   updateSpecialOptions();
+  if(isGroupMode())updateGroupReservations();
 }
 
 function updateComboPriceLabels(){
@@ -1280,16 +1281,46 @@ function getDestDetails(d){
 
 function genCombinado(d1,d2,gens){
   const n1=DEST_NAMES[d1]||d1,n2=DEST_NAMES[d2]||d2;
-  const p1=v('precio-tramo1'),p2=v('precio-tramo2'),pt=v('precio');
   const nights=calcNights();
-  let m=greet(d1)+'\n'+travelers();
+  const group=isGroupMode(),gd=group?getGroupData():null;
+  let m=greet(d1);
+  if(group){
+    m+=`\n*Cotización grupal:* ${gd.length} habitaciones`;
+  }else{
+    m+='\n'+travelers();
+  }
   m+=`\n\nCheck in: ${formatDate(v('checkin'))}\nCheck out: ${formatDate(v('checkout'))}`;
   if(nights>0)m+=`\n📅 *${nights} noches*`;
-  m+=`\n\n━━━━━━━━━━━━━━━━━━━━\n*${n1}*\n━━━━━━━━━━━━━━━━━━━━\n${getDestDetails(d1)}`;
-  if(p1)m+=`\n\n💸 *$${p1} USD*`;
-  m+=`\n\n━━━━━━━━━━━━━━━━━━━━\n*${n2}*\n━━━━━━━━━━━━━━━━━━━━\n${getDestDetails(d2)}`;
-  if(p2)m+=`\n\n💸 *$${p2} USD*`;
-  if(pt)m+=`\n\n━━━━━━━━━━━━━━━━━━━━\n*💸 TOTAL: $${pt} USD*`;
+
+  if(group){
+    let sub1=0,sub2=0,grandTotal=0;
+    // Park 1
+    m+=`\n\n━━━━━━━━━━━━━━━━━━━━\n*${n1}*\n━━━━━━━━━━━━━━━━━━━━\n${getDestDetails(d1)}`;
+    gd.forEach((r,i)=>{
+      const p=parseFloat((r.price1||'0').replace(/,/g,''))||0;sub1+=p;
+      m+=`\n\n🏷 *Habitación ${i+1} — ${r.name}*\n${r.adults} Adulto${r.adults!==1?'s':''}${r.minors>0?', '+r.minors+' Menor'+(r.minors!==1?'es':''):''}`;
+      m+=`\n*💸 $${r.price1} USD*`;
+      if(r.notes)m+=`\n_${r.notes}_`;
+    });
+    if(gd.length>1)m+=`\n\n💰 *Subtotal ${(DEST_NAMES[d1]||d1).replace(/^[^\s]+\s/,'')}: $${formatUSD(sub1)} USD*`;
+    // Park 2
+    m+=`\n\n━━━━━━━━━━━━━━━━━━━━\n*${n2}*\n━━━━━━━━━━━━━━━━━━━━\n${getDestDetails(d2)}`;
+    gd.forEach((r,i)=>{
+      const p=parseFloat((r.price2||'0').replace(/,/g,''))||0;sub2+=p;
+      m+=`\n\n🏷 *Habitación ${i+1} — ${r.name}*\n${r.adults} Adulto${r.adults!==1?'s':''}${r.minors>0?', '+r.minors+' Menor'+(r.minors!==1?'es':''):''}`;
+      m+=`\n*💸 $${r.price2} USD*`;
+    });
+    if(gd.length>1)m+=`\n\n💰 *Subtotal ${(DEST_NAMES[d2]||d2).replace(/^[^\s]+\s/,'')}: $${formatUSD(sub2)} USD*`;
+    grandTotal=sub1+sub2;
+    m+=`\n\n━━━━━━━━━━━━━━━━━━━━\n💰 *TOTAL: $${formatUSD(grandTotal)} USD* (${gd.length} habitaciones)`;
+  }else{
+    const p1=v('precio-tramo1'),p2=v('precio-tramo2'),pt=v('precio');
+    m+=`\n\n━━━━━━━━━━━━━━━━━━━━\n*${n1}*\n━━━━━━━━━━━━━━━━━━━━\n${getDestDetails(d1)}`;
+    if(p1)m+=`\n\n💸 *$${p1} USD*`;
+    m+=`\n\n━━━━━━━━━━━━━━━━━━━━\n*${n2}*\n━━━━━━━━━━━━━━━━━━━━\n${getDestDetails(d2)}`;
+    if(p2)m+=`\n\n💸 *$${p2} USD*`;
+    if(pt)m+=`\n\n━━━━━━━━━━━━━━━━━━━━\n*💸 TOTAL: $${pt} USD*`;
+  }
   const conds=[];if(CONDITIONS[d1])conds.push(CONDITIONS[d1]);if(CONDITIONS[d2]&&CONDITIONS[d2]!==CONDITIONS[d1])conds.push(CONDITIONS[d2]);
   if(conds.length)m+=`\n\n${conds.join('\n\n')}`;
   const n=getNotasText();if(n)m+=`\n\n${n}`;
@@ -1308,6 +1339,7 @@ function generarMensaje(){
   $('#preview-section').style.display='';switchTab('texto');
   $('#preview-section').scrollIntoView({behavior:'smooth',block:'start'});
 }
+function formatUSD(n){return n.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:2})}
 function genGroupMessage(dest,baseFn){
   let msg=baseFn();
   const gd=getGroupData();
@@ -1431,7 +1463,6 @@ function getCardDetailsFor(dest){
 // ── COMBINED CARD GENERATION ──
 function generateCardCombo(d1,d2){
   const nombre=v('nombre')||'Cliente',adultos=v('adultos'),minors=getMinorsCardText(),checkin=v('checkin'),checkout=v('checkout'),precio=v('precio');
-  const p1=v('precio-tramo1'),p2=v('precio-tramo2');
   const n1=DEST_NAMES[d1]||d1,n2=DEST_NAMES[d2]||d2;
   const nights=calcNights();
   const dateLabel=`${formatDateShort(checkin)} → ${formatDateShort(checkout)}`;
@@ -1439,6 +1470,79 @@ function generateCardCombo(d1,d2){
   const imgUrl=(v('card-image-url')||DEST_IMAGES[d1]||'').trim();
   const det1=getCardDetailsFor(d1),det2=getCardDetailsFor(d2);
   const condMap={orlando:'✅ Aparta con $200 USD · Liquida 1 mes antes',california:'✅ Aparta con $200 USD · Liquida 1 mes antes',universal:'✅ Aparta con $50 USD/persona · Liquida 45 días antes',hollywood:'✅ Precios sujetos a disponibilidad','crucero-disney':'✅ Aparta con 10% · Liquida 3 meses antes','crucero-otros':'✅ Aparta con 20% · Liquida 3 meses antes',nickelodeon:'✅ Aparta con $200 USD',xcaret:'✅ Aparta con $200 USD',paris:''};
+  const group=isGroupMode(),gd=group?getGroupData():null;
+  const color1=(DEST_GRADIENTS[d1]||'#E8716D').match(/#[0-9a-fA-F]{6}/)?.[0]||'#E8716D';
+  const color2=(DEST_GRADIENTS[d2]||'#0066cc').match(/#[0-9a-fA-F]{6}/)?.[0]||'#0066cc';
+
+  // Travelers section
+  let travelersHtml='';
+  if(group){
+    travelersHtml=`<div style="display:flex;gap:12px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid #f0f0f0;align-items:center;justify-content:center">
+      <div style="font-size:18px">👥</div><div style="font-size:12px;font-weight:700;color:#1B2A4A">Cotización grupal · ${gd.length} habitaciones</div></div>`;
+  }else{
+    travelersHtml=`<div style="display:flex;gap:16px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid #f0f0f0">
+      <div style="text-align:center;flex:1"><div style="font-size:22px">👥</div><div style="font-size:12px;font-weight:600;color:#1B2A4A">${adultos} Adulto${+adultos!==1?'s':''}</div></div>
+      ${getMinorsTotal()>0?`<div style="text-align:center;flex:1"><div style="font-size:22px">👶</div><div style="font-size:11px;font-weight:600;color:#1B2A4A">${minors}</div></div>`:''}</div>`;
+  }
+
+  // Park blocks
+  let park1Html='',park2Html='',totalHtml='';
+  if(group){
+    let sub1=0,sub2=0;
+    // Park 1 block with room details
+    let rooms1='';
+    gd.forEach((r,i)=>{
+      const p=parseFloat((r.price1||'0').replace(/,/g,''))||0;sub1+=p;
+      rooms1+=`<div style="background:rgba(255,255,255,.7);border-radius:8px;padding:8px 10px;margin-top:6px">
+        <div style="font-size:10px;font-weight:700;color:#1B2A4A">🏷 Hab. ${i+1} · <span contenteditable="true" class="card-editable-dark">${r.name}</span></div>
+        <div style="font-size:10px;color:#666">${r.adults} Adulto${r.adults!==1?'s':''}${r.minors>0?' · '+r.minors+' Menor'+(r.minors!==1?'es':''):''}</div>
+        <div style="font-size:12px;font-weight:700;color:#1B2A4A;margin-top:2px">$<span contenteditable="true" class="card-editable-dark">${r.price1||'0'}</span> USD</div>
+      </div>`;
+    });
+    if(gd.length>1)rooms1+=`<div style="font-size:11px;font-weight:700;color:${color1};margin-top:6px;text-align:right">Subtotal: $${formatUSD(sub1)} USD</div>`;
+    park1Html=`<div style="background:#f8f4ff;border-radius:12px;padding:12px 14px;margin-bottom:10px;border-left:3px solid ${color1}">
+<div style="font-size:11px;font-weight:700;color:#1B2A4A;margin-bottom:6px">${n1}</div>
+<div style="display:flex;flex-direction:column;gap:5px;font-size:11px;color:#333">${det1}</div>
+${rooms1}</div>`;
+    // Park 2 block with room details
+    let rooms2='';
+    gd.forEach((r,i)=>{
+      const p=parseFloat((r.price2||'0').replace(/,/g,''))||0;sub2+=p;
+      rooms2+=`<div style="background:rgba(255,255,255,.7);border-radius:8px;padding:8px 10px;margin-top:6px">
+        <div style="font-size:10px;font-weight:700;color:#1B2A4A">🏷 Hab. ${i+1} · <span contenteditable="true" class="card-editable-dark">${r.name}</span></div>
+        <div style="font-size:10px;color:#666">${r.adults} Adulto${r.adults!==1?'s':''}${r.minors>0?' · '+r.minors+' Menor'+(r.minors!==1?'es':''):''}</div>
+        <div style="font-size:12px;font-weight:700;color:#1B2A4A;margin-top:2px">$<span contenteditable="true" class="card-editable-dark">${r.price2||'0'}</span> USD</div>
+      </div>`;
+    });
+    if(gd.length>1)rooms2+=`<div style="font-size:11px;font-weight:700;color:${color2};margin-top:6px;text-align:right">Subtotal: $${formatUSD(sub2)} USD</div>`;
+    park2Html=`<div style="background:#f0f8ff;border-radius:12px;padding:12px 14px;margin-bottom:14px;border-left:3px solid ${color2}">
+<div style="font-size:11px;font-weight:700;color:#1B2A4A;margin-bottom:6px">${n2}</div>
+<div style="display:flex;flex-direction:column;gap:5px;font-size:11px;color:#333">${det2}</div>
+${rooms2}</div>`;
+    const grandTotal=sub1+sub2;
+    totalHtml=`<div style="background:linear-gradient(135deg,#1B2A4A,#2C4570);border-radius:14px;padding:14px;text-align:center;margin-bottom:14px">
+      <div style="font-size:10px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Total · ${gd.length} habitaciones</div>
+      <div style="font-size:26px;font-weight:800;color:#fff">$<span class="card-editable" contenteditable="true">${formatUSD(grandTotal)}</span></div>
+      <div style="font-size:11px;color:rgba(255,255,255,.6)">USD</div></div>`;
+  }else{
+    const p1=v('precio-tramo1'),p2=v('precio-tramo2');
+    park1Html=`<div style="background:#f8f4ff;border-radius:12px;padding:12px 14px;margin-bottom:10px;border-left:3px solid ${color1}">
+<div style="font-size:11px;font-weight:700;color:#1B2A4A;margin-bottom:6px">${n1}</div>
+<div style="display:flex;flex-direction:column;gap:5px;font-size:11px;color:#333">${det1}</div>
+${p1?`<div style="font-size:12px;font-weight:700;color:#1B2A4A;margin-top:6px">💸 $${p1} USD</div>`:''}
+</div>`;
+    park2Html=`<div style="background:#f0f8ff;border-radius:12px;padding:12px 14px;margin-bottom:14px;border-left:3px solid ${color2}">
+<div style="font-size:11px;font-weight:700;color:#1B2A4A;margin-bottom:6px">${n2}</div>
+<div style="display:flex;flex-direction:column;gap:5px;font-size:11px;color:#333">${det2}</div>
+${p2?`<div style="font-size:12px;font-weight:700;color:#1B2A4A;margin-top:6px">💸 $${p2} USD</div>`:''}
+</div>`;
+    totalHtml=precio?`<div style="background:linear-gradient(135deg,#1B2A4A,#2C4570);border-radius:14px;padding:14px;text-align:center;margin-bottom:14px">
+<div style="font-size:10px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Precio total</div>
+<div style="font-size:26px;font-weight:800;color:#fff">$<span class="card-editable" contenteditable="true">${precio}</span></div>
+<div style="font-size:11px;color:rgba(255,255,255,.6)">USD</div></div>`:'';
+  }
+
+  const firstNote=group?'':'';
 
   $('#card-render').innerHTML=`<div style="width:100%;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 4px 30px rgba(0,0,0,.12);font-family:'Poppins',sans-serif">
 <div style="position:relative;height:130px;background:${grad1};overflow:hidden">${imgUrl?`<img src="${imgUrl}" style="width:100%;height:100%;object-fit:cover;opacity:.45" onerror="this.style.display='none'" crossorigin="anonymous">`:''}
@@ -1448,30 +1552,14 @@ function generateCardCombo(d1,d2){
 <div style="background:#1B2A4A;color:#fff;padding:9px 20px;display:flex;justify-content:space-between;align-items:center">
 <div><span style="font-size:13px;font-weight:700">✨ Mich Murrieta</span><span style="font-size:10px;opacity:.6;margin-left:8px">${AGENT_TITLES[d1]||''}</span></div><div><span style="font-size:9px;opacity:.5">michmurrietaviajes.com</span></div></div>
 <div style="padding:20px">
-<div style="display:flex;gap:16px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid #f0f0f0">
-<div style="text-align:center;flex:1"><div style="font-size:22px">👥</div><div style="font-size:12px;font-weight:600;color:#1B2A4A">${adultos} Adulto${+adultos!==1?'s':''}</div></div>
-${getMinorsTotal()>0?`<div style="text-align:center;flex:1"><div style="font-size:22px">👶</div><div style="font-size:11px;font-weight:600;color:#1B2A4A">${minors}</div></div>`:''}</div>
+${travelersHtml}
 <div style="background:#FFF8F0;border-radius:12px;padding:10px 16px;margin-bottom:14px;text-align:center">
 <div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">📅 Fechas</div>
 <div style="font-size:13px;font-weight:600;color:#1B2A4A">${dateLabel}</div>
 ${nights>0?`<div style="font-size:11px;color:#E8716D;font-weight:600;margin-top:2px">${nights} noches</div>`:''}</div>
-
-<div style="background:#f8f4ff;border-radius:12px;padding:12px 14px;margin-bottom:10px;border-left:3px solid ${(DEST_GRADIENTS[d1]||'#E8716D').match(/#[0-9a-fA-F]{6}/)?.[0]||'#E8716D'}">
-<div style="font-size:11px;font-weight:700;color:#1B2A4A;margin-bottom:6px">${n1}</div>
-<div style="display:flex;flex-direction:column;gap:5px;font-size:11px;color:#333">${det1}</div>
-${p1?`<div style="font-size:12px;font-weight:700;color:#1B2A4A;margin-top:6px">💸 $${p1} USD</div>`:''}
-</div>
-
-<div style="background:#f0f8ff;border-radius:12px;padding:12px 14px;margin-bottom:14px;border-left:3px solid ${(DEST_GRADIENTS[d2]||'#0066cc').match(/#[0-9a-fA-F]{6}/)?.[0]||'#0066cc'}">
-<div style="font-size:11px;font-weight:700;color:#1B2A4A;margin-bottom:6px">${n2}</div>
-<div style="display:flex;flex-direction:column;gap:5px;font-size:11px;color:#333">${det2}</div>
-${p2?`<div style="font-size:12px;font-weight:700;color:#1B2A4A;margin-top:6px">💸 $${p2} USD</div>`:''}
-</div>
-
-${precio?`<div style="background:linear-gradient(135deg,#1B2A4A,#2C4570);border-radius:14px;padding:14px;text-align:center;margin-bottom:14px">
-<div style="font-size:10px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Precio total</div>
-<div style="font-size:26px;font-weight:800;color:#fff">$<span class="card-editable" contenteditable="true">${precio}</span></div>
-<div style="font-size:11px;color:rgba(255,255,255,.6)">USD</div></div>`:''}
+${park1Html}
+${park2Html}
+${totalHtml}
 <div style="font-size:10px;color:#888;line-height:1.5;margin-bottom:4px">${condMap[d1]||''}</div>
 ${condMap[d2]&&condMap[d2]!==condMap[d1]?`<div style="font-size:10px;color:#888;line-height:1.5;margin-bottom:4px">${condMap[d2]}</div>`:''}
 <div style="font-size:10px;color:#888;margin-bottom:6px">Notas adicionales</div>
@@ -1480,8 +1568,9 @@ ${condMap[d2]&&condMap[d2]!==condMap[d1]?`<div style="font-size:10px;color:#888;
 </div>
 <button type="button" onclick="addCardNote()" style="font-size:11px;color:#E8716D;font-weight:600;background:none;border:none;cursor:pointer;padding:4px 0;text-align:left">+ Agregar otra nota</button>
 </div>
-<div style="background:#FFF8F0;padding:12px 20px;text-align:center;border-top:1px solid #f0e8dc">
-<div style="font-size:11px;color:#1B2A4A;font-weight:600">📸 @michmurrieta_viajes</div></div></div>`}
+<div style="background:#FFF8F0;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid #f0e8dc">
+<div><div style="font-size:11px;color:#1B2A4A;font-weight:600">📲 +52 55 1766 6721</div><div style="font-size:9px;color:#888">michmurrietaviajes.com</div></div>
+<div style="font-size:9px;color:#888;text-align:right">📸 @michmurrieta_viajes</div></div></div>`}
 
 // ── TABS ──
 function switchTab(t){$('#tab-texto').classList.toggle('active',t==='texto');$('#tab-tarjeta').classList.toggle('active',t==='tarjeta');$('#panel-texto').style.display=t==='texto'?'':'none';$('#panel-tarjeta').style.display=t==='tarjeta'?'':'none'}
@@ -1510,36 +1599,60 @@ function updateGroupReservations(){
   const container=$('#group-reservations');
   const list=$('#group-res-list');
   const priceRel=$('#precio').closest('.relative');
+  const combo=isCombo();
   if(n<=1){container.style.display='none';if(priceRel)priceRel.style.display='';return}
   container.style.display='';if(priceRel)priceRel.style.display='none';
-  const existing=list.querySelectorAll('.group-res-block').length;
-  if(existing===n)return;
+  if(combo)$('#combo-pricing').style.display='none';
+  const d1=v('destino'),d2=v('destino-2');
+  const lbl1=combo?(DEST_NAMES[d1]||'Tramo 1').replace(/^[^\s]+\s/,''):'';
+  const lbl2=combo?(DEST_NAMES[d2]||'Tramo 2').replace(/^[^\s]+\s/,''):'';
   let html='';
   for(let i=1;i<=n;i++){
     html+=`<div class="group-res-block" style="background:#FFF8F0;border-radius:14px;padding:16px;margin-bottom:12px;border:1.5px solid #FFE8CC">
       <div style="font-weight:700;color:#1B2A4A;font-size:14px;margin-bottom:10px">🏷 Reservación ${i}</div>
       <input id="grp-name-${i}" type="text" placeholder="Nombre(s) de viajeros" class="fi-input mb-2" value="${i===1?(v('nombre')||''):''}">
-      <div class="grid grid-cols-3 gap-2 mb-2">
+      <div class="grid grid-cols-2 gap-2 mb-2">
         <div><label class="text-[11px] text-gray-400">Adultos</label><input id="grp-adults-${i}" type="number" min="1" value="${i===1?(v('adultos')||2):2}" class="fi-input"></div>
         <div><label class="text-[11px] text-gray-400">Menores</label><input id="grp-minors-${i}" type="number" min="0" value="0" class="fi-input"></div>
-        <div><label class="text-[11px] text-gray-400">Precio USD</label><input id="grp-price-${i}" type="text" placeholder="0" class="fi-input"></div>
       </div>
+      ${combo?`<div class="grid grid-cols-2 gap-2 mb-2">
+        <div><label class="text-[11px] text-gray-400">💰 ${lbl1}</label><input id="grp-price1-${i}" type="text" placeholder="0" class="fi-input" oninput="updateGroupComboTotal()"></div>
+        <div><label class="text-[11px] text-gray-400">💰 ${lbl2}</label><input id="grp-price2-${i}" type="text" placeholder="0" class="fi-input" oninput="updateGroupComboTotal()"></div>
+      </div>`:`<div class="mb-2"><label class="text-[11px] text-gray-400">Precio USD</label><input id="grp-price-${i}" type="text" placeholder="0" class="fi-input"></div>`}
       <input id="grp-notes-${i}" type="text" placeholder="Notas de esta reservación (opcional)" class="fi-input">
     </div>`;
   }
   list.innerHTML=html;
 }
+function updateGroupComboTotal(){
+  const n=parseInt(v('habitaciones'))||1;let total=0;
+  for(let i=1;i<=n;i++){
+    const a=parseFloat(((document.getElementById('grp-price1-'+i)||{}).value||'0').replace(/,/g,''))||0;
+    const b=parseFloat(((document.getElementById('grp-price2-'+i)||{}).value||'0').replace(/,/g,''))||0;
+    total+=a+b;
+  }
+  if(total>0)$('#precio').value=total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
 
 function getGroupData(){
-  const n=parseInt(v('habitaciones'))||1;const res=[];
+  const n=parseInt(v('habitaciones'))||1;const res=[];const combo=isCombo();
   for(let i=1;i<=n;i++){
-    res.push({
+    const r={
       name:(document.getElementById('grp-name-'+i)||{}).value?.trim()||'Reservación '+i,
       adults:parseInt((document.getElementById('grp-adults-'+i)||{}).value)||2,
       minors:parseInt((document.getElementById('grp-minors-'+i)||{}).value)||0,
-      price:(document.getElementById('grp-price-'+i)||{}).value?.trim()||'0',
       notes:(document.getElementById('grp-notes-'+i)||{}).value?.trim()||''
-    });
+    };
+    if(combo){
+      r.price1=(document.getElementById('grp-price1-'+i)||{}).value?.trim()||'0';
+      r.price2=(document.getElementById('grp-price2-'+i)||{}).value?.trim()||'0';
+      const p1=parseFloat(r.price1.replace(/,/g,''))||0;
+      const p2=parseFloat(r.price2.replace(/,/g,''))||0;
+      r.price=(p1+p2).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:2});
+    }else{
+      r.price=(document.getElementById('grp-price-'+i)||{}).value?.trim()||'0';
+    }
+    res.push(r);
   }
   return res;
 }
