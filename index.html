@@ -238,12 +238,25 @@
 </div>
 <script>
 (function(){
-  var PIN = '2004'; // Código de acceso numérico
+  var PIN = '2004'; // Código de acceso numérico (solo 2004 es válido)
   var SECRET = 'michUnlocked';
   var overlay = document.getElementById('security-overlay');
   var dots = document.getElementById('security-dots');
   var errEl = document.getElementById('security-err');
   var input = '';
+
+  var frasesSatira = [
+    'Código incorrecto. ¿Seguro que eres de Mich Murrieta Viajes?',
+    'Nope. Ese no es. Intenta recordar… o preguntarle a Mich.',
+    'Ese código no abre nada. Ni la puerta de tu casa.',
+    'Incorrecto. Aquí no entran códigos de la suegra.',
+    'Error. El sistema detecta que no sabes el código.',
+    'Código equivocado. La próxima será la vencida… o no.',
+    'Nada. Sigue intentando, la paciencia es clave en los viajes.',
+    'Incorrecto. Este no es el PIN del cajero automático.',
+    'Ese número no está en la lista de destinos. Otro.',
+    'Código erróneo. Ni con mapa y brújula.'
+  ];
 
   function updateDots(){
     var children = dots.querySelectorAll('.security-dot');
@@ -251,6 +264,10 @@
   }
   function clearError(){ errEl.textContent = ''; }
   function showError(msg){ errEl.textContent = msg; }
+
+  function fraseAleatoria(){
+    return frasesSatira[Math.floor(Math.random() * frasesSatira.length)];
+  }
 
   function unlock(){
     try { sessionStorage.setItem(SECRET, '1'); } catch(e){}
@@ -263,10 +280,10 @@
       clearError();
       unlock();
     } else {
-      showError('Código incorrecto');
+      showError(fraseAleatoria());
       input = '';
       updateDots();
-      setTimeout(clearError, 2000);
+      setTimeout(clearError, 3500);
     }
   }
 
