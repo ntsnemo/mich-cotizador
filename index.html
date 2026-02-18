@@ -1637,7 +1637,7 @@ function generateCard(dest){
 <div style="position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:14px 20px;background:linear-gradient(to top,rgba(0,0,0,.55),transparent)">
 <div style="font-size:17px;font-weight:800;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.3)">${names[dest]||dest}</div></div></div>
 <div style="background:#1B2A4A;color:#fff;padding:9px 20px;display:flex;justify-content:space-between;align-items:center">
-<div style="display:flex;align-items:center;gap:10px"><img src="${BRAND_STAMP_B64}" style="width:36px;height:36px;border-radius:10px;object-fit:contain"><div><span style="font-size:13px;font-weight:700">Mich Murrieta</span><span style="font-size:10px;opacity:.6;margin-left:8px">${AGENT_TITLES[dest]||''}</span></div></div><div><span style="font-size:9px;opacity:.5">michmurrietaviajes.com</span></div></div>
+<div style="display:flex;align-items:center;gap:10px"><img src="${BRAND_STAMP_B64}" style="width:40px;height:40px;border-radius:12px;object-fit:contain"><div><span style="font-size:13px;font-weight:700">Mich Murrieta</span><span style="font-size:10px;opacity:.6;margin-left:8px">${AGENT_TITLES[dest]||''}</span></div></div><div><span style="font-size:9px;opacity:.5">michmurrietaviajes.com</span></div></div>
 <div style="padding:20px">
 ${travelersHtml}
 <div style="background:#FFF8F0;border-radius:12px;padding:10px 16px;margin-bottom:14px;text-align:center">
@@ -1765,7 +1765,7 @@ ${p2?`<div style="font-size:12px;font-weight:700;color:#1B2A4A;margin-top:6px">�
 <div style="font-size:15px;font-weight:800;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.3)">🔀 Viaje Combinado</div>
 <div style="font-size:11px;color:rgba(255,255,255,.8);margin-top:2px">${n1} + ${n2}</div></div></div>
 <div style="background:#1B2A4A;color:#fff;padding:9px 20px;display:flex;justify-content:space-between;align-items:center">
-<div style="display:flex;align-items:center;gap:10px"><img src="${BRAND_STAMP_B64}" style="width:36px;height:36px;border-radius:10px;object-fit:contain"><div><span style="font-size:13px;font-weight:700">Mich Murrieta</span><span style="font-size:10px;opacity:.6;margin-left:8px">${AGENT_TITLES[d1]||''}</span></div></div><div><span style="font-size:9px;opacity:.5">michmurrietaviajes.com</span></div></div>
+<div style="display:flex;align-items:center;gap:10px"><img src="${BRAND_STAMP_B64}" style="width:40px;height:40px;border-radius:12px;object-fit:contain"><div><span style="font-size:13px;font-weight:700">Mich Murrieta</span><span style="font-size:10px;opacity:.6;margin-left:8px">${AGENT_TITLES[d1]||''}</span></div></div><div><span style="font-size:9px;opacity:.5">michmurrietaviajes.com</span></div></div>
 <div style="padding:20px">
 ${travelersHtml}
 <div style="background:#FFF8F0;border-radius:12px;padding:10px 16px;margin-bottom:14px;text-align:center">
@@ -2788,7 +2788,7 @@ function generateItPreview(){
     daysHtml+=`<div class="itp-day" data-idx="${idx}"><div class="itp-day-head" onclick="toggleItDay(this)"><div class="itp-day-badge" style="background:${color}"><span class="db-label">Día</span><span class="db-num">${idx+1}</span></div><div class="itp-day-info"><div class="itp-day-date">${dateStr}</div><div class="itp-day-name">${day.icon} ${day.title}</div></div><span class="itp-day-chev">▾</span></div><div class="itp-day-body"><div class="itp-timeline">${timelineHtml}</div>${tipsHtml}</div></div>`;
   });
 
-  container.innerHTML=`<div class="itp" id="itp-card"><div class="itp-hero" style="background-image:url('${data.cover}')"><div class="itp-hero-ov"><h1>${data.title}</h1>${clientSubtitle}<p>${dateRange}</p></div></div><div class="itp-agent"><img src="${BRAND_STAMP_B64}" style="width:44px;height:44px;border-radius:50%;object-fit:contain;flex-shrink:0"><div class="itp-agent-info"><h3>Mich Murrieta</h3><p>Tu agente de viajes</p><div class="itp-contact">📸 @michmurrieta_viajes</div></div></div><div class="itp-travelers"><div>👥 ${data.adults} Adulto${+data.adults!==1?'s':''}</div>${data.kids?`<div>👶 ${data.kids}</div>`:''}<div>🏨 ${data.hotel}</div></div>${docsHtml}<div class="itp-section" style="padding-bottom:0"><div class="itp-stitle">📅 Tu itinerario día por día</div></div>${daysHtml}<div class="brand-footer"><img src="${BRAND_LOGO_B64}" class="bf-logo" style="height:24px" alt="Mich Murrieta Viajes"><div class="bf-text">📲 +52 55 1766 6721</div><div class="bf-sub">michmurrietaviajes.com · 📸 @michmurrieta_viajes</div></div></div>`;
+  container.innerHTML=`<div class="itp" id="itp-card"><div class="itp-hero" style="background-image:url('${data.cover}')"><div class="itp-hero-ov"><h1>${data.title}</h1>${clientSubtitle}<p>${dateRange}</p></div></div><div class="itp-agent"><img src="${BRAND_STAMP_B64}" style="width:40px;height:40px;border-radius:12px;object-fit:contain;flex-shrink:0"><div class="itp-agent-info"><h3>Mich Murrieta</h3><p>Tu agente de viajes</p><div class="itp-contact"><span>📸 @michmurrieta_viajes</span></div></div></div><div class="itp-travelers"><div>👥 ${data.adults} Adulto${+data.adults!==1?'s':''}</div>${data.kids?`<div>👶 ${data.kids}</div>`:''}<div>🏨 ${data.hotel}</div></div>${docsHtml}<div class="itp-section" style="padding-bottom:0"><div class="itp-stitle">📅 Tu itinerario día por día</div></div>${daysHtml}<div class="brand-footer"><img src="${BRAND_LOGO_B64}" class="bf-logo" style="height:24px" alt="Mich Murrieta Viajes"><div class="bf-text">📲 +52 55 1766 6721</div><div class="bf-sub">michmurrietaviajes.com · 📸 @michmurrieta_viajes</div></div></div>`;
 
   document.getElementById('it-form').style.display='none';
   document.getElementById('it-preview-section').style.display='';
@@ -3148,7 +3148,7 @@ function renderTimelineCard(client,destLabel,startDate,endDate,milestones){
   const fmtD=s=>{if(!s)return'';const[y,mo,d]=s.split('-');return`${+d} ${months[+mo-1]} ${y}`};
   let html=`<div class="tl-card" id="tl-card">`;
   html+=`<div class="tl-header">`;
-  html+=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><div class="tl-sub" contenteditable="false">Timeline de viaje</div><img src="${BRAND_STAMP_B64}" style="width:32px;height:32px;border-radius:8px;object-fit:contain;opacity:0.9"></div>`;
+  html+=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><div class="tl-sub" contenteditable="false">Timeline de viaje</div><img src="${BRAND_STAMP_B64}" style="width:40px;height:40px;border-radius:12px;object-fit:contain"></div>`;
   html+=`<h2 contenteditable="false">${client||'Mi viaje'}</h2>`;
   html+=`<div class="tl-dates">${destLabel} · ${fmtD(startDate)}${endDate?' — '+fmtD(endDate):''}</div>`;
   html+=`</div>`;
