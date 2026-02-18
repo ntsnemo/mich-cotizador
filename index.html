@@ -212,6 +212,63 @@
     .numpad-btn:active{transform:scale(0.97)}
     .numpad-btn.del{font-size:14px;font-weight:600}
     @media(max-width:400px){.numpad-wrap{grid-template-columns:repeat(3,56px);gap:8px}.numpad-btn{width:56px;height:50px;font-size:20px}}
+
+    /* ── Timeline Card ── */
+    .tl-card{max-width:440px;margin:0 auto;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 8px 40px rgba(27,42,74,0.12);font-family:'Poppins',sans-serif}
+    .tl-header{background:linear-gradient(135deg,#1B2A4A 0%,#2C4570 100%);padding:28px 24px 22px;color:#fff}
+    .tl-header h2{font-size:20px;font-weight:800;margin-bottom:2px}
+    .tl-header .tl-sub{font-size:12px;opacity:.7;margin-bottom:4px}
+    .tl-header .tl-dates{font-size:13px;font-weight:600;opacity:.9}
+    .tl-body{padding:20px 24px 28px}
+    .tl-milestone{display:flex;gap:0;position:relative;min-height:56px}
+    .tl-dot-col{display:flex;flex-direction:column;align-items:center;width:28px;flex-shrink:0}
+    .tl-dot{width:14px;height:14px;border-radius:50%;flex-shrink:0;z-index:1;border:3px solid #fff;box-shadow:0 0 0 2px currentColor}
+    .tl-line{flex:1;width:2px;background:#e8e0d4;margin-top:4px}
+    .tl-milestone:last-child .tl-line{display:none}
+    .tl-content{flex:1;padding:0 0 18px 14px}
+    .tl-date{font-size:11px;font-weight:700;color:#999;margin-bottom:2px;display:flex;align-items:center;gap:6px}
+    .tl-date input[type="date"]{font-size:11px;font-weight:700;color:#1B2A4A;border:1px dashed #ccc;border-radius:6px;padding:2px 6px;background:#FFFDF9;display:none}
+    .tl-card.editing .tl-date input[type="date"]{display:inline-block}
+    .tl-card.editing .tl-date-text{display:none}
+    .tl-label{font-size:13px;font-weight:700;color:#1B2A4A;line-height:1.3}
+    .tl-desc{font-size:11px;color:#777;margin-top:2px;line-height:1.4}
+    .tl-label[contenteditable="true"],.tl-desc[contenteditable="true"]{outline:none;border-bottom:1px dashed rgba(0,0,0,0.15);min-width:40px}
+    .tl-label[contenteditable="true"]:focus,.tl-desc[contenteditable="true"]:focus{border-bottom-color:rgba(0,0,0,0.4);background:rgba(0,0,0,0.02)}
+
+    /* Timeline dot colors */
+    .tl-dot.payment{color:#E8716D;background:#FFF1F0}
+    .tl-dot.reservation{color:#7C3AED;background:#F3E8FF}
+    .tl-dot.purchase{color:#D97706;background:#FFF8E1}
+    .tl-dot.planning{color:#2563EB;background:#EFF6FF}
+    .tl-dot.logistics{color:#059669;background:#ECFDF5}
+    .tl-dot.trip{color:#E8716D;background:linear-gradient(135deg,#E8716D,#D4605C)}
+    .tl-dot.trip{border-color:#E8716D;box-shadow:0 0 0 2px #E8716D,0 0 12px rgba(232,113,109,0.4)}
+    .tl-dot.custom{color:#6B7280;background:#F3F4F6}
+    .tl-dot.common{color:#0D9488;background:#F0FDFA}
+
+    /* Timeline states */
+    .tl-milestone.past{opacity:.5}
+    .tl-milestone.past .tl-dot{box-shadow:none;border-color:transparent}
+    .tl-milestone.next .tl-dot{box-shadow:0 0 0 2px currentColor,0 0 12px 3px currentColor;animation:tlGlow 2s ease-in-out infinite}
+    @keyframes tlGlow{0%,100%{box-shadow:0 0 0 2px currentColor,0 0 8px 2px currentColor}50%{box-shadow:0 0 0 3px currentColor,0 0 16px 4px currentColor}}
+    .tl-badge-today{display:inline-block;background:#E8716D;color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:6px;margin-left:6px;letter-spacing:.3px}
+
+    /* Timeline edit mode */
+    .tl-edit-btn{display:none}
+    .tl-card.editing .tl-edit-btn{display:inline-flex}
+    .tl-remove-btn{width:22px;height:22px;border-radius:6px;border:1px solid #fca5a5;background:#FFF1F0;color:#E8716D;font-size:11px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all .15s;margin-left:auto;flex-shrink:0}
+    .tl-remove-btn:hover{background:#E8716D;color:#fff;border-color:#E8716D}
+    .tl-add-btn{display:none;width:100%;padding:10px;border-radius:12px;border:2px dashed #d1d5db;background:transparent;color:#6B7280;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;margin-top:4px}
+    .tl-add-btn:hover{border-color:#E8716D;color:#E8716D;background:#FFF1F0}
+    .tl-card.editing .tl-add-btn{display:block}
+
+    /* Capturing mode — hide edit controls */
+    .tl-card.capturing .tl-edit-btn,.tl-card.capturing .tl-remove-btn,.tl-card.capturing .tl-add-btn{display:none!important}
+    .tl-card.capturing .tl-label[contenteditable],.tl-card.capturing .tl-desc[contenteditable]{border-bottom:none}
+    .tl-card.capturing .tl-date input[type="date"]{display:none!important}
+    .tl-card.capturing .tl-date-text{display:inline!important}
+
+    @media(max-width:640px){.tl-card{max-width:340px}.tl-header{padding:22px 18px 18px}.tl-body{padding:16px 18px 22px}}
   </style>
 </head>
 <body class="bg-cream-100 min-h-screen">
@@ -328,6 +385,7 @@
     </div>
     <div class="main-tabs">
       <button onclick="switchMainTab('cotizador')" id="mtab-cotizador" class="main-tab active">🏷 Cotizador</button>
+      <button onclick="switchMainTab('timeline')" id="mtab-timeline" class="main-tab">⏳ Timeline</button>
       <button onclick="switchMainTab('itinerario')" id="mtab-itinerario" class="main-tab">📋 Itinerario</button>
     </div>
   </div>
@@ -1042,6 +1100,96 @@
 
 </main>
 </div><!-- /tab-itinerario-content -->
+
+<!-- ═══════════════ TAB: TIMELINE ═══════════════ -->
+<div id="tab-timeline-content" style="display:none">
+<main class="max-w-2xl mx-auto px-4 py-6 pb-32">
+
+  <!-- Saved Timelines -->
+  <div class="s-card" id="tl-saved-section">
+    <h2>💾 Mis timelines guardados</h2>
+    <div id="tl-saved-list"></div>
+    <div id="tl-saved-empty" class="text-center py-4">
+      <p class="text-gray-400 text-sm">No hay timelines guardados aún</p>
+      <p class="text-gray-300 text-xs mt-1">Genera uno y se guardará automáticamente</p>
+    </div>
+  </div>
+
+  <!-- Form -->
+  <div class="s-card" id="tl-form-card">
+    <h2>⏳ Timeline previo a tu viaje</h2>
+    <p class="text-[11px] text-gray-400 mb-4">Genera una línea del tiempo con las fechas clave antes de tu viaje</p>
+
+    <label class="fi-label">Nombre del cliente / familia</label>
+    <input id="tl-client" type="text" placeholder="Familia García" class="fi-input mb-3">
+
+    <label class="fi-label">✈️ Destino</label>
+    <select id="tl-destino" class="fi-select text-base font-semibold mb-3" onchange="onTLDestinoChange()">
+      <option value="">— Selecciona un destino —</option>
+      <optgroup label="🏰 Disney">
+        <option value="wdw">🏰 Disney World · Orlando</option>
+        <option value="disneyland-ca">🎡 Disneyland · California</option>
+        <option value="disneyland-paris">🗼 Disneyland · Paris</option>
+      </optgroup>
+      <optgroup label="🎢 Universal">
+        <option value="universal-orl">🎢 Universal Studios · Orlando</option>
+        <option value="universal-hwd">🎬 Universal Studios · Hollywood</option>
+      </optgroup>
+      <optgroup label="🚢 Cruceros">
+        <option value="crucero-disney">🚢 Disney Cruise Line</option>
+        <option value="royal-caribbean">⚓ Royal Caribbean</option>
+        <option value="celebrity">🛳 Celebrity Cruises</option>
+        <option value="virgin">🔴 Virgin Voyages</option>
+        <option value="crucero-otros">🚢 Otro crucero</option>
+      </optgroup>
+      <optgroup label="🌴 Resorts">
+        <option value="nickelodeon">🟢 Nickelodeon Resort</option>
+        <option value="xcaret">🌿 Xcaret</option>
+      </optgroup>
+    </select>
+
+    <div class="grid grid-cols-2 gap-3 mb-3">
+      <div><label class="fi-label">Fecha de inicio</label><input id="tl-start" type="date" class="fi-input"></div>
+      <div><label class="fi-label">Fecha de fin</label><input id="tl-end" type="date" class="fi-input"></div>
+    </div>
+
+    <div id="tl-disney-resort-wrap" style="display:none" class="mb-3">
+      <label class="toggle-wrap">
+        <input type="checkbox" id="tl-disney-resort" checked>
+        <span class="toggle-track"></span>
+        <span class="toggle-text">Hospedaje dentro de Disney?</span>
+      </label>
+    </div>
+
+    <div id="tl-special-events-wrap" style="display:none" class="mb-3">
+      <label class="toggle-wrap">
+        <input type="checkbox" id="tl-special-events">
+        <span class="toggle-track"></span>
+        <span class="toggle-text">Incluir eventos especiales?</span>
+      </label>
+    </div>
+
+    <button onclick="generateTimeline()" class="btn-generate mt-2">✨ Generar Timeline</button>
+  </div>
+
+  <!-- Output -->
+  <div id="tl-output" style="display:none">
+    <div class="grid grid-cols-2 gap-3 mb-3">
+      <button onclick="editTimeline()" class="btn-action">✏️ Editar datos</button>
+      <button onclick="toggleTimelineEdit()" id="tl-edit-toggle-btn" class="btn-action">🖊 Editar timeline</button>
+    </div>
+    <div class="grid grid-cols-3 gap-3 mb-4">
+      <button onclick="downloadTimelinePDF()" class="btn-action" style="background:#1B2A4A;color:#fff;border-color:#1B2A4A">📄 PDF</button>
+      <button onclick="downloadTimelineImage()" class="btn-action" style="background:#1B2A4A;color:#fff;border-color:#1B2A4A">🖼 Imagen</button>
+      <button onclick="copyTimelineText()" class="btn-action" style="background:#059669;color:#fff;border-color:#059669">📋 Texto</button>
+    </div>
+    <div class="flex justify-center">
+      <div id="tl-render"></div>
+    </div>
+  </div>
+
+</main>
+</div><!-- /tab-timeline-content -->
 
 <div id="toast" class="toast opacity-0 pointer-events-none">Copiado ✅</div>
 
@@ -1798,8 +1946,10 @@ function descargarImagen(){const card=$('#card-render');card.classList.add('capt
 function switchMainTab(tab){
   document.getElementById('tab-cotizador-content').style.display=tab==='cotizador'?'':'none';
   document.getElementById('tab-itinerario-content').style.display=tab==='itinerario'?'':'none';
+  document.getElementById('tab-timeline-content').style.display=tab==='timeline'?'':'none';
   document.getElementById('mtab-cotizador').classList.toggle('active',tab==='cotizador');
   document.getElementById('mtab-itinerario').classList.toggle('active',tab==='itinerario');
+  document.getElementById('mtab-timeline').classList.toggle('active',tab==='timeline');
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
@@ -2834,8 +2984,391 @@ function handleImport(event){
   event.target.value='';
 }
 
+// ══════════════════════════════════════════════════════════════
+// TIMELINE — CONFIG & FUNCTIONS
+// ══════════════════════════════════════════════════════════════
+
+const TIMELINE_CATEGORIES={
+  'wdw':'orlando','disneyland-ca':'disneyland','disneyland-paris':'disneyland',
+  'universal-orl':'universal','universal-hwd':'universal',
+  'crucero-disney':'crucero-disney','royal-caribbean':'royal-caribbean',
+  'celebrity':'celebrity','virgin':'virgin','crucero-otros':'crucero-otros',
+  'nickelodeon':'resort','xcaret':'resort'
+};
+
+const TIMELINE_DEST_LABELS={
+  'wdw':'Disney World · Orlando','disneyland-ca':'Disneyland · California','disneyland-paris':'Disneyland · Paris',
+  'universal-orl':'Universal Studios · Orlando','universal-hwd':'Universal Studios · Hollywood',
+  'crucero-disney':'Disney Cruise Line','royal-caribbean':'Royal Caribbean',
+  'celebrity':'Celebrity Cruises','virgin':'Virgin Voyages','crucero-otros':'Crucero',
+  'nickelodeon':'Nickelodeon Resort','xcaret':'Xcaret'
+};
+
+const TIMELINE_CONFIG={
+  orlando:[
+    {id:'special-events',label:'Boletos de eventos especiales',icon:'🎃',offsetDays:-120,description:'Tu agente te confirmará fechas exactas de venta',category:'purchase',condition:'specialEvents'},
+    {id:'docs',label:'Documentos de viaje',icon:'📄',offsetDays:-90,description:'Verifica que pasaportes y visas estén vigentes',category:'common'},
+    {id:'adr',label:'Reservas de restaurantes abren (ADR)',icon:'🍽',offsetDays:-60,description:'Huéspedes Disney: +10 días extra de ventana',category:'reservation'},
+    {id:'seguro',label:'Seguro de viaje',icon:'🛡',offsetDays:-60,description:'Contrata tu seguro de viaje',category:'common'},
+    {id:'pago-final',label:'Pago final del paquete',icon:'💳',offsetDays:-30,description:'Liquidar saldo pendiente',category:'payment'},
+    {id:'park-res',label:'Park Reservations',icon:'🎟',offsetDays:-30,description:'Obligatorias además del boleto — reserva en My Disney Experience',category:'reservation'},
+    {id:'estrategia',label:'Llamada de estrategia con agente',icon:'📞',offsetDays:-14,description:'Repaso de planes, tips y últimos detalles',category:'planning'},
+    {id:'checkin',label:'Check-in online en My Disney Experience',icon:'📱',offsetDays:-10,description:'Completa el check-in para agilizar tu llegada',category:'logistics'},
+    {id:'magicband',label:'Configurar MagicBand+ / descargar app',icon:'⌚',offsetDays:-7,description:'My Disney Experience — configura tu MagicBand y vincula boletos',category:'logistics'},
+    {id:'lightning',label:'Lightning Lane Multi Pass',icon:'⚡',offsetDays:-7,description:'Se activa 7 días antes para huéspedes Disney, 3 días para demás',category:'purchase',condition:'disneyResort'},
+    {id:'lightning-off',label:'Lightning Lane Multi Pass',icon:'⚡',offsetDays:-3,description:'Se activa 3 días antes para visitantes sin hospedaje Disney',category:'purchase',condition:'notDisneyResort'},
+    {id:'transporte',label:'Confirmar transporte aeropuerto-hotel',icon:'🚐',offsetDays:-7,description:'Verifica horarios y reservaciones de traslados',category:'logistics'},
+    {id:'viaje',label:'Inicio del viaje ✈️',icon:'✈️',offsetDays:0,description:'¡Buen viaje!',category:'trip'}
+  ],
+  disneyland:[
+    {id:'docs',label:'Documentos de viaje',icon:'📄',offsetDays:-90,description:'Verifica que pasaportes y visas estén vigentes',category:'common'},
+    {id:'adr',label:'Reservas de restaurantes abren',icon:'🍽',offsetDays:-60,description:'Reserva tus restaurantes favoritos',category:'reservation'},
+    {id:'seguro',label:'Seguro de viaje',icon:'🛡',offsetDays:-60,description:'Contrata tu seguro de viaje',category:'common'},
+    {id:'special-events',label:'Boletos de eventos especiales',icon:'🎃',offsetDays:-60,description:'Tu agente te confirmará fechas exactas de venta',category:'purchase',condition:'specialEvents'},
+    {id:'pago-final',label:'Pago final del paquete',icon:'💳',offsetDays:-30,description:'Liquidar saldo pendiente',category:'payment'},
+    {id:'estrategia',label:'Llamada de estrategia',icon:'📞',offsetDays:-14,description:'Repaso de planes, tips y últimos detalles',category:'planning'},
+    {id:'lightning',label:'Lightning Lane Premier Pass',icon:'⚡',offsetDays:-7,description:'Compra anticipada disponible',category:'purchase'},
+    {id:'transporte',label:'Confirmar transporte',icon:'🚐',offsetDays:-7,description:'Verifica horarios y reservaciones de traslados',category:'logistics'},
+    {id:'viaje',label:'Inicio del viaje ✈️',icon:'✈️',offsetDays:0,description:'¡Buen viaje!',category:'trip'}
+  ],
+  universal:[
+    {id:'docs',label:'Documentos de viaje',icon:'📄',offsetDays:-90,description:'Verifica que pasaportes y visas estén vigentes',category:'common'},
+    {id:'seguro',label:'Seguro de viaje',icon:'🛡',offsetDays:-60,description:'Contrata tu seguro de viaje',category:'common'},
+    {id:'pago-final',label:'Pago final del paquete',icon:'💳',offsetDays:-45,description:'Liquidar saldo pendiente',category:'payment'},
+    {id:'estrategia',label:'Llamada de estrategia / revisar Express Pass',icon:'📞',offsetDays:-14,description:'Repaso de planes y opciones de Express Pass',category:'planning'},
+    {id:'transporte',label:'Confirmar transporte',icon:'🚐',offsetDays:-7,description:'Verifica horarios y reservaciones de traslados',category:'logistics'},
+    {id:'viaje',label:'Inicio del viaje ✈️',icon:'✈️',offsetDays:0,description:'¡Buen viaje!',category:'trip'}
+  ],
+  'crucero-disney':[
+    {id:'special-events',label:'Boletos de eventos especiales',icon:'🎃',offsetDays:-120,description:'Tu agente te confirmará fechas exactas de venta',category:'purchase',condition:'specialEvents'},
+    {id:'pago-final',label:'Pago final del crucero',icon:'💳',offsetDays:-90,description:'6+ noches: -120d / 1-5 noches: -90d — consulta con tu agente',category:'payment'},
+    {id:'actividades',label:'Reserva de actividades abre',icon:'🎭',offsetDays:-75,description:'Nuevos: 75d / Silver: 90d / Gold: 105d / Platinum: 120d (Castaway Club)',category:'reservation'},
+    {id:'excursiones',label:'Excursiones en puertos',icon:'🏝',offsetDays:-75,description:'Reserva excursiones en los puertos de escala',category:'reservation'},
+    {id:'docs',label:'Documentos de viaje (pasaporte)',icon:'📄',offsetDays:-60,description:'Verifica que pasaportes estén vigentes',category:'common'},
+    {id:'seguro',label:'Seguro de viaje',icon:'🛡',offsetDays:-60,description:'Contrata tu seguro de viaje',category:'common'},
+    {id:'checkin',label:'Check-in online',icon:'📱',offsetDays:-30,description:'Completa el check-in online del crucero',category:'logistics'},
+    {id:'estrategia',label:'Llamada de estrategia',icon:'📞',offsetDays:-14,description:'Repaso de planes, tips y últimos detalles',category:'planning'},
+    {id:'equipaje',label:'Preparar equipaje',icon:'🧳',offsetDays:-5,description:'Ropa formal, bloqueador, medicamento para mareo',category:'logistics'},
+    {id:'viaje',label:'Día de embarque 🚢',icon:'🚢',offsetDays:0,description:'¡Bon voyage!',category:'trip'}
+  ],
+  'royal-caribbean':[
+    {id:'pago-final',label:'Pago final del crucero',icon:'💳',offsetDays:-90,description:'5-14 noches: -90d / 1-4: -75d / 15+: -120d',category:'payment'},
+    {id:'docs',label:'Documentos de viaje',icon:'📄',offsetDays:-60,description:'Verifica que pasaportes estén vigentes',category:'common'},
+    {id:'seguro',label:'Seguro de viaje',icon:'🛡',offsetDays:-60,description:'Contrata tu seguro de viaje',category:'common'},
+    {id:'planner',label:'Cruise Planner abre',icon:'🗓',offsetDays:-60,description:'Reserva excursiones, restaurantes y paquete de bebidas',category:'reservation'},
+    {id:'checkin',label:'Check-in online / e-documents',icon:'📱',offsetDays:-45,description:'Completa el check-in y descarga documentos',category:'logistics'},
+    {id:'estrategia',label:'Llamada de estrategia',icon:'📞',offsetDays:-14,description:'Repaso de planes y últimos detalles',category:'planning'},
+    {id:'equipaje',label:'Preparar equipaje',icon:'🧳',offsetDays:-5,description:'Ropa formal, bloqueador, medicamento para mareo',category:'logistics'},
+    {id:'viaje',label:'Día de embarque 🚢',icon:'🚢',offsetDays:0,description:'¡Bon voyage!',category:'trip'}
+  ],
+  celebrity:[
+    {id:'pago-final',label:'Pago final del crucero',icon:'💳',offsetDays:-75,description:'Estándar: -75d / 15+ noches: -125d',category:'payment'},
+    {id:'actividades',label:'Reserva actividades / excursiones',icon:'🎭',offsetDays:-60,description:'Reserva actividades y excursiones en puertos',category:'reservation'},
+    {id:'docs',label:'Documentos de viaje',icon:'📄',offsetDays:-60,description:'Verifica que pasaportes estén vigentes',category:'common'},
+    {id:'seguro',label:'Seguro de viaje',icon:'🛡',offsetDays:-60,description:'Contrata tu seguro de viaje',category:'common'},
+    {id:'checkin',label:'Check-in online',icon:'📱',offsetDays:-30,description:'Completa el check-in online',category:'logistics'},
+    {id:'estrategia',label:'Llamada de estrategia',icon:'📞',offsetDays:-14,description:'Repaso de planes y últimos detalles',category:'planning'},
+    {id:'equipaje',label:'Preparar equipaje',icon:'🧳',offsetDays:-5,description:'Ropa formal, bloqueador, medicamento para mareo',category:'logistics'},
+    {id:'viaje',label:'Día de embarque 🚢',icon:'🚢',offsetDays:0,description:'¡Bon voyage!',category:'trip'}
+  ],
+  virgin:[
+    {id:'pago-final',label:'Pago final del crucero',icon:'💳',offsetDays:-120,description:'Liquidar saldo pendiente',category:'payment'},
+    {id:'docs',label:'Documentos de viaje',icon:'📄',offsetDays:-60,description:'Verifica que pasaportes estén vigentes',category:'common'},
+    {id:'seguro',label:'Seguro de viaje',icon:'🛡',offsetDays:-60,description:'Contrata tu seguro de viaje',category:'common'},
+    {id:'actividades',label:'Reserva actividades / excursiones',icon:'🎭',offsetDays:-60,description:'Reserva actividades y excursiones en puertos',category:'reservation'},
+    {id:'checkin',label:'Check-in online',icon:'📱',offsetDays:-30,description:'Completa el check-in online',category:'logistics'},
+    {id:'estrategia',label:'Llamada de estrategia',icon:'📞',offsetDays:-14,description:'Repaso de planes y últimos detalles',category:'planning'},
+    {id:'equipaje',label:'Preparar equipaje',icon:'🧳',offsetDays:-5,description:'Ropa formal, bloqueador, medicamento para mareo',category:'logistics'},
+    {id:'viaje',label:'Día de embarque 🚢',icon:'🚢',offsetDays:0,description:'¡Bon voyage!',category:'trip'}
+  ],
+  'crucero-otros':[
+    {id:'pago-final',label:'Pago final del crucero',icon:'💳',offsetDays:-90,description:'Liquidar saldo pendiente',category:'payment'},
+    {id:'docs',label:'Documentos de viaje',icon:'📄',offsetDays:-60,description:'Verifica que pasaportes estén vigentes',category:'common'},
+    {id:'seguro',label:'Seguro de viaje',icon:'🛡',offsetDays:-60,description:'Contrata tu seguro de viaje',category:'common'},
+    {id:'actividades',label:'Reserva actividades / excursiones',icon:'🎭',offsetDays:-60,description:'Reserva actividades y excursiones en puertos',category:'reservation'},
+    {id:'checkin',label:'Check-in online',icon:'📱',offsetDays:-30,description:'Completa el check-in online',category:'logistics'},
+    {id:'estrategia',label:'Llamada de estrategia',icon:'📞',offsetDays:-14,description:'Repaso de planes y últimos detalles',category:'planning'},
+    {id:'equipaje',label:'Preparar equipaje',icon:'🧳',offsetDays:-5,description:'Ropa formal, bloqueador, medicamento para mareo',category:'logistics'},
+    {id:'viaje',label:'Día de embarque 🚢',icon:'🚢',offsetDays:0,description:'¡Bon voyage!',category:'trip'}
+  ],
+  resort:[
+    {id:'docs',label:'Documentos de viaje',icon:'📄',offsetDays:-90,description:'Verifica que pasaportes y visas estén vigentes',category:'common'},
+    {id:'seguro',label:'Seguro de viaje',icon:'🛡',offsetDays:-60,description:'Contrata tu seguro de viaje',category:'common'},
+    {id:'pago-final',label:'Pago final del paquete',icon:'💳',offsetDays:-30,description:'Liquidar saldo pendiente',category:'payment'},
+    {id:'estrategia',label:'Llamada de estrategia',icon:'📞',offsetDays:-14,description:'Repaso de planes y últimos detalles',category:'planning'},
+    {id:'transporte',label:'Confirmar transporte',icon:'🚐',offsetDays:-7,description:'Verifica horarios y reservaciones de traslados',category:'logistics'},
+    {id:'viaje',label:'Inicio del viaje ✈️',icon:'✈️',offsetDays:0,description:'¡Buen viaje!',category:'trip'}
+  ]
+};
+
+function onTLDestinoChange(){
+  const d=document.getElementById('tl-destino').value;
+  const cat=TIMELINE_CATEGORIES[d]||'';
+  document.getElementById('tl-disney-resort-wrap').style.display=cat==='orlando'?'':'none';
+  const isDisney=['orlando','disneyland'].includes(cat);
+  document.getElementById('tl-special-events-wrap').style.display=isDisney?'':'none';
+}
+
+function getDestinationCategory(destId){return TIMELINE_CATEGORIES[destId]||'resort'}
+
+function computeTimeline(startDate,destId,options){
+  const cat=getDestinationCategory(destId);
+  const config=TIMELINE_CONFIG[cat]||TIMELINE_CONFIG.resort;
+  const start=new Date(startDate+'T00:00:00');
+  const today=new Date();today.setHours(0,0,0,0);
+  let milestones=[];
+  config.forEach(m=>{
+    if(m.condition==='specialEvents'&&!options.specialEvents)return;
+    if(m.condition==='disneyResort'&&!options.disneyResort)return;
+    if(m.condition==='notDisneyResort'&&options.disneyResort)return;
+    const d=new Date(start);d.setDate(d.getDate()+m.offsetDays);
+    milestones.push({...m,date:d,dateStr:d.toISOString().split('T')[0]});
+  });
+  milestones.sort((a,b)=>a.date-b.date);
+  let foundNext=false;
+  milestones.forEach(m=>{
+    m.past=m.date<today;
+    m.isToday=m.date.toDateString()===today.toDateString();
+    if(!m.past&&!foundNext){m.next=true;foundNext=true}else{m.next=false}
+  });
+  return milestones;
+}
+
+function renderTimelineCard(client,destLabel,startDate,endDate,milestones){
+  const months=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const fmtD=s=>{if(!s)return'';const[y,mo,d]=s.split('-');return`${+d} ${months[+mo-1]} ${y}`};
+  let html=`<div class="tl-card" id="tl-card">`;
+  html+=`<div class="tl-header">`;
+  html+=`<div class="tl-sub" contenteditable="false">Timeline de viaje</div>`;
+  html+=`<h2 contenteditable="false">${client||'Mi viaje'}</h2>`;
+  html+=`<div class="tl-dates">${destLabel} · ${fmtD(startDate)}${endDate?' — '+fmtD(endDate):''}</div>`;
+  html+=`</div>`;
+  html+=`<div class="tl-body">`;
+  milestones.forEach((m,i)=>{
+    const stateClass=m.past?'past':m.next?'next':'';
+    html+=`<div class="tl-milestone ${stateClass}" data-index="${i}" data-date="${m.dateStr}">`;
+    html+=`<div class="tl-dot-col"><div class="tl-dot ${m.category||'planning'}"></div><div class="tl-line"></div></div>`;
+    html+=`<div class="tl-content">`;
+    html+=`<div class="tl-date"><span class="tl-date-text">${fmtD(m.dateStr)}</span><input type="date" class="tl-edit-btn" value="${m.dateStr}" onchange="onTLDateChange(this)">`;
+    if(m.isToday)html+=`<span class="tl-badge-today">HOY</span>`;
+    html+=`<button class="tl-remove-btn tl-edit-btn" onclick="removeTimelineMilestone(this)" title="Eliminar">✕</button>`;
+    html+=`</div>`;
+    html+=`<div class="tl-label" contenteditable="false">${m.icon} ${m.label}</div>`;
+    html+=`<div class="tl-desc" contenteditable="false">${m.description||''}</div>`;
+    html+=`</div>`;
+    html+=`</div>`;
+  });
+  html+=`<button class="tl-add-btn" onclick="addCustomMilestone()">+ Agregar hito</button>`;
+  html+=`</div></div>`;
+  return html;
+}
+
+let currentTLData=null;
+
+function generateTimeline(){
+  const client=document.getElementById('tl-client').value.trim();
+  const destId=document.getElementById('tl-destino').value;
+  const startDate=document.getElementById('tl-start').value;
+  const endDate=document.getElementById('tl-end').value;
+  if(!destId){showToast('Selecciona un destino');return}
+  if(!startDate){showToast('Selecciona fecha de inicio');return}
+  const options={
+    disneyResort:document.getElementById('tl-disney-resort').checked,
+    specialEvents:document.getElementById('tl-special-events').checked
+  };
+  const milestones=computeTimeline(startDate,destId,options);
+  const destLabel=TIMELINE_DEST_LABELS[destId]||destId;
+  document.getElementById('tl-render').innerHTML=renderTimelineCard(client,destLabel,startDate,endDate,milestones);
+  document.getElementById('tl-output').style.display='';
+  document.getElementById('tl-form-card').style.display='none';
+  currentTLData={client,destId,destLabel,startDate,endDate,options,savedAt:Date.now()};
+  saveTimelineToLS(currentTLData);
+  // Reset edit mode
+  const card=document.getElementById('tl-card');
+  if(card)card.classList.remove('editing');
+  document.getElementById('tl-edit-toggle-btn').textContent='🖊 Editar timeline';
+}
+
+function editTimeline(){
+  document.getElementById('tl-output').style.display='none';
+  document.getElementById('tl-form-card').style.display='';
+}
+
+function toggleTimelineEdit(){
+  const card=document.getElementById('tl-card');
+  if(!card)return;
+  const editing=card.classList.toggle('editing');
+  document.getElementById('tl-edit-toggle-btn').textContent=editing?'👁 Ver timeline':'🖊 Editar timeline';
+  card.querySelectorAll('.tl-label, .tl-desc').forEach(el=>{
+    el.contentEditable=editing?'true':'false';
+  });
+}
+
+function addCustomMilestone(){
+  const card=document.getElementById('tl-card');
+  if(!card)return;
+  const body=card.querySelector('.tl-body');
+  const addBtn=body.querySelector('.tl-add-btn');
+  const today=new Date().toISOString().split('T')[0];
+  const months=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const fmtD=s=>{if(!s)return'';const[y,mo,d]=s.split('-');return`${+d} ${months[+mo-1]} ${y}`};
+  const div=document.createElement('div');
+  div.className='tl-milestone';
+  div.dataset.date=today;
+  div.innerHTML=`<div class="tl-dot-col"><div class="tl-dot custom"></div><div class="tl-line"></div></div>`+
+    `<div class="tl-content">`+
+    `<div class="tl-date"><span class="tl-date-text">${fmtD(today)}</span><input type="date" class="tl-edit-btn" value="${today}" onchange="onTLDateChange(this)" style="display:inline-block">`+
+    `<button class="tl-remove-btn tl-edit-btn" onclick="removeTimelineMilestone(this)" title="Eliminar" style="display:inline-flex">✕</button></div>`+
+    `<div class="tl-label" contenteditable="true">📌 Nuevo hito</div>`+
+    `<div class="tl-desc" contenteditable="true">Descripción</div>`+
+    `</div>`;
+  body.insertBefore(div,addBtn);
+  reorderMilestones();
+}
+
+function removeTimelineMilestone(btn){
+  const milestone=btn.closest('.tl-milestone');
+  if(milestone)milestone.remove();
+  fixTimelineLines();
+}
+
+function onTLDateChange(input){
+  const milestone=input.closest('.tl-milestone');
+  const dateStr=input.value;
+  milestone.dataset.date=dateStr;
+  const months=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const[y,mo,d]=dateStr.split('-');
+  milestone.querySelector('.tl-date-text').textContent=`${+d} ${months[+mo-1]} ${y}`;
+  reorderMilestones();
+}
+
+function reorderMilestones(){
+  const card=document.getElementById('tl-card');
+  if(!card)return;
+  const body=card.querySelector('.tl-body');
+  const addBtn=body.querySelector('.tl-add-btn');
+  const ms=[...body.querySelectorAll('.tl-milestone')];
+  ms.sort((a,b)=>new Date(a.dataset.date)-new Date(b.dataset.date));
+  ms.forEach(m=>body.insertBefore(m,addBtn));
+  fixTimelineLines();
+}
+
+function fixTimelineLines(){
+  const card=document.getElementById('tl-card');
+  if(!card)return;
+  const ms=card.querySelectorAll('.tl-milestone');
+  ms.forEach((m,i)=>{
+    const line=m.querySelector('.tl-line');
+    if(line)line.style.display=i===ms.length-1?'none':'';
+  });
+}
+
+function getRenderedMilestones(){
+  const card=document.getElementById('tl-card');
+  if(!card)return[];
+  return[...card.querySelectorAll('.tl-milestone')].map(m=>({
+    date:m.dataset.date,
+    label:(m.querySelector('.tl-label')||{}).textContent||'',
+    desc:(m.querySelector('.tl-desc')||{}).textContent||'',
+    past:m.classList.contains('past')
+  }));
+}
+
+function downloadTimelinePDF(){
+  const card=document.getElementById('tl-card');
+  if(!card)return;
+  card.classList.add('capturing');
+  showToast('Generando PDF...');
+  html2pdf().set({margin:[10,10,10,10],filename:`Timeline_${(currentTLData?.client||'viaje').replace(/\s+/g,'_')}.pdf`,image:{type:'jpeg',quality:0.98},html2canvas:{scale:2,useCORS:true,logging:false},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}}).from(card).save().then(()=>{
+    card.classList.remove('capturing');
+    showToast('PDF descargado ✅');
+  }).catch(()=>{card.classList.remove('capturing')});
+}
+
+function downloadTimelineImage(){
+  const card=document.getElementById('tl-card');
+  if(!card)return;
+  card.classList.add('capturing');
+  showToast('Generando imagen...');
+  html2canvas(card,{scale:2,backgroundColor:null,useCORS:true,logging:false}).then(canvas=>{
+    card.classList.remove('capturing');
+    const a=document.createElement('a');
+    a.download=`Timeline_${(currentTLData?.client||'viaje').replace(/\s+/g,'_')}.png`;
+    a.href=canvas.toDataURL('image/png');
+    a.click();
+    showToast('Imagen descargada ✅');
+  }).catch(()=>{card.classList.remove('capturing')});
+}
+
+function copyTimelineText(){
+  const ms=getRenderedMilestones();
+  if(!ms.length){showToast('No hay timeline generado');return}
+  const months=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const fmtD=s=>{if(!s)return'';const[y,mo,d]=s.split('-');return`${+d} ${months[+mo-1]} ${y}`};
+  let text=`⏳ *Timeline de viaje*\n`;
+  if(currentTLData?.client)text+=`👤 ${currentTLData.client}\n`;
+  if(currentTLData?.destLabel)text+=`✈️ ${currentTLData.destLabel}\n`;
+  text+=`\n`;
+  ms.forEach(m=>{
+    const check=m.past?'✅':'⬜';
+    text+=`${check} *${fmtD(m.date)}*\n${m.label}\n`;
+    if(m.desc)text+=`   _${m.desc}_\n`;
+    text+=`\n`;
+  });
+  navigator.clipboard.writeText(text).then(()=>showToast('Copiado al portapapeles ✅'));
+}
+
+// ── Timeline localStorage ──
+function getTLSavedList(){try{return JSON.parse(localStorage.getItem('mich_saved_timelines'))||[]}catch(e){return[]}}
+function setTLSavedList(list){localStorage.setItem('mich_saved_timelines',JSON.stringify(list))}
+
+function saveTimelineToLS(data){
+  const list=getTLSavedList();
+  const existing=list.findIndex(x=>x.client===data.client&&x.destId===data.destId&&x.startDate===data.startDate);
+  if(existing>=0)list[existing]=data;else list.unshift(data);
+  setTLSavedList(list);
+  renderTLSavedList();
+}
+
+function renderTLSavedList(){
+  const list=getTLSavedList();
+  const container=document.getElementById('tl-saved-list');
+  const empty=document.getElementById('tl-saved-empty');
+  if(!container)return;
+  if(!list.length){container.innerHTML='';empty.style.display='';return}
+  empty.style.display='none';
+  container.innerHTML=list.map((item,i)=>{
+    const d=item.savedAt?new Date(item.savedAt).toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric'}):'';
+    return`<div class="saved-item"><div class="saved-item-info"><div class="saved-item-title">${item.client||'Sin nombre'} — ${item.destLabel||item.destId}</div><div class="saved-item-meta">${item.startDate||''} · Guardado ${d}</div></div><div class="saved-item-actions"><button class="saved-item-btn" onclick="loadSavedTL(${i})" title="Cargar">📂</button><button class="saved-item-btn danger" onclick="deleteSavedTL(${i})" title="Eliminar">🗑</button></div></div>`;
+  }).join('');
+}
+
+function loadSavedTL(index){
+  const list=getTLSavedList();
+  const data=list[index];if(!data)return;
+  document.getElementById('tl-client').value=data.client||'';
+  document.getElementById('tl-destino').value=data.destId||'';
+  document.getElementById('tl-start').value=data.startDate||'';
+  document.getElementById('tl-end').value=data.endDate||'';
+  onTLDestinoChange();
+  if(data.options){
+    document.getElementById('tl-disney-resort').checked=!!data.options.disneyResort;
+    document.getElementById('tl-special-events').checked=!!data.options.specialEvents;
+  }
+  generateTimeline();
+  showToast('Timeline cargado ✅');
+}
+
+function deleteSavedTL(index){
+  const list=getTLSavedList();
+  list.splice(index,1);
+  setTLSavedList(list);
+  renderTLSavedList();
+  showToast('Timeline eliminado');
+}
+
 // Initialize saved list on load
-document.addEventListener('DOMContentLoaded',async ()=>{await loadCotizacionData();renderSavedList();});
+document.addEventListener('DOMContentLoaded',async ()=>{await loadCotizacionData();renderSavedList();renderTLSavedList();});
 </script>
 </body>
 </html>
