@@ -740,26 +740,31 @@
 
       <!-- Combined trip pricing (hidden by default) -->
       <div id="combo-pricing" style="display:none">
-        <label class="fi-label" id="combo-price1-label">Precio Tramo 1 USD</label>
-        <div class="relative mb-3">
-          <span class="absolute left-4 top-1/2 -translate-y-1/2 text-coral-400 font-bold text-lg">$</span>
-          <input id="precio-tramo1" type="text" placeholder="1,500.00" class="fi-input pl-10 text-base font-bold" style="letter-spacing:0.02em" oninput="updateComboTotal()">
-          <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-semibold">USD</span>
+        <div style="background:#f8f4ff;border-radius:12px;padding:12px 14px;margin-bottom:10px;border-left:3px solid #7C3AED">
+          <label class="fi-label" id="combo-price1-label" style="margin-bottom:6px">💰 Precio Tramo 1 USD</label>
+          <div class="relative">
+            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-coral-400 font-bold text-lg">$</span>
+            <input id="precio-tramo1" type="text" placeholder="1,500.00" class="fi-input pl-10 text-base font-bold" style="letter-spacing:0.02em" oninput="updateComboTotal()">
+            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-semibold">USD</span>
+          </div>
         </div>
-        <label class="fi-label" id="combo-price2-label">Precio Tramo 2 USD</label>
-        <div class="relative mb-3">
-          <span class="absolute left-4 top-1/2 -translate-y-1/2 text-coral-400 font-bold text-lg">$</span>
-          <input id="precio-tramo2" type="text" placeholder="1,200.00" class="fi-input pl-10 text-base font-bold" style="letter-spacing:0.02em" oninput="updateComboTotal()">
-          <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-semibold">USD</span>
+        <div style="background:#f0f8ff;border-radius:12px;padding:12px 14px;margin-bottom:10px;border-left:3px solid #0066cc">
+          <label class="fi-label" id="combo-price2-label" style="margin-bottom:6px">💰 Precio Tramo 2 USD</label>
+          <div class="relative">
+            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-coral-400 font-bold text-lg">$</span>
+            <input id="precio-tramo2" type="text" placeholder="1,200.00" class="fi-input pl-10 text-base font-bold" style="letter-spacing:0.02em" oninput="updateComboTotal()">
+            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-semibold">USD</span>
+          </div>
         </div>
       </div>
 
-      <label class="fi-label">Precio total USD</label>
+      <label class="fi-label" id="precio-label">Precio total USD</label>
       <div class="relative mb-3">
         <span class="absolute left-4 top-1/2 -translate-y-1/2 text-coral-400 font-bold text-lg">$</span>
         <input id="precio" type="text" placeholder="2,717.38" class="fi-input pl-10 text-lg font-bold" style="letter-spacing:0.02em">
         <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-semibold">USD</span>
       </div>
+      <div id="combo-total-hint" style="display:none;font-size:11px;color:#888;margin:-8px 0 12px 4px">Se calcula sumando ambos tramos</div>
       <!-- Enhanced Notes Section -->
       <div class="mt-4" style="border-top:1px solid #f0e8dc;padding-top:16px">
         <h2 style="font-size:14px;font-weight:700;color:#1B2A4A;margin-bottom:12px">📋 Notas importantes</h2>
@@ -1229,6 +1234,11 @@ const COMBO_MAP={
 const DEST_NAMES={orlando:'🏰 Disney World · Orlando',universal:'🎢 Universal Studios · Orlando',california:'🎡 Disneyland · California',hollywood:'🎬 Universal Studios · Hollywood',paris:'🗼 Disneyland · Paris','crucero-disney':'🚢 Crucero Disney','crucero-otros':'🛳 Crucero Otras Navieras',nickelodeon:'🧽 Nickelodeon Resort',xcaret:'🌴 Xcaret'};
 const DEST_MAP={orlando:'campos-orlando',universal:'campos-universal',california:'campos-california',hollywood:'campos-hollywood',paris:'campos-paris','crucero-disney':'campos-crucero-disney','crucero-otros':'campos-crucero-otros',nickelodeon:'campos-nickelodeon',xcaret:'campos-xcaret'};
 
+function setComboTotalMode(on){
+  const el=$('#precio'),hint=$('#combo-total-hint');
+  if(on){el.readOnly=true;el.style.opacity='.6';el.style.cursor='default';hint.style.display=''}
+  else{el.readOnly=false;el.style.opacity='';el.style.cursor='';hint.style.display='none'}
+}
 function onCombinadoChange(){
   const on=ck('viaje-combinado');
   $('#combo-dest2-wrap').style.display=on?'':'none';
@@ -1236,9 +1246,10 @@ function onCombinadoChange(){
     $('#destino-2').value='';
     onDestino2Change();
     $('#combo-pricing').style.display='none';
+    setComboTotalMode(false);
   }else{
     populateDestino2();
-    if(!isGroupMode()){$('#combo-pricing').style.display='';updateComboPriceLabels()}
+    if(!isGroupMode()){$('#combo-pricing').style.display='';updateComboPriceLabels();setComboTotalMode(true)}
   }
   if(isGroupMode())updateGroupReservations();
 }
@@ -1596,12 +1607,12 @@ ${rooms2}</div>`;
     park1Html=`<div style="background:#f8f4ff;border-radius:12px;padding:12px 14px;margin-bottom:10px;border-left:3px solid ${color1}">
 <div style="font-size:11px;font-weight:700;color:#1B2A4A;margin-bottom:6px">${n1}</div>
 <div style="display:flex;flex-direction:column;gap:5px;font-size:11px;color:#333">${det1}</div>
-${p1?`<div style="font-size:12px;font-weight:700;color:#1B2A4A;margin-top:6px">💸 $${p1} USD</div>`:''}
+${p1?`<div style="font-size:12px;font-weight:700;color:${color1};margin-top:8px;text-align:right">💸 $<span contenteditable="true" class="card-editable-dark">${p1}</span> USD</div>`:''}
 </div>`;
     park2Html=`<div style="background:#f0f8ff;border-radius:12px;padding:12px 14px;margin-bottom:14px;border-left:3px solid ${color2}">
 <div style="font-size:11px;font-weight:700;color:#1B2A4A;margin-bottom:6px">${n2}</div>
 <div style="display:flex;flex-direction:column;gap:5px;font-size:11px;color:#333">${det2}</div>
-${p2?`<div style="font-size:12px;font-weight:700;color:#1B2A4A;margin-top:6px">💸 $${p2} USD</div>`:''}
+${p2?`<div style="font-size:12px;font-weight:700;color:${color2};margin-top:8px;text-align:right">💸 $<span contenteditable="true" class="card-editable-dark">${p2}</span> USD</div>`:''}
 </div>`;
     totalHtml=precio?`<div style="background:linear-gradient(135deg,#1B2A4A,#2C4570);border-radius:14px;padding:14px;text-align:center;margin-bottom:14px">
 <div style="font-size:10px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Precio total</div>
@@ -1714,9 +1725,9 @@ function updateGroupReservations(){
   const list=$('#group-res-list');
   const priceRel=$('#precio').closest('.relative');
   const combo=isCombo();
-  if(n<=1){container.style.display='none';if(priceRel)priceRel.style.display='';if(combo){$('#combo-pricing').style.display='';updateComboPriceLabels();updateComboTotal()}else{$('#precio').value=''}return}
+  if(n<=1){container.style.display='none';if(priceRel)priceRel.style.display='';if(combo){$('#combo-pricing').style.display='';updateComboPriceLabels();updateComboTotal();setComboTotalMode(true)}else{$('#precio').value='';setComboTotalMode(false)}return}
   container.style.display='';if(priceRel)priceRel.style.display='none';
-  if(combo)$('#combo-pricing').style.display='none';
+  if(combo){$('#combo-pricing').style.display='none';setComboTotalMode(false)}
   const d1=v('destino'),d2=v('destino-2');
   const lbl1=combo?(DEST_NAMES[d1]||'Tramo 1').replace(/^[^\s]+\s/,''):'';
   const lbl2=combo?(DEST_NAMES[d2]||'Tramo 2').replace(/^[^\s]+\s/,''):'';
