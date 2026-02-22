@@ -7,6 +7,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script>
     tailwind.config = {
@@ -118,6 +119,15 @@
     .it-day-num.park{background:linear-gradient(135deg,#7C3AED,#6D28D9)}
     .it-day-num.travel{background:linear-gradient(135deg,#F59E0B,#D97706)}
     .it-day-num.free{background:linear-gradient(135deg,#059669,#047857)}
+    .it-day-num.activity{background:linear-gradient(135deg,#E8716D,#D4605C)}
+    .it-drag-handle{cursor:grab;color:#bbb;font-size:16px;font-weight:700;user-select:none;padding:4px 2px;line-height:1;letter-spacing:-2px;flex-shrink:0}
+    .it-drag-handle:active{cursor:grabbing}
+    .sortable-ghost{opacity:0.4;background:#FFF1F0!important}
+    .it-time-badge{font-size:10px;font-weight:600;color:#888;background:#f5f0eb;border-radius:6px;padding:2px 6px;min-width:90px;text-align:center;flex-shrink:0;white-space:nowrap}
+    .it-time-warning{font-size:10px;color:#ef4444;font-weight:600;padding:4px 8px;background:#fef2f2;border-radius:8px;margin-top:4px}
+    .it-day-settings{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;padding:10px;background:#FFF8F0;border-radius:10px;border:1px solid #FFE8CC}
+    .it-day-drag-handle{cursor:grab;color:#ccc;font-size:18px;font-weight:700;user-select:none;padding:4px;line-height:1;letter-spacing:-2px;flex-shrink:0}
+    .it-day-drag-handle:active{cursor:grabbing}
 
     /* ── Itinerary Preview ── */
     .itp{max-width:440px;margin:0 auto;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 8px 40px rgba(27,42,74,0.12);font-family:'Poppins',sans-serif}
@@ -478,8 +488,9 @@
       <div class="s-card">
         <h2>🏰 Detalles Disney World</h2>
         <label class="fi-label">Hotel / Hospedaje</label>
-        <select id="orl-hotel" class="fi-select mb-2" onchange="showHotelPreview('orl')">
+        <select id="orl-hotel" class="fi-select mb-2" onchange="onHotelChange('orl')">
           <option value="">— Selecciona un hotel —</option>
+          <option value="solo-tickets">🎟 Solo Tickets (sin hospedaje)</option>
           <optgroup label="⭐ Value Resorts">
             <option>Disney's All-Star Movies Resort</option>
             <option>Disney's All-Star Music Resort</option>
@@ -564,8 +575,9 @@
       <div class="s-card">
         <h2>🎢 Detalles Universal Studios</h2>
         <label class="fi-label">Hotel / Hospedaje</label>
-        <select id="uni-hotel" class="fi-select mb-2" onchange="showHotelPreview('uni')">
+        <select id="uni-hotel" class="fi-select mb-2" onchange="onHotelChange('uni')">
           <option value="">— Selecciona un hotel —</option>
+          <option value="solo-tickets">🎟 Solo Tickets (sin hospedaje)</option>
           <optgroup label="⭐ Value">
             <option>Universal's Endless Summer - Surfside Inn</option>
             <option>Universal's Endless Summer - Dockside Inn</option>
@@ -615,8 +627,9 @@
       <div class="s-card">
         <h2>🎡 Detalles Disneyland California</h2>
         <label class="fi-label">Hotel / Hospedaje</label>
-        <select id="cal-hotel" class="fi-select mb-2" onchange="showHotelPreview('cal')">
+        <select id="cal-hotel" class="fi-select mb-2" onchange="onHotelChange('cal')">
           <option value="">— Selecciona un hotel —</option>
+          <option value="solo-tickets">🎟 Solo Tickets (sin hospedaje)</option>
           <optgroup label="🏰 Hoteles Disney">
             <option>Disneyland Hotel</option>
             <option>Disney's Grand Californian Hotel &amp; Spa</option>
@@ -671,8 +684,9 @@
       <div class="s-card">
         <h2>🎬 Detalles Universal Studios Hollywood</h2>
         <label class="fi-label">Hotel / Hospedaje</label>
-        <select id="hwd-hotel" class="fi-select mb-2" onchange="showHotelPreview('hwd')">
+        <select id="hwd-hotel" class="fi-select mb-2" onchange="onHotelChange('hwd')">
           <option value="">— Selecciona un hotel —</option>
+          <option value="solo-tickets">🎟 Solo Tickets (sin hospedaje)</option>
           <optgroup label="🏨 Hoteles cercanos">
             <option>Hilton Los Angeles/Universal City</option>
             <option>Sheraton Universal Hotel</option>
@@ -751,8 +765,9 @@
           <div><label class="fi-label">Tipo de camarote</label>
             <select id="crd-camarote" class="fi-select"><option>Interior</option><option>Vista al mar</option><option>Balcón</option><option>Suite</option></select>
           </div>
-          <div><label class="fi-label">Camarotes</label><input id="crd-camarotes" type="number" min="1" value="1" class="fi-input"></div>
+          <div><label class="fi-label">Camarotes</label><input id="crd-camarotes" type="number" min="1" value="1" class="fi-input" onchange="updateCabinRows()"></div>
         </div>
+        <div id="crd-cabin-breakdown"></div>
         <label class="fi-label">Promoción (opcional)</label>
         <input id="crd-promo" type="text" placeholder="Ej: 20% DE DESCUENTO + $250 USD DE CRÉDITO" class="fi-input">
       </div>
@@ -1354,6 +1369,23 @@ function v(id){return document.getElementById(id)?.value?.trim()||''}
 function ck(id){return document.getElementById(id)?.checked||false}
 function showToast(t){const el=$('#toast');el.textContent=t;el.classList.remove('opacity-0','pointer-events-none');setTimeout(()=>el.classList.add('opacity-0','pointer-events-none'),2000)}
 
+// ── HOTEL CHANGE HANDLER (solo-tickets support) ──
+function onHotelChange(pfx){
+  const val=document.getElementById(`${pfx}-hotel`).value;
+  const rtSel=document.getElementById(`${pfx}-room-type`);
+  const rtLabel=rtSel?.previousElementSibling;
+  const prev=document.getElementById(`${pfx}-hotel-preview`);
+  if(val==='solo-tickets'){
+    if(rtSel){rtSel.style.display='none'}
+    if(rtLabel&&rtLabel.classList.contains('fi-label'))rtLabel.style.display='none';
+    if(prev)prev.innerHTML='';
+  }else{
+    if(rtSel){rtSel.style.display=''}
+    if(rtLabel&&rtLabel.classList.contains('fi-label'))rtLabel.style.display='';
+    showHotelPreview(pfx);
+  }
+}
+
 // ── HOTEL/SHIP PREVIEW ──
 function showHotelPreview(pfx){const sel=document.getElementById(`${pfx}-hotel`),prev=document.getElementById(`${pfx}-hotel-preview`),h=sel.value;if(!h){prev.innerHTML='';return}const d=HOTEL_CATS[h],imgUrl=HOTEL_IMAGES[h];if(!d){prev.innerHTML='';return}if(imgUrl){prev.innerHTML=`<div style="background:#FFF8F0;border:1.5px solid #FFE8CC;border-radius:14px;overflow:hidden"><img src="${imgUrl}" alt="" style="width:100%;height:120px;object-fit:cover;display:block" onerror="this.style.display='none'"><div style="padding:12px;display:flex;align-items:center;gap:10px"><span class="hotel-cat ${d.c}">${d.cat}</span><span style="font-size:13px;font-weight:500;color:#1B2A4A">${h}</span></div></div>`}else{prev.innerHTML=`<div style="background:#FFF8F0;border:1.5px solid #FFE8CC;border-radius:14px;padding:12px;display:flex;align-items:center;gap:10px"><span class="hotel-cat ${d.c}">${d.cat}</span><span style="font-size:13px;font-weight:500;color:#1B2A4A">${h}</span></div>`}updateIndividualRoomType(pfx);if(isGroupMode())updateGroupRoomTypeOptions();}
 function updateIndividualRoomType(pfx){const sel=document.getElementById(`${pfx}-room-type`);if(!sel)return;const hotel=v(`${pfx}-hotel`);const types=getRoomTypesForHotel(hotel);const cur=sel.value;sel.innerHTML='<option value="">— Selecciona —</option>'+types.map(t=>`<option value="${t}"${t===cur?' selected':''}>${t}</option>`).join('');}
@@ -1449,22 +1481,35 @@ function getItineraryHtml(p){const rows=document.getElementById(`${p}-itinerario
 function addPriceGroup(){pgCount++;const n=pgCount,c=$('#cro-precios-container'),d=document.createElement('div');d.className='price-group-card';d.id=`pg-${n}`;d.innerHTML=`<div style="display:flex;gap:8px;margin-bottom:10px"><input type="text" placeholder="Ej: 2 Adultos 1 Menor (8 años)" class="fi-input" style="flex:1;padding:10px 14px;font-size:13px" id="pg-${n}-d"><button type="button" onclick="document.getElementById('pg-${n}').remove()" style="color:#E8716D;font-size:18px;font-weight:700;border:none;background:none;cursor:pointer">×</button></div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px"><div><label style="font-size:10px;color:#999">Interior</label><input type="text" placeholder="$" class="fi-input" style="padding:8px 10px;font-size:12px" id="pg-${n}-i"></div><div><label style="font-size:10px;color:#999">Vista al mar</label><input type="text" placeholder="$" class="fi-input" style="padding:8px 10px;font-size:12px" id="pg-${n}-v"></div><div><label style="font-size:10px;color:#999">Balcón</label><input type="text" placeholder="$" class="fi-input" style="padding:8px 10px;font-size:12px" id="pg-${n}-b"></div></div>`;c.appendChild(d)}
 function getPriceGroups(){const gs=$('#cro-precios-container').querySelectorAll('.price-group-card');let t='';gs.forEach(g=>{const id=g.id,desc=g.querySelector(`#${id}-d`)?.value?.trim()||'',i=g.querySelector(`#${id}-i`)?.value?.trim()||'',vi=g.querySelector(`#${id}-v`)?.value?.trim()||'',b=g.querySelector(`#${id}-b`)?.value?.trim()||'';if(desc){t+=`\n💸Precios para ${desc}\n`;if(i)t+=`- Camarote interior: Desde $${i} USD\n`;if(vi)t+=`- Camarote con vista al mar: Desde $${vi} USD\n`;if(b)t+=`- Camarote con balcón: Desde $${b} USD\n`}});return t.trim()}
 
+// ── CABIN BREAKDOWN ──
+function updateCabinRows(){
+  const qty=parseInt(document.getElementById('crd-camarotes').value)||1;
+  const container=document.getElementById('crd-cabin-breakdown');
+  if(qty<=1){container.innerHTML='';return}
+  let html='<div style="margin-top:12px;padding:16px;background:#FFF8F0;border-radius:14px;border:1.5px solid #FFE8CC"><div style="font-size:12px;font-weight:700;color:#1B2A4A;margin-bottom:12px">Desglose por camarote</div>';
+  for(let i=1;i<=qty;i++){
+    html+=`<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px"><span style="font-size:12px;font-weight:600;color:#1B2A4A;width:90px;flex-shrink:0">Camarote ${i}</span><input type="number" id="crd-cab-${i}-pax" placeholder="Personas" min="1" value="2" class="fi-input" style="width:80px;padding:8px 10px;font-size:12px"><input type="text" id="crd-cab-${i}-price" placeholder="Precio USD" class="fi-input" style="flex:1;padding:8px 10px;font-size:12px"></div>`;
+  }
+  html+='</div>';
+  container.innerHTML=html;
+}
+
 // ── MESSAGE BUILDERS ──
 function greet(d){const n=v('nombre'),t=AGENT_TITLES[d]||'Agente de viajes';return`${n?'Hola '+n+'!':'Hola!'} Cómo estás?\nSoy Mich Murrieta, ${t}\n\nTe comparto tu cotización, avísame cómo la ves y si gustas que hagamos alguna modificación o tienes alguna duda ⬇️`}
 function travelers(){const a=v('adultos'),m=getMinorsText();let t=`\n*Adultos:* ${a}`;if(m)t+=`\n*Menores:* ${m}`;return t}
 function closing(){return'Cualquier duda estoy a tus órdenes ✨'}
 
-function genOrlando(){const h=v('orl-hotel'),mod=v('orl-modalidad'),dias=v('orl-dias'),p=v('precio'),plan=v('orl-comidas'),kf=ck('orl-kidsfree'),mm=ck('orl-memory'),nights=calcNights(),rt=v('orl-room-type');let m=greet('orlando')+'\n'+travelers();if(h)m+=`\n*Hospedaje:* ${h}`;if(rt)m+=`\n🛏 Tipo: ${rt}`;m+=`\n\nCheck in: ${formatDate(v('checkin'))}\nCheck out: ${formatDate(v('checkout'))}`;if(nights>0)m+=`\n📅 *${nights} noches*`;const modText=mod.includes('Base')?'1 parque x día':mod;m+=`\n\n🎟 Entradas a los parques con modalidad "${modText}" válido por ${dias} días`;if(plan==='quick')m+=`\n🍔 Plan de comidas Quick-Service (2 comidas rápidas + 1 snack x persona x noche)`;else if(plan==='standard')m+=`\n🍽 Plan de comidas Standard (1 mesa + 1 rápida + 1 snack x persona x noche)`;if(kf)m+=`\n🎉 *Promoción Kids Eat Free 2026* - Niños de 3 a 9 años comen gratis con plan de comidas de adulto`;m+=`\n\n*💸$${p} USD*`;if(mm)m+=`\n\n📸Agrega el paquete de fotos "Memory Maker" por *$185 USD* adicionales`;m+=`\n\n${CONDITIONS.orlando}`;const n=getNotasText();if(n)m+=`\n\n${n}`;m+=`\n\n${closing()}`;return m}
+function genOrlando(){const h=v('orl-hotel'),mod=v('orl-modalidad'),dias=v('orl-dias'),p=v('precio'),plan=v('orl-comidas'),kf=ck('orl-kidsfree'),mm=ck('orl-memory'),nights=calcNights(),rt=v('orl-room-type');let m=greet('orlando')+'\n'+travelers();if(h==='solo-tickets'){m+=`\n🎟 *Solo entradas a parques (sin hospedaje)*`}else{if(h)m+=`\n*Hospedaje:* ${h}`;if(rt)m+=`\n🛏 Tipo: ${rt}`}m+=`\n\nCheck in: ${formatDate(v('checkin'))}\nCheck out: ${formatDate(v('checkout'))}`;if(nights>0)m+=`\n📅 *${nights} noches*`;const modText=mod.includes('Base')?'1 parque x día':mod;m+=`\n\n🎟 Entradas a los parques con modalidad "${modText}" válido por ${dias} días`;if(plan==='quick')m+=`\n🍔 Plan de comidas Quick-Service (2 comidas rápidas + 1 snack x persona x noche)`;else if(plan==='standard')m+=`\n🍽 Plan de comidas Standard (1 mesa + 1 rápida + 1 snack x persona x noche)`;if(kf)m+=`\n🎉 *Promoción Kids Eat Free 2026* - Niños de 3 a 9 años comen gratis con plan de comidas de adulto`;m+=`\n\n*💸$${p} USD*`;if(mm)m+=`\n\n📸Agrega el paquete de fotos "Memory Maker" por *$185 USD* adicionales`;m+=`\n\n${CONDITIONS.orlando}`;const n=getNotasText();if(n)m+=`\n\n${n}`;m+=`\n\n${closing()}`;return m}
 
-function genUniversal(){const h=v('uni-hotel'),ticket=v('uni-modalidad'),dias=v('uni-dias'),p=v('precio'),vol=ck('uni-volcano'),nights=calcNights(),rt=v('uni-room-type');const ticketNames={'3base':'Base (1 parque por día)','3ptp':'Park-to-Park','4ptp':'Park-to-Park','5ptp':'Park-to-Park'};let m=greet('universal')+'\n'+travelers();if(h)m+=`\n\nHospedaje: ${h}`;if(rt)m+=`\n🛏 Tipo: ${rt}`;m+=`\n\nCheck in: ${formatDate(v('checkin'))}\nCheck out: ${formatDate(v('checkout'))}`;if(nights>0)m+=`\n📅 *${nights} noches*`;m+=`\n\n🎟 Entradas con modalidad "${ticketNames[ticket]||ticket}" válido por ${dias} días`;m+=`\n que te permite entrar a:\n•⁠  ⁠Universal Studios Florida\n•⁠  ⁠Islands of Adventure\n•⁠  ⁠Universal Epic Universe`;if(vol)m+=`\n•⁠  ⁠Volcano Bay`;m+=`\n\n💸 *$${p} USD*\n\n${CONDITIONS.universal}`;const n=getNotasText();if(n)m+=`\n\n${n}`;m+=`\n\n${closing()}`;return m}
+function genUniversal(){const h=v('uni-hotel'),ticket=v('uni-modalidad'),dias=v('uni-dias'),p=v('precio'),vol=ck('uni-volcano'),nights=calcNights(),rt=v('uni-room-type');const ticketNames={'3base':'Base (1 parque por día)','3ptp':'Park-to-Park','4ptp':'Park-to-Park','5ptp':'Park-to-Park'};let m=greet('universal')+'\n'+travelers();if(h==='solo-tickets'){m+=`\n\n🎟 *Solo entradas a parques (sin hospedaje)*`}else{if(h)m+=`\n\nHospedaje: ${h}`;if(rt)m+=`\n🛏 Tipo: ${rt}`}m+=`\n\nCheck in: ${formatDate(v('checkin'))}\nCheck out: ${formatDate(v('checkout'))}`;if(nights>0)m+=`\n📅 *${nights} noches*`;m+=`\n\n🎟 Entradas con modalidad "${ticketNames[ticket]||ticket}" válido por ${dias} días`;m+=`\n que te permite entrar a:\n•⁠  ⁠Universal Studios Florida\n•⁠  ⁠Islands of Adventure\n•⁠  ⁠Universal Epic Universe`;if(vol)m+=`\n•⁠  ⁠Volcano Bay`;m+=`\n\n💸 *$${p} USD*\n\n${CONDITIONS.universal}`;const n=getNotasText();if(n)m+=`\n\n${n}`;m+=`\n\n${closing()}`;return m}
 
-function genCalifornia(){const h=v('cal-hotel'),ticket=v('cal-ticket'),dias=v('cal-dias'),ll=v('cal-lightning'),p=v('precio'),sw=ck('cal-starwars'),nights=calcNights(),rt=v('cal-room-type');let m=greet('california')+'\n'+travelers();if(h)m+=`\n*Hospedaje:* ${h}`;if(rt)m+=`\n🛏 Tipo: ${rt}`;m+=`\n\nCheck in: ${formatDate(v('checkin'))}\nCheck out: ${formatDate(v('checkout'))}`;if(nights>0)m+=`\n📅 *${nights} noches*`;m+=`\n\n🎟 Entradas a los parques con modalidad "${ticket}" válido por ${dias} días`;if(ll==='multi')m+=`\n⚡ Lightning Lane Multi Pass incluido`;else if(ll==='single')m+=`\n⚡ Lightning Lane Single Pass (atracciones selectas)`;else if(ll==='premier')m+=`\n⚡ Lightning Lane Premier Pass (todas las atracciones, sin ventana de horario)`;m+=`\n\n*💸$${p} USD*\n\n${CONDITIONS.california}`;if(sw){const ev=CONDITIONES_EVENTOS['california'];m+=`\n\n${ev||'*STAR WARS NITE🪐* La entrada a este evento es adicional y costaría aproximadamente $200 USD x persona. Aún no tenemos los precios, pero yo les avisaría en cuanto estén disponibles'}`;}const n=getNotasText();if(n)m+=`\n\n${n}`;m+=`\n\n${closing()}`;return m}
+function genCalifornia(){const h=v('cal-hotel'),ticket=v('cal-ticket'),dias=v('cal-dias'),ll=v('cal-lightning'),p=v('precio'),sw=ck('cal-starwars'),nights=calcNights(),rt=v('cal-room-type');let m=greet('california')+'\n'+travelers();if(h==='solo-tickets'){m+=`\n🎟 *Solo entradas a parques (sin hospedaje)*`}else{if(h)m+=`\n*Hospedaje:* ${h}`;if(rt)m+=`\n🛏 Tipo: ${rt}`}m+=`\n\nCheck in: ${formatDate(v('checkin'))}\nCheck out: ${formatDate(v('checkout'))}`;if(nights>0)m+=`\n📅 *${nights} noches*`;m+=`\n\n🎟 Entradas a los parques con modalidad "${ticket}" válido por ${dias} días`;if(ll==='multi')m+=`\n⚡ Lightning Lane Multi Pass incluido`;else if(ll==='single')m+=`\n⚡ Lightning Lane Single Pass (atracciones selectas)`;else if(ll==='premier')m+=`\n⚡ Lightning Lane Premier Pass (todas las atracciones, sin ventana de horario)`;m+=`\n\n*💸$${p} USD*\n\n${CONDITIONS.california}`;if(sw){const ev=CONDITIONES_EVENTOS['california'];m+=`\n\n${ev||'*STAR WARS NITE🪐* La entrada a este evento es adicional y costaría aproximadamente $200 USD x persona. Aún no tenemos los precios, pero yo les avisaría en cuanto estén disponibles'}`;}const n=getNotasText();if(n)m+=`\n\n${n}`;m+=`\n\n${closing()}`;return m}
 
-function genHollywood(){const h=v('hwd-hotel'),ticket=v('hwd-ticket'),dias=v('hwd-dias'),p=v('precio'),vip=ck('hwd-vip'),nin=ck('hwd-nintendo'),nights=calcNights(),rt=v('hwd-room-type');const ticketNames={general:'General Admission',express:'Universal Express',['express-unl']:'Universal Express Unlimited'};let m=greet('hollywood')+'\n'+travelers();if(h)m+=`\n*Hospedaje:* ${h}`;if(rt)m+=`\n🛏 Tipo: ${rt}`;m+=`\n\nCheck in: ${formatDate(v('checkin'))}\nCheck out: ${formatDate(v('checkout'))}`;if(nights>0)m+=`\n📅 *${nights} noches*`;m+=`\n\n🎟 Entradas con modalidad "${ticketNames[ticket]||ticket}" válido por ${dias} día${+dias!==1?'s':''}`;if(nin)m+=`\n🎮 Acceso a Super Nintendo World incluido`;if(vip)m+=`\n🌟 *VIP Experience* - Tour guiado con acceso prioritario`;m+=`\n\n*💸$${p} USD*\n\n${CONDITIONS.hollywood}`;const n=getNotasText();if(n)m+=`\n\n${n}`;m+=`\n\n${closing()}`;return m}
+function genHollywood(){const h=v('hwd-hotel'),ticket=v('hwd-ticket'),dias=v('hwd-dias'),p=v('precio'),vip=ck('hwd-vip'),nin=ck('hwd-nintendo'),nights=calcNights(),rt=v('hwd-room-type');const ticketNames={general:'General Admission',express:'Universal Express',['express-unl']:'Universal Express Unlimited'};let m=greet('hollywood')+'\n'+travelers();if(h==='solo-tickets'){m+=`\n🎟 *Solo entradas a parques (sin hospedaje)*`}else{if(h)m+=`\n*Hospedaje:* ${h}`;if(rt)m+=`\n🛏 Tipo: ${rt}`}m+=`\n\nCheck in: ${formatDate(v('checkin'))}\nCheck out: ${formatDate(v('checkout'))}`;if(nights>0)m+=`\n📅 *${nights} noches*`;m+=`\n\n🎟 Entradas con modalidad "${ticketNames[ticket]||ticket}" válido por ${dias} día${+dias!==1?'s':''}`;if(nin)m+=`\n🎮 Acceso a Super Nintendo World incluido`;if(vip)m+=`\n🌟 *VIP Experience* - Tour guiado con acceso prioritario`;m+=`\n\n*💸$${p} USD*\n\n${CONDITIONS.hollywood}`;const n=getNotasText();if(n)m+=`\n\n${n}`;m+=`\n\n${closing()}`;return m}
 
 function genParis(){const h=v('par-hotel'),p=v('precio'),nights=calcNights(),rt=v('par-room-type');let m=greet('paris')+'\n'+travelers();if(h)m+=`\n*Hospedaje:* ${h}`;if(rt)m+=`\n🛏 Tipo: ${rt}`;m+=`\n\nCheck in: ${formatDate(v('checkin'))}\nCheck out: ${formatDate(v('checkout'))}`;if(nights>0)m+=`\n📅 *${nights} noches*`;m+=`\n\n🎟 Entradas válidas por toda su estancia\n🍽 Desayuno incluido\n\n*💸$${p} USD*`;const n=getNotasText();if(n)m+=`\n\n${n}`;m+=`\n\n${closing()}`;return m}
 
-function genCruceroDisney(){const b=v('crd-barco'),cam=v('crd-camarote').toLowerCase(),p=v('precio'),promo=v('crd-promo'),it=getItinerary('crd'),nights=calcNights();let m=greet('crucero-disney')+'\n'+travelers();m+=`\n\n🛳Barco: *${b}*`;if(it)m+=`\n\n📍Itinerario\n${it}`;m+=`\n\n🗓*Fechas*\n${formatDate(v('checkin'))} al ${formatDate(v('checkout'))}`;if(nights>0)m+=`\n📅 *${nights} noches*`;m+=`\n\n💸Precios\n• Camarote con ${cam}: *Desde $${p} USD*`;if(promo)m+=`\n\n*PROMOCIÓN: ${promo}✨🤩*`;m+=`\n\n${CONDITIONS['crucero-disney']}\n\n${INCLUSIONS_CRUISE}`;const n=getNotasText();if(n)m+=`\n\n${n}`;m+=`\n\n${closing()}`;return m}
+function genCruceroDisney(){const b=v('crd-barco'),cam=v('crd-camarote').toLowerCase(),p=v('precio'),promo=v('crd-promo'),it=getItinerary('crd'),nights=calcNights(),cabQty=parseInt(v('crd-camarotes'))||1;let m=greet('crucero-disney')+'\n'+travelers();m+=`\n\n🛳Barco: *${b}*`;if(it)m+=`\n\n📍Itinerario\n${it}`;m+=`\n\n🗓*Fechas*\n${formatDate(v('checkin'))} al ${formatDate(v('checkout'))}`;if(nights>0)m+=`\n📅 *${nights} noches*`;if(cabQty>1){m+=`\n\n💸Precios (${cabQty} camarotes · ${cam})`;let total=0;for(let i=1;i<=cabQty;i++){const cp=v(`crd-cab-${i}-price`)||'0',pax=v(`crd-cab-${i}-pax`)||'2';const cpn=parseFloat(cp.replace(/,/g,''))||0;total+=cpn;m+=`\n🛏 Camarote ${i}: ${pax} personas · *$${cp} USD*`}m+=`\n\n💰 *TOTAL: $${formatUSD(total)} USD*`}else{m+=`\n\n💸Precios\n• Camarote con ${cam}: *Desde $${p} USD*`}if(promo)m+=`\n\n*PROMOCIÓN: ${promo}✨🤩*`;m+=`\n\n${CONDITIONS['crucero-disney']}\n\n${INCLUSIONS_CRUISE}`;const n=getNotasText();if(n)m+=`\n\n${n}`;m+=`\n\n${closing()}`;return m}
 
 function genCruceroOtros(){const b=v('cro-barco'),it=getItinerary('cro'),pg=getPriceGroups(),nights=calcNights();let m=greet('crucero-otros')+'\n'+travelers();if(b)m+=`\n\n🛳Barco: ${b}`;if(it)m+=`\n\n📍Itinerario\n${it}`;m+=`\n\n🗓Fechas\n${formatDate(v('checkin'))} al ${formatDate(v('checkout'))}`;if(nights>0)m+=`\n📅 *${nights} noches*`;if(pg)m+=`\n\n${pg}`;m+=`\n\n${CONDITIONS['crucero-otros']}`;const n=getNotasText();if(n)m+=`\n\n${n}`;m+=`\n\n${closing()}`;return m}
 
@@ -1478,10 +1523,10 @@ function waHtmlToText(el){let t=el.innerHTML;t=t.replace(/<b>(.*?)<\/b>/gi,'*$1*
 
 // ── COMBINED TRIP MESSAGE ──
 function getDestDetails(d){
-  if(d==='orlando'){const h=v('orl-hotel'),mod=v('orl-modalidad'),dias=v('orl-dias'),plan=v('orl-comidas'),kf=ck('orl-kidsfree'),mm=ck('orl-memory'),rt=v('orl-room-type');let t='';if(h)t+=`*Hospedaje:* ${h}\n`;if(rt)t+=`🛏 Tipo: ${rt}\n`;const modText=mod.includes('Base')?'1 parque x día':mod;t+=`🎟 Entradas "${modText}" por ${dias} días`;if(plan==='quick')t+=`\n🍔 Plan Quick-Service`;else if(plan==='standard')t+=`\n🍽 Plan Standard`;if(kf)t+=`\n🎉 *Kids Eat Free 2026*`;if(mm)t+=`\n📸 Memory Maker ($185 USD)`;return t}
-  if(d==='universal'){const h=v('uni-hotel'),ticket=v('uni-modalidad'),dias=v('uni-dias'),vol=ck('uni-volcano'),rt=v('uni-room-type');const tn={'3base':'Base','3ptp':'Park-to-Park','4ptp':'Park-to-Park','5ptp':'Park-to-Park'};let t='';if(h)t+=`*Hospedaje:* ${h}\n`;if(rt)t+=`🛏 Tipo: ${rt}\n`;t+=`🎟 Entradas "${tn[ticket]||ticket}" por ${dias} días\n• Universal Studios Florida\n• Islands of Adventure\n• Epic Universe`;if(vol)t+=`\n• Volcano Bay`;return t}
-  if(d==='california'){const h=v('cal-hotel'),ticket=v('cal-ticket'),dias=v('cal-dias'),ll=v('cal-lightning'),sw=ck('cal-starwars'),rt=v('cal-room-type');let t='';if(h)t+=`*Hospedaje:* ${h}\n`;if(rt)t+=`🛏 Tipo: ${rt}\n`;t+=`🎟 Entradas "${ticket}" por ${dias} días`;if(ll==='multi')t+=`\n⚡ Lightning Lane Multi Pass`;else if(ll==='single')t+=`\n⚡ Lightning Lane Single Pass`;else if(ll==='premier')t+=`\n⚡ Lightning Lane Premier Pass`;return t}
-  if(d==='hollywood'){const h=v('hwd-hotel'),ticket=v('hwd-ticket'),dias=v('hwd-dias'),vip=ck('hwd-vip'),nin=ck('hwd-nintendo'),rt=v('hwd-room-type');const tn={general:'General Admission',express:'Express',['express-unl']:'Express Unlimited'};let t='';if(h)t+=`*Hospedaje:* ${h}\n`;if(rt)t+=`🛏 Tipo: ${rt}\n`;t+=`🎟 Entradas "${tn[ticket]||ticket}" por ${dias} día${+dias!==1?'s':''}`;if(nin)t+=`\n🎮 Super Nintendo World`;if(vip)t+=`\n🌟 VIP Experience`;return t}
+  if(d==='orlando'){const h=v('orl-hotel'),mod=v('orl-modalidad'),dias=v('orl-dias'),plan=v('orl-comidas'),kf=ck('orl-kidsfree'),mm=ck('orl-memory'),rt=v('orl-room-type');let t='';if(h==='solo-tickets'){t+=`🎟 *Solo entradas a parques (sin hospedaje)*\n`}else{if(h)t+=`*Hospedaje:* ${h}\n`;if(rt)t+=`🛏 Tipo: ${rt}\n`}const modText=mod.includes('Base')?'1 parque x día':mod;t+=`🎟 Entradas "${modText}" por ${dias} días`;if(plan==='quick')t+=`\n🍔 Plan Quick-Service`;else if(plan==='standard')t+=`\n🍽 Plan Standard`;if(kf)t+=`\n🎉 *Kids Eat Free 2026*`;if(mm)t+=`\n📸 Memory Maker ($185 USD)`;return t}
+  if(d==='universal'){const h=v('uni-hotel'),ticket=v('uni-modalidad'),dias=v('uni-dias'),vol=ck('uni-volcano'),rt=v('uni-room-type');const tn={'3base':'Base','3ptp':'Park-to-Park','4ptp':'Park-to-Park','5ptp':'Park-to-Park'};let t='';if(h==='solo-tickets'){t+=`🎟 *Solo entradas a parques (sin hospedaje)*\n`}else{if(h)t+=`*Hospedaje:* ${h}\n`;if(rt)t+=`🛏 Tipo: ${rt}\n`}t+=`🎟 Entradas "${tn[ticket]||ticket}" por ${dias} días\n• Universal Studios Florida\n• Islands of Adventure\n• Epic Universe`;if(vol)t+=`\n• Volcano Bay`;return t}
+  if(d==='california'){const h=v('cal-hotel'),ticket=v('cal-ticket'),dias=v('cal-dias'),ll=v('cal-lightning'),sw=ck('cal-starwars'),rt=v('cal-room-type');let t='';if(h==='solo-tickets'){t+=`🎟 *Solo entradas a parques (sin hospedaje)*\n`}else{if(h)t+=`*Hospedaje:* ${h}\n`;if(rt)t+=`🛏 Tipo: ${rt}\n`}t+=`🎟 Entradas "${ticket}" por ${dias} días`;if(ll==='multi')t+=`\n⚡ Lightning Lane Multi Pass`;else if(ll==='single')t+=`\n⚡ Lightning Lane Single Pass`;else if(ll==='premier')t+=`\n⚡ Lightning Lane Premier Pass`;return t}
+  if(d==='hollywood'){const h=v('hwd-hotel'),ticket=v('hwd-ticket'),dias=v('hwd-dias'),vip=ck('hwd-vip'),nin=ck('hwd-nintendo'),rt=v('hwd-room-type');const tn={general:'General Admission',express:'Express',['express-unl']:'Express Unlimited'};let t='';if(h==='solo-tickets'){t+=`🎟 *Solo entradas a parques (sin hospedaje)*\n`}else{if(h)t+=`*Hospedaje:* ${h}\n`;if(rt)t+=`🛏 Tipo: ${rt}\n`}t+=`🎟 Entradas "${tn[ticket]||ticket}" por ${dias} día${+dias!==1?'s':''}`;if(nin)t+=`\n🎮 Super Nintendo World`;if(vip)t+=`\n🌟 VIP Experience`;return t}
   if(d==='crucero-disney'){const b=v('crd-barco'),cam=v('crd-camarote').toLowerCase(),it=getItinerary('crd');let t=`🛳 Barco: *${b}*`;if(it)t+=`\n📍 Itinerario:\n${it}`;t+=`\n🛏 Camarote ${cam}`;if(v('crd-promo'))t+=`\n🎉 *${v('crd-promo')}*`;return t}
   if(d==='crucero-otros'){const b=v('cro-barco'),it=getItinerary('cro');let t='';if(b)t+=`🛳 ${b}`;if(it)t+=`\n📍 Itinerario:\n${it}`;return t}
   return'';
@@ -1577,12 +1622,12 @@ function generateCard(dest){
   const nombre=v('nombre')||'Cliente',adultos=v('adultos'),minors=getMinorsCardText(),checkin=v('checkin'),checkout=v('checkout'),precio=v('precio');
   const names={orlando:'🏰 Disney World · Orlando',universal:'🎢 Universal Studios · Orlando',california:'🎡 Disneyland · California',hollywood:'🎬 Universal Studios · Hollywood',paris:'🗼 Disneyland · Paris','crucero-disney':'🚢 Crucero Disney','crucero-otros':'🛳 Crucero',nickelodeon:'🧽 Nickelodeon Resort',xcaret:'🌴 Xcaret'};
   let details='';
-  if(dest==='orlando'){const h=v('orl-hotel'),rt=v('orl-room-type');if(h)details+=`<div style="display:flex;align-items:center;gap:8px"><span>🏨</span><span class="card-editable-dark" contenteditable="true">${h}</span></div>`;if(rt)details+=`<div style="display:flex;align-items:center;gap:8px"><span>🛏</span><span class="card-editable-dark" contenteditable="true">${rt}</span></div>`;details+=`<div style="display:flex;align-items:center;gap:8px"><span>🎟</span><span>${v('orl-modalidad')} · ${v('orl-dias')} días</span></div>`;if(v('orl-comidas'))details+=`<div style="display:flex;align-items:center;gap:8px"><span>🍽</span><span>Plan de comidas incluido</span></div>`;if(ck('orl-kidsfree'))details+=`<div style="display:flex;align-items:center;gap:8px;color:#22c55e;font-weight:600"><span>🎉</span><span>Kids Eat Free 2026</span></div>`}
-  else if(dest==='universal'){const h=v('uni-hotel'),rt=v('uni-room-type');if(h)details+=`<div style="display:flex;align-items:center;gap:8px"><span>🏨</span><span class="card-editable-dark" contenteditable="true">${h}</span></div>`;if(rt)details+=`<div style="display:flex;align-items:center;gap:8px"><span>🛏</span><span class="card-editable-dark" contenteditable="true">${rt}</span></div>`;details+=`<div style="display:flex;align-items:center;gap:8px"><span>🎟</span><span>Epic Universe + Universal + Islands</span></div>`;if(ck('uni-volcano'))details+=`<div style="display:flex;align-items:center;gap:8px"><span>🌋</span><span>Volcano Bay incluido</span></div>`}
-  else if(dest==='california'){const h=v('cal-hotel'),rt=v('cal-room-type');if(h)details+=`<div style="display:flex;align-items:center;gap:8px"><span>🏨</span><span class="card-editable-dark" contenteditable="true">${h}</span></div>`;if(rt)details+=`<div style="display:flex;align-items:center;gap:8px"><span>🛏</span><span class="card-editable-dark" contenteditable="true">${rt}</span></div>`;details+=`<div style="display:flex;align-items:center;gap:8px"><span>🎟</span><span>${v('cal-ticket')} · ${v('cal-dias')} días</span></div>`;const ll=v('cal-lightning');if(ll)details+=`<div style="display:flex;align-items:center;gap:8px"><span>⚡</span><span>Lightning Lane</span></div>`}
-  else if(dest==='hollywood'){const h=v('hwd-hotel'),rt=v('hwd-room-type');if(h)details+=`<div style="display:flex;align-items:center;gap:8px"><span>🏨</span><span class="card-editable-dark" contenteditable="true">${h}</span></div>`;if(rt)details+=`<div style="display:flex;align-items:center;gap:8px"><span>🛏</span><span class="card-editable-dark" contenteditable="true">${rt}</span></div>`;const tn={general:'General Admission',express:'Express',['express-unl']:'Express Unlimited'};details+=`<div style="display:flex;align-items:center;gap:8px"><span>🎟</span><span>${tn[v('hwd-ticket')]||v('hwd-ticket')} · ${v('hwd-dias')} día${+v('hwd-dias')!==1?'s':''}</span></div>`;if(ck('hwd-nintendo'))details+=`<div style="display:flex;align-items:center;gap:8px"><span>🎮</span><span>Super Nintendo World</span></div>`;if(ck('hwd-vip'))details+=`<div style="display:flex;align-items:center;gap:8px;color:#f59e0b;font-weight:600"><span>🌟</span><span>VIP Experience</span></div>`}
+  if(dest==='orlando'){const h=v('orl-hotel'),rt=v('orl-room-type');if(h==='solo-tickets'){details+=`<div style="display:flex;align-items:center;gap:8px"><span>🎟</span><span>Solo entradas a parques</span></div>`}else{if(h)details+=`<div style="display:flex;align-items:center;gap:8px"><span>🏨</span><span class="card-editable-dark" contenteditable="true">${h}</span></div>`;if(rt)details+=`<div style="display:flex;align-items:center;gap:8px"><span>🛏</span><span class="card-editable-dark" contenteditable="true">${rt}</span></div>`}details+=`<div style="display:flex;align-items:center;gap:8px"><span>🎟</span><span>${v('orl-modalidad')} · ${v('orl-dias')} días</span></div>`;if(v('orl-comidas'))details+=`<div style="display:flex;align-items:center;gap:8px"><span>🍽</span><span>Plan de comidas incluido</span></div>`;if(ck('orl-kidsfree'))details+=`<div style="display:flex;align-items:center;gap:8px;color:#22c55e;font-weight:600"><span>🎉</span><span>Kids Eat Free 2026</span></div>`}
+  else if(dest==='universal'){const h=v('uni-hotel'),rt=v('uni-room-type');if(h==='solo-tickets'){details+=`<div style="display:flex;align-items:center;gap:8px"><span>🎟</span><span>Solo entradas a parques</span></div>`}else{if(h)details+=`<div style="display:flex;align-items:center;gap:8px"><span>🏨</span><span class="card-editable-dark" contenteditable="true">${h}</span></div>`;if(rt)details+=`<div style="display:flex;align-items:center;gap:8px"><span>🛏</span><span class="card-editable-dark" contenteditable="true">${rt}</span></div>`}details+=`<div style="display:flex;align-items:center;gap:8px"><span>🎟</span><span>Epic Universe + Universal + Islands</span></div>`;if(ck('uni-volcano'))details+=`<div style="display:flex;align-items:center;gap:8px"><span>🌋</span><span>Volcano Bay incluido</span></div>`}
+  else if(dest==='california'){const h=v('cal-hotel'),rt=v('cal-room-type');if(h==='solo-tickets'){details+=`<div style="display:flex;align-items:center;gap:8px"><span>🎟</span><span>Solo entradas a parques</span></div>`}else{if(h)details+=`<div style="display:flex;align-items:center;gap:8px"><span>🏨</span><span class="card-editable-dark" contenteditable="true">${h}</span></div>`;if(rt)details+=`<div style="display:flex;align-items:center;gap:8px"><span>🛏</span><span class="card-editable-dark" contenteditable="true">${rt}</span></div>`}details+=`<div style="display:flex;align-items:center;gap:8px"><span>🎟</span><span>${v('cal-ticket')} · ${v('cal-dias')} días</span></div>`;const ll=v('cal-lightning');if(ll)details+=`<div style="display:flex;align-items:center;gap:8px"><span>⚡</span><span>Lightning Lane</span></div>`}
+  else if(dest==='hollywood'){const h=v('hwd-hotel'),rt=v('hwd-room-type');if(h==='solo-tickets'){details+=`<div style="display:flex;align-items:center;gap:8px"><span>🎟</span><span>Solo entradas a parques</span></div>`}else{if(h)details+=`<div style="display:flex;align-items:center;gap:8px"><span>🏨</span><span class="card-editable-dark" contenteditable="true">${h}</span></div>`;if(rt)details+=`<div style="display:flex;align-items:center;gap:8px"><span>🛏</span><span class="card-editable-dark" contenteditable="true">${rt}</span></div>`}const tn={general:'General Admission',express:'Express',['express-unl']:'Express Unlimited'};details+=`<div style="display:flex;align-items:center;gap:8px"><span>🎟</span><span>${tn[v('hwd-ticket')]||v('hwd-ticket')} · ${v('hwd-dias')} día${+v('hwd-dias')!==1?'s':''}</span></div>`;if(ck('hwd-nintendo'))details+=`<div style="display:flex;align-items:center;gap:8px"><span>🎮</span><span>Super Nintendo World</span></div>`;if(ck('hwd-vip'))details+=`<div style="display:flex;align-items:center;gap:8px;color:#f59e0b;font-weight:600"><span>🌟</span><span>VIP Experience</span></div>`}
   else if(dest==='paris'){const h=v('par-hotel'),rt=v('par-room-type');if(h)details+=`<div style="display:flex;align-items:center;gap:8px"><span>🏨</span><span class="card-editable-dark" contenteditable="true">${h}</span></div>`;if(rt)details+=`<div style="display:flex;align-items:center;gap:8px"><span>🛏</span><span class="card-editable-dark" contenteditable="true">${rt}</span></div>`;details+=`<div style="display:flex;align-items:center;gap:8px"><span>🎟</span><span>Entradas toda la estancia</span></div><div style="display:flex;align-items:center;gap:8px"><span>🍽</span><span>Desayuno incluido</span></div>`}
-  else if(dest==='crucero-disney'){details+=`<div style="display:flex;align-items:center;gap:8px"><span>🚢</span><span class="card-editable-dark" contenteditable="true">${v('crd-barco')}</span></div><div style="display:flex;align-items:center;gap:8px"><span>🛏</span><span>Camarote ${v('crd-camarote').toLowerCase()}</span></div>`;if(v('crd-promo'))details+=`<div style="display:flex;align-items:center;gap:8px;color:#E8716D;font-weight:600"><span>🎉</span><span class="card-editable-dark" contenteditable="true">${v('crd-promo')}</span></div>`}
+  else if(dest==='crucero-disney'){const cabQty=parseInt(v('crd-camarotes'))||1;details+=`<div style="display:flex;align-items:center;gap:8px"><span>🚢</span><span class="card-editable-dark" contenteditable="true">${v('crd-barco')}</span></div>`;if(cabQty>1){details+=`<div style="display:flex;align-items:center;gap:8px"><span>🛏</span><span>${cabQty} camarotes · ${v('crd-camarote').toLowerCase()}</span></div>`;let cabHtml='',cabTotal=0;for(let i=1;i<=cabQty;i++){const cp=v(`crd-cab-${i}-price`)||'0',pax=v(`crd-cab-${i}-pax`)||'2';cabTotal+=parseFloat(cp.replace(/,/g,''))||0;cabHtml+=`<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:11px" contenteditable="true"><span>Camarote ${i} (${pax} pers.)</span><span style="font-weight:600">$${cp} USD</span></div>`}details+=`<div style="background:#F0F4FF;border-radius:10px;padding:10px 14px;margin:8px 0"><div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Desglose por camarote</div>${cabHtml}<div style="display:flex;justify-content:space-between;padding-top:6px;border-top:1px solid #ddd;margin-top:4px;font-size:12px;font-weight:700;color:#1B2A4A"><span>Total</span><span>$${formatUSD(cabTotal)} USD</span></div></div>`}else{details+=`<div style="display:flex;align-items:center;gap:8px"><span>🛏</span><span>Camarote ${v('crd-camarote').toLowerCase()}</span></div>`}if(v('crd-promo'))details+=`<div style="display:flex;align-items:center;gap:8px;color:#E8716D;font-weight:600"><span>🎉</span><span class="card-editable-dark" contenteditable="true">${v('crd-promo')}</span></div>`}
   else if(dest==='crucero-otros'){if(v('cro-barco'))details+=`<div style="display:flex;align-items:center;gap:8px"><span>🚢</span><span class="card-editable-dark" contenteditable="true">${v('cro-barco')}</span></div>`}
   else if(dest==='nickelodeon'){details+=`<div style="display:flex;align-items:center;gap:8px"><span>🏨</span><span>Nickelodeon Resort · Riviera Maya</span></div><div style="display:flex;align-items:center;gap:8px"><span>✅</span><span>TODO INCLUIDO</span></div>`}
   else if(dest==='xcaret'){const rt=v('xca-room-type');details+=`<div style="display:flex;align-items:center;gap:8px"><span>🏨</span><span class="card-editable-dark" contenteditable="true">${v('xca-hotel')}</span></div>`;if(rt)details+=`<div style="display:flex;align-items:center;gap:8px"><span>🛏</span><span class="card-editable-dark" contenteditable="true">${rt}</span></div>`;details+=`<div style="display:flex;align-items:center;gap:8px"><span>✅</span><span>TODO INCLUIDO</span></div>`}
@@ -1665,12 +1710,12 @@ ${priceHtml}
 // ── CARD: get details for a specific dest (reusable) ──
 function getCardDetailsFor(dest){
   let d='';
-  if(dest==='orlando'){const h=v('orl-hotel'),rt=v('orl-room-type');if(h)d+=`<div style="display:flex;align-items:center;gap:8px"><span>🏨</span><span>${h}</span></div>`;if(rt)d+=`<div style="display:flex;align-items:center;gap:8px"><span>🛏</span><span>${rt}</span></div>`;d+=`<div style="display:flex;align-items:center;gap:8px"><span>🎟</span><span>${v('orl-modalidad')} · ${v('orl-dias')} días</span></div>`;if(v('orl-comidas'))d+=`<div style="display:flex;align-items:center;gap:8px"><span>🍽</span><span>Plan de comidas</span></div>`;if(ck('orl-kidsfree'))d+=`<div style="display:flex;align-items:center;gap:8px;color:#22c55e;font-weight:600"><span>🎉</span><span>Kids Eat Free 2026</span></div>`}
-  else if(dest==='universal'){const h=v('uni-hotel'),rt=v('uni-room-type');if(h)d+=`<div style="display:flex;align-items:center;gap:8px"><span>🏨</span><span>${h}</span></div>`;if(rt)d+=`<div style="display:flex;align-items:center;gap:8px"><span>🛏</span><span>${rt}</span></div>`;d+=`<div style="display:flex;align-items:center;gap:8px"><span>🎟</span><span>Epic Universe + Universal + Islands</span></div>`;if(ck('uni-volcano'))d+=`<div style="display:flex;align-items:center;gap:8px"><span>🌋</span><span>Volcano Bay</span></div>`}
-  else if(dest==='california'){const h=v('cal-hotel'),rt=v('cal-room-type');if(h)d+=`<div style="display:flex;align-items:center;gap:8px"><span>🏨</span><span>${h}</span></div>`;if(rt)d+=`<div style="display:flex;align-items:center;gap:8px"><span>🛏</span><span>${rt}</span></div>`;d+=`<div style="display:flex;align-items:center;gap:8px"><span>🎟</span><span>${v('cal-ticket')} · ${v('cal-dias')} días</span></div>`;if(v('cal-lightning'))d+=`<div style="display:flex;align-items:center;gap:8px"><span>⚡</span><span>Lightning Lane</span></div>`}
-  else if(dest==='hollywood'){const h=v('hwd-hotel'),rt=v('hwd-room-type');if(h)d+=`<div style="display:flex;align-items:center;gap:8px"><span>🏨</span><span>${h}</span></div>`;if(rt)d+=`<div style="display:flex;align-items:center;gap:8px"><span>🛏</span><span>${rt}</span></div>`;const tn={general:'General Admission',express:'Express',['express-unl']:'Express Unlimited'};d+=`<div style="display:flex;align-items:center;gap:8px"><span>🎟</span><span>${tn[v('hwd-ticket')]||''} · ${v('hwd-dias')} día${+v('hwd-dias')!==1?'s':''}</span></div>`;if(ck('hwd-nintendo'))d+=`<div style="display:flex;align-items:center;gap:8px"><span>🎮</span><span>Super Nintendo World</span></div>`;if(ck('hwd-vip'))d+=`<div style="display:flex;align-items:center;gap:8px;color:#f59e0b;font-weight:600"><span>🌟</span><span>VIP Experience</span></div>`}
-  else if(dest==='crucero-disney'){d+=`<div style="display:flex;align-items:center;gap:8px"><span>🚢</span><span>${v('crd-barco')}</span></div><div style="display:flex;align-items:center;gap:8px"><span>🛏</span><span>Camarote ${v('crd-camarote').toLowerCase()}</span></div>`;if(v('crd-promo'))d+=`<div style="display:flex;align-items:center;gap:8px;color:#E8716D;font-weight:600"><span>🎉</span><span>${v('crd-promo')}</span></div>`;d+=getItineraryHtml('crd')}
-  else if(dest==='crucero-otros'){if(v('cro-barco'))d+=`<div style="display:flex;align-items:center;gap:8px"><span>🚢</span><span>${v('cro-barco')}</span></div>`;d+=getItineraryHtml('cro')}
+  if(dest==='orlando'){const h=v('orl-hotel'),rt=v('orl-room-type');if(h&&h!=='solo-tickets')d+=`<div style="display:flex;align-items:center;gap:8px"><span>🏨</span><span class="card-editable-dark" contenteditable="true">${h}</span></div>`;if(h==='solo-tickets')d+=`<div style="display:flex;align-items:center;gap:8px"><span>🎟</span><span>Solo entradas a parques</span></div>`;if(h!=='solo-tickets'&&rt)d+=`<div style="display:flex;align-items:center;gap:8px"><span>🛏</span><span class="card-editable-dark" contenteditable="true">${rt}</span></div>`;d+=`<div style="display:flex;align-items:center;gap:8px"><span>🎟</span><span>${v('orl-modalidad')} · ${v('orl-dias')} días</span></div>`;if(v('orl-comidas'))d+=`<div style="display:flex;align-items:center;gap:8px"><span>🍽</span><span>Plan de comidas</span></div>`;if(ck('orl-kidsfree'))d+=`<div style="display:flex;align-items:center;gap:8px;color:#22c55e;font-weight:600"><span>🎉</span><span>Kids Eat Free 2026</span></div>`}
+  else if(dest==='universal'){const h=v('uni-hotel'),rt=v('uni-room-type');if(h&&h!=='solo-tickets')d+=`<div style="display:flex;align-items:center;gap:8px"><span>🏨</span><span class="card-editable-dark" contenteditable="true">${h}</span></div>`;if(h==='solo-tickets')d+=`<div style="display:flex;align-items:center;gap:8px"><span>🎟</span><span>Solo entradas a parques</span></div>`;if(h!=='solo-tickets'&&rt)d+=`<div style="display:flex;align-items:center;gap:8px"><span>🛏</span><span class="card-editable-dark" contenteditable="true">${rt}</span></div>`;d+=`<div style="display:flex;align-items:center;gap:8px"><span>🎟</span><span>Epic Universe + Universal + Islands</span></div>`;if(ck('uni-volcano'))d+=`<div style="display:flex;align-items:center;gap:8px"><span>🌋</span><span>Volcano Bay</span></div>`}
+  else if(dest==='california'){const h=v('cal-hotel'),rt=v('cal-room-type');if(h&&h!=='solo-tickets')d+=`<div style="display:flex;align-items:center;gap:8px"><span>🏨</span><span class="card-editable-dark" contenteditable="true">${h}</span></div>`;if(h==='solo-tickets')d+=`<div style="display:flex;align-items:center;gap:8px"><span>🎟</span><span>Solo entradas a parques</span></div>`;if(h!=='solo-tickets'&&rt)d+=`<div style="display:flex;align-items:center;gap:8px"><span>🛏</span><span class="card-editable-dark" contenteditable="true">${rt}</span></div>`;d+=`<div style="display:flex;align-items:center;gap:8px"><span>🎟</span><span>${v('cal-ticket')} · ${v('cal-dias')} días</span></div>`;if(v('cal-lightning'))d+=`<div style="display:flex;align-items:center;gap:8px"><span>⚡</span><span>Lightning Lane</span></div>`}
+  else if(dest==='hollywood'){const h=v('hwd-hotel'),rt=v('hwd-room-type');if(h&&h!=='solo-tickets')d+=`<div style="display:flex;align-items:center;gap:8px"><span>🏨</span><span class="card-editable-dark" contenteditable="true">${h}</span></div>`;if(h==='solo-tickets')d+=`<div style="display:flex;align-items:center;gap:8px"><span>🎟</span><span>Solo entradas a parques</span></div>`;if(h!=='solo-tickets'&&rt)d+=`<div style="display:flex;align-items:center;gap:8px"><span>🛏</span><span class="card-editable-dark" contenteditable="true">${rt}</span></div>`;const tn={general:'General Admission',express:'Express',['express-unl']:'Express Unlimited'};d+=`<div style="display:flex;align-items:center;gap:8px"><span>🎟</span><span>${tn[v('hwd-ticket')]||''} · ${v('hwd-dias')} día${+v('hwd-dias')!==1?'s':''}</span></div>`;if(ck('hwd-nintendo'))d+=`<div style="display:flex;align-items:center;gap:8px"><span>🎮</span><span>Super Nintendo World</span></div>`;if(ck('hwd-vip'))d+=`<div style="display:flex;align-items:center;gap:8px;color:#f59e0b;font-weight:600"><span>🌟</span><span>VIP Experience</span></div>`}
+  else if(dest==='crucero-disney'){const cabQtyC=parseInt(v('crd-camarotes'))||1;d+=`<div style="display:flex;align-items:center;gap:8px"><span>🚢</span><span class="card-editable-dark" contenteditable="true">${v('crd-barco')}</span></div>`;if(cabQtyC>1){d+=`<div style="display:flex;align-items:center;gap:8px"><span>🛏</span><span class="card-editable-dark" contenteditable="true">${cabQtyC} camarotes · ${v('crd-camarote').toLowerCase()}</span></div>`}else{d+=`<div style="display:flex;align-items:center;gap:8px"><span>🛏</span><span class="card-editable-dark" contenteditable="true">Camarote ${v('crd-camarote').toLowerCase()}</span></div>`}if(v('crd-promo'))d+=`<div style="display:flex;align-items:center;gap:8px;color:#E8716D;font-weight:600"><span>🎉</span><span class="card-editable-dark" contenteditable="true">${v('crd-promo')}</span></div>`;d+=getItineraryHtml('crd')}
+  else if(dest==='crucero-otros'){if(v('cro-barco'))d+=`<div style="display:flex;align-items:center;gap:8px"><span>🚢</span><span class="card-editable-dark" contenteditable="true">${v('cro-barco')}</span></div>`;d+=getItineraryHtml('cro')}
   return d;
 }
 
@@ -1981,6 +2026,143 @@ const IT_GRADIENTS={
   'universal':'linear-gradient(135deg,#003366,#0066cc,#00ccff)'
 };
 const DAY_COLORS=['#E8716D','#7C3AED','#0D9488','#2563EB','#D97706','#059669','#E11D48','#6366F1','#14B8A6','#F59E0B','#8B5CF6','#EC4899'];
+
+const PARK_DEFAULT_ACTIVITIES={
+'MK':{title:'Magic Kingdom 🏰',icon:'🏰',acts:[
+  {d:'⏰ Despertar y prepararse — desayuno rápido',duration:30},
+  {d:'🚌 Tomar transporte al parque (bus, monorriel o ferry)',duration:30},
+  {d:'🎟️ Entrada anticipada (30 min antes para huéspedes Disney)',duration:30},
+  {d:'🎢 Directo a Tiana\'s Bayou Adventure y Seven Dwarfs Mine Train',duration:90},
+  {d:'🚀 TRON Lightcycle Run (fila virtual o Lightning Lane)',duration:60},
+  {d:'🎠 Peter Pan\'s Flight + It\'s a Small World + Haunted Mansion',duration:120},
+  {d:'🍽️ Almuerzo (Be Our Guest o Columbia Harbour House)',duration:60},
+  {d:'🏴‍☠️ Pirates of the Caribbean + Jungle Cruise + Thunder Mountain',duration:90},
+  {d:'🎪 Festival of Fantasy Parade (buscar lugar 20 min antes)',duration:60},
+  {d:'🏰 Foto en el Castillo de Cenicienta + tiendas Main Street',duration:90},
+  {d:'🍕 Cena (Cosmic Ray\'s o restaurante con reservación)',duration:60},
+  {d:'🎢 Re-rides de atracciones favoritas con menos fila',duration:120},
+  {d:'🎆 Happily Ever After — Show de fuegos artificiales',duration:30}
+],tips:['Llega 30 min antes de apertura — la primera hora es la menos concurrida','TRON tiene Virtual Queue — reserva a las 7:00 AM exactas en la app','El mejor lugar para fuegos artificiales es al inicio de Main Street frente al castillo','Usa Mobile Order en la app para pedir comida rápida sin esperar fila']},
+'EPCOT':{title:'EPCOT 🌎',icon:'🌎',acts:[
+  {d:'🎟️ Entrada anticipada — directo a Guardians of the Galaxy: Cosmic Rewind',duration:60},
+  {d:'🧊 Frozen Ever After (ir temprano, siempre tiene fila)',duration:60},
+  {d:'🚀 Test Track + Mission: SPACE + Journey of Water',duration:90},
+  {d:'🌎 Inicio del recorrido por World Showcase — México y Noruega',duration:60},
+  {d:'🍽️ Almuerzo en World Showcase (San Angel Inn o Le Cellier)',duration:60},
+  {d:'🗾 Continuar World Showcase — Japón, Marruecos, Francia, UK',duration:90},
+  {d:'🍦 Snacks del mundo — croissant en Francia, gelato en Italia',duration:90},
+  {d:'🎭 Remy\'s Ratatouille Adventure en el pabellón de Francia',duration:60},
+  {d:'🍽️ Cena en World Showcase',duration:60},
+  {d:'🎆 Luminous: The Symphony of Us — Show nocturno en la laguna',duration:30}
+],tips:['Guardians of the Galaxy tiene Virtual Queue — reserva a las 7:00 AM','World Showcase abre a las 11:00 AM — aprovecha la mañana en Future World','Los snacks de los pabellones son una experiencia imperdible — prueba de todo','EPCOT es enorme — usa zapatos cómodos, vas a caminar mucho']},
+'HS':{title:'Hollywood Studios 🎬',icon:'🎬',acts:[
+  {d:'🎟️ Entrada anticipada — directo a Star Wars: Rise of the Resistance',duration:60},
+  {d:'🧸 Slinky Dog Dash en Toy Story Land',duration:45},
+  {d:'🗼 Tower of Terror + Rock \'n\' Roller Coaster',duration:60},
+  {d:'🤠 Toy Story Mania + Alien Swirling Saucers',duration:60},
+  {d:'🍽️ Almuerzo (Woody\'s Lunch Box o Backlot Express)',duration:60},
+  {d:'🚀 Millennium Falcon: Smugglers Run en Galaxy\'s Edge',duration:60},
+  {d:'🔫 Explorar Star Wars: Galaxy\'s Edge — cantina Oga\'s, tiendas',duration:90},
+  {d:'🎭 Indiana Jones Stunt Spectacular o shows en vivo',duration:90},
+  {d:'📸 Fotos en Hollywood Boulevard + tiendas',duration:90},
+  {d:'🍽️ Cena (50\'s Prime Time Café o reservación)',duration:60},
+  {d:'🎆 Fantasmic! — Show nocturno (llegar 45 min antes)',duration:60}
+],tips:['Rise of the Resistance es LA atracción — ve PRIMERO al abrir','En Galaxy\'s Edge puedes construir tu propia espada láser — experiencia única','Slinky Dog Dash tiene filas largas TODO el día — hazlo temprano','Para Fantasmic! llega al menos 45 min antes para buen asiento']},
+'AK':{title:'Animal Kingdom 🦁',icon:'🦁',acts:[
+  {d:'🎟️ Entrada anticipada — directo a Flight of Passage en Pandora',duration:60},
+  {d:'🌊 Na\'vi River Journey en Pandora',duration:60},
+  {d:'🦁 Kilimanjaro Safaris (animales más activos por la mañana)',duration:60},
+  {d:'🎢 Expedition Everest',duration:60},
+  {d:'🦕 Dinosaur + Kali River Rapids',duration:60},
+  {d:'🍽️ Almuerzo (Flame Tree Barbecue o Satu\'li Canteen en Pandora)',duration:60},
+  {d:'🌳 Explorar los senderos — Maharajah Jungle Trek, Gorilla Falls',duration:60},
+  {d:'🎭 Finding Nemo: The Big Blue...and Beyond! (show)',duration:60},
+  {d:'🌟 Regreso al hotel — tarde de piscina y descanso',duration:60},
+  {d:'🍽️ Cena fuera de parques o en Disney Springs',duration:60}
+],tips:['Flight of Passage es la mejor atracción de TODOS los parques — vale cualquier espera','El safari es MUCHO mejor por la mañana — los animales están activos','Animal Kingdom cierra más temprano que los demás — planea tu tarde libre','Kali River Rapids te moja MUCHO — lleva poncho o cambio de ropa']},
+'USF':{title:'Universal Studios Florida 🎬',icon:'🎬',acts:[
+  {d:'🎟️ Early Park Admission (1 hora antes)',duration:30},
+  {d:'🎢 Directo a Hagrid\'s Magical Creatures o Revenge of the Mummy',duration:60},
+  {d:'🧙 Diagon Alley — Harry Potter and the Escape from Gringotts',duration:90},
+  {d:'🦈 JAWS tribute + MEN IN BLACK: Alien Attack',duration:60},
+  {d:'🎢 Hollywood Rip Ride Rockit',duration:60},
+  {d:'🍽️ Almuerzo (Leaky Cauldron en Diagon Alley)',duration:60},
+  {d:'🚂 Hogwarts Express a Islands of Adventure',duration:30},
+  {d:'🏰 Hogsmeade — Forbidden Journey + Flight of the Hippogriff',duration:90},
+  {d:'🍺 Cerveza de mantequilla en Hogsmeade',duration:60},
+  {d:'🚂 Regreso en Hogwarts Express',duration:30},
+  {d:'🍽️ Cena',duration:60},
+  {d:'✨ Paseo nocturno por Diagon Alley iluminado',duration:60}
+],tips:['Hogwarts Express requiere boleto Park-to-Park — es una EXPERIENCIA','Diagon Alley de noche es mágico — las luces son increíbles','En Ollivanders hacen demostración de selección de varita — ve temprano','Si tienes Express Pass, úsalo en atracciones con más de 30 min de espera']},
+'IoA':{title:'Islands of Adventure 🏝️',icon:'🏝️',acts:[
+  {d:'🎟️ Early Park Admission',duration:30},
+  {d:'🎢 Directo a VelociCoaster (la mejor montaña rusa de Orlando)',duration:60},
+  {d:'🎢 Hagrid\'s Magical Creatures Motorbike Adventure',duration:60},
+  {d:'🦖 Jurassic World: The Ride',duration:60},
+  {d:'🕷️ Amazing Adventures of Spider-Man',duration:60},
+  {d:'🍽️ Almuerzo (Three Broomsticks en Hogsmeade o Mythos)',duration:60},
+  {d:'🐉 Hagrid\'s (repetir si la fila lo permite)',duration:60},
+  {d:'💧 Popeye\'s Rapids + Dudley Do-Right',duration:60},
+  {d:'🏊 Regreso al hotel — piscina',duration:120},
+  {d:'🍽️ Cena en CityWalk',duration:60}
+],tips:['VelociCoaster es IMPERDIBLE — la mejor montaña rusa de todo Orlando','Hagrid\'s tiene filas de 2+ horas — ve al abrir','Mythos fue nombrado mejor restaurante de parques temáticos del mundo','Popeye\'s te moja COMPLETAMENTE — lleva poncho']},
+'Epic':{title:'Epic Universe 🌟',icon:'🌟',acts:[
+  {d:'🎟️ Entrada al nuevo parque Epic Universe',duration:30},
+  {d:'🎢 Explorar los mundos: Super Nintendo World, How to Train Your Dragon, Dark Universe',duration:120},
+  {d:'🍄 Super Nintendo World — Mario Kart ride + actividades interactivas',duration:120},
+  {d:'🍽️ Almuerzo temático',duration:60},
+  {d:'🐉 How to Train Your Dragon — montaña rusa + explorar',duration:90},
+  {d:'🧛 Dark Universe — atracciones de monstruos clásicos',duration:90},
+  {d:'🌌 Celestial Park — área central del parque',duration:90},
+  {d:'🍽️ Cena en Epic Universe',duration:60},
+  {d:'✨ Shows nocturnos de cierre',duration:60}
+],tips:['Epic Universe es el parque MÁS NUEVO de Universal — abierto desde 2025','Super Nintendo World es la atracción estrella — lleva la Power-Up Band','El parque es ENORME — planifica tu ruta','Llega temprano — la primera hora tiene menos gente']},
+'VB':{title:'Volcano Bay 🌋',icon:'🌋',acts:[
+  {d:'😴 Despertar sin prisa',duration:60},
+  {d:'🌊 Llegada a Volcano Bay',duration:30},
+  {d:'🏄 Toboganes principales: Krakatau Aqua Coaster',duration:90},
+  {d:'🌊 Vol\'s Waterfall + TeAwa The Fearless River',duration:60},
+  {d:'🍽️ Almuerzo en el parque',duration:60},
+  {d:'🛟 Lazy river + Puka Uli Lagoon',duration:90},
+  {d:'🏊 Regreso al hotel — descanso',duration:60},
+  {d:'🍽️ Cena en CityWalk',duration:60}
+],tips:['Usa la TapuTapu wearable — es como un Virtual Queue para todo','Los lockers cuestan ~$13-16 USD','Llega temprano — se llena rápido los fines de semana','Lleva bloqueador solar waterproof']},
+'DL':{title:'Disneyland Park 🏰',icon:'🏰',acts:[
+  {d:'🎟️ Entrada anticipada para huéspedes de hoteles Disney',duration:30},
+  {d:'🎢 Directo a Rise of the Resistance en Galaxy\'s Edge',duration:90},
+  {d:'⛰️ Matterhorn Bobsleds + Space Mountain',duration:90},
+  {d:'🎠 Fantasyland: Indiana Jones, Pirates, Haunted Mansion',duration:90},
+  {d:'🍽️ Almuerzo (Blue Bayou para experiencia única o Docking Bay 7)',duration:60},
+  {d:'🚀 Galaxy\'s Edge: Millennium Falcon + explorar',duration:90},
+  {d:'🏰 Sleeping Beauty Castle + Main Street',duration:60},
+  {d:'🎢 Big Thunder Mountain + Splash Mountain',duration:120},
+  {d:'🍽️ Cena',duration:60},
+  {d:'🎆 Wondrous Journeys o show nocturno',duration:30}
+],tips:['Rise of the Resistance PRIMERO — es la más popular','Blue Bayou es el restaurante DENTRO de Pirates — experiencia mágica','El castillo de Disneyland es el ORIGINAL — Walt Disney caminó por aquí','Disneyland es más compacto que WDW — puedes hacer más en menos tiempo']},
+'DCA':{title:'Disney California Adventure 🎡',icon:'🎡',acts:[
+  {d:'🎟️ Entrada al parque',duration:30},
+  {d:'🕸️ Directo a WEB SLINGERS: A Spider-Man Adventure',duration:60},
+  {d:'🎢 Radiator Springs Racers en Cars Land',duration:60},
+  {d:'🦸 Avengers Campus — encuentros con superhéroes',duration:60},
+  {d:'🎢 Incredicoaster + Guardians of the Galaxy: Mission Breakout',duration:90},
+  {d:'🍽️ Almuerzo (Lamplight Lounge o Pym Test Kitchen)',duration:60},
+  {d:'🎭 Frozen: Live at the Hyperion',duration:90},
+  {d:'🏖️ Pixar Pier + juegos',duration:90},
+  {d:'🍽️ Cena',duration:60},
+  {d:'🌊 World of Color — show de agua y luces',duration:30}
+],tips:['Radiator Springs Racers es LA atracción — ve temprano','Cars Land de noche es ESPECTACULAR — las luces de neón son mágicas','World of Color es imperdible — busca lugar 30 min antes','Pym Test Kitchen tiene porciones gigantes — divertidísimo']},
+'Paris':{title:'Disneyland Paris 🗼',icon:'🗼',acts:[
+  {d:'🎟️ Entrada anticipada — directo a atracciones principales',duration:30},
+  {d:'🎢 Big Thunder Mountain + Indiana Jones',duration:90},
+  {d:'🚀 Star Wars Hyperspace Mountain + Buzz Lightyear',duration:90},
+  {d:'🎠 Peter Pan\'s Flight + It\'s a Small World',duration:60},
+  {d:'🍽️ Almuerzo',duration:60},
+  {d:'🏰 Castillo de la Bella Durmiente + Fantasyland',duration:90},
+  {d:'🎢 Walt Disney Studios: Avengers Assemble + Ratatouille',duration:120},
+  {d:'🍽️ Cena',duration:60},
+  {d:'✨ Disney Illuminations — show nocturno',duration:30}
+],tips:['Descarga la app Disneyland Paris antes de llegar','El parque es más pequeño que WDW — se puede hacer en menos días','La comida en los pabellones de Walt Disney Studios es buena','El show nocturno frente al castillo es espectacular']}
+};
 
 const IT_TEMPLATES={
 'disney-world-5':{
@@ -2644,26 +2826,35 @@ function addItDay(data){
   const div=document.createElement('div');
   div.className='it-day-card';
   div.id='itday-'+n;
-  const typeClass=data?.type==='park'?'park':data?.type==='cruise'?'cruise':data?.type==='travel'?'travel':data?.type==='free'?'free':'';
-  div.innerHTML=`<div class="it-day-header" onclick="this.parentElement.classList.toggle('open')"><div class="it-day-num ${typeClass}"><span style="font-size:10px">DÍA</span><br>${n}</div><div style="flex:1;min-width:0"><input type="text" value="${data?.title||'Nuevo día'}" placeholder="Título del día" class="fi-input it-mini-input" style="font-weight:600" id="itday-${n}-title" onclick="event.stopPropagation()"><div style="display:flex;gap:6px;margin-top:4px"><input type="text" value="${data?.icon||'📍'}" placeholder="🏰" class="fi-input it-mini-input" style="width:40px;text-align:center;padding:4px" id="itday-${n}-icon" onclick="event.stopPropagation()"><select class="fi-select it-mini-input" style="flex:1;padding:4px 24px 4px 8px" id="itday-${n}-type" onclick="event.stopPropagation()"><option value="travel" ${data?.type==='travel'?'selected':''}>✈️ Viaje</option><option value="park" ${data?.type==='park'?'selected':''}>🏰 Parque</option><option value="cruise" ${data?.type==='cruise'?'selected':''}>🚢 Crucero</option><option value="free" ${data?.type==='free'?'selected':''}>🌴 Día libre</option><option value="activity" ${data?.type==='activity'?'selected':''}>🎉 Actividad</option></select></div></div><span class="it-chevron" style="font-size:16px;padding:8px">▾</span></div><div class="it-day-body"><div style="margin-bottom:12px"><label class="fi-label" style="font-size:11px">Actividades</label><div id="itday-${n}-acts"></div><button type="button" onclick="addItActivity(${n})" class="btn-link" style="font-size:11px"><span class="text-lg leading-none">+</span> Agregar actividad</button></div><div style="margin-bottom:8px"><label class="fi-label" style="font-size:11px">💡 Tips</label><div id="itday-${n}-tips"></div><button type="button" onclick="addItTip(${n})" class="btn-link" style="font-size:11px"><span class="text-lg leading-none">+</span> Agregar tip</button></div><div style="text-align:right;padding-top:8px;border-top:1px solid #f0ebe5"><button type="button" onclick="document.getElementById('itday-${n}').remove()" class="btn-link" style="color:#999;font-size:11px">🗑 Eliminar este día</button></div></div>`;
+  const typeClass=data?.type==='park'?'park':data?.type==='cruise'?'cruise':data?.type==='travel'?'travel':data?.type==='free'?'free':data?.type==='activity'?'activity':'';
+  const parkVal=data?.park||'';
+  div.innerHTML=`<div class="it-day-header" onclick="this.parentElement.classList.toggle('open')"><span class="it-day-drag-handle" onclick="event.stopPropagation()">⋮⋮</span><div class="it-day-num ${typeClass}"><span style="font-size:10px">DÍA</span><br>${n}</div><div style="flex:1;min-width:0"><input type="text" value="${data?.title||'Nuevo día'}" placeholder="Título del día" class="fi-input it-mini-input" style="font-weight:600" id="itday-${n}-title" onclick="event.stopPropagation()"><div style="display:flex;gap:6px;margin-top:4px"><input type="text" value="${data?.icon||'📍'}" placeholder="🏰" class="fi-input it-mini-input" style="width:40px;text-align:center;padding:4px" id="itday-${n}-icon" onclick="event.stopPropagation()"><select class="fi-select it-mini-input" style="flex:1;padding:4px 24px 4px 8px" id="itday-${n}-type" onclick="event.stopPropagation()" onchange="onDayTypeChange(${n})"><option value="travel" ${data?.type==='travel'?'selected':''}>✈️ Viaje</option><option value="park" ${data?.type==='park'?'selected':''}>🏰 Parque</option><option value="cruise" ${data?.type==='cruise'?'selected':''}>🚢 Crucero</option><option value="free" ${data?.type==='free'?'selected':''}>🌴 Día libre</option><option value="activity" ${data?.type==='activity'?'selected':''}>🎉 Actividad</option></select><select class="fi-select it-mini-input" style="flex:1;padding:4px 24px 4px 8px;display:${data?.type==='park'?'':'none'}" id="itday-${n}-park" onclick="event.stopPropagation()" onchange="onParkChange(${n})"><option value="">— Parque —</option><optgroup label="Disney World"><option value="MK" ${parkVal==='MK'?'selected':''}>Magic Kingdom</option><option value="EPCOT" ${parkVal==='EPCOT'?'selected':''}>EPCOT</option><option value="HS" ${parkVal==='HS'?'selected':''}>Hollywood Studios</option><option value="AK" ${parkVal==='AK'?'selected':''}>Animal Kingdom</option></optgroup><optgroup label="Universal Orlando"><option value="USF" ${parkVal==='USF'?'selected':''}>Universal Studios</option><option value="IoA" ${parkVal==='IoA'?'selected':''}>Islands of Adventure</option><option value="Epic" ${parkVal==='Epic'?'selected':''}>Epic Universe</option><option value="VB" ${parkVal==='VB'?'selected':''}>Volcano Bay</option></optgroup><optgroup label="California"><option value="DL" ${parkVal==='DL'?'selected':''}>Disneyland</option><option value="DCA" ${parkVal==='DCA'?'selected':''}>Disney California Adventure</option></optgroup><optgroup label="Otros"><option value="Paris" ${parkVal==='Paris'?'selected':''}>Disneyland Paris</option></optgroup></select></div></div><span class="it-chevron" style="font-size:16px;padding:8px">▾</span></div><div class="it-day-body"><div class="it-day-settings"><div><label class="fi-label" style="font-size:10px">Hora inicio</label><input type="time" value="${data?.dayStart||'08:00'}" class="fi-input it-mini-input" id="itday-${n}-daystart" onchange="recalcDayTimes(${n})"></div><div><label class="fi-label" style="font-size:10px">Hora fin</label><input type="time" value="${data?.dayEnd||'22:00'}" class="fi-input it-mini-input" id="itday-${n}-dayend"></div><div><label class="fi-label" style="font-size:10px">Duración default</label><select class="fi-select it-mini-input" style="padding:4px 24px 4px 8px" id="itday-${n}-defdur" onchange="recalcDayTimes(${n})"><option value="30" ${(data?.defDur||60)==30?'selected':''}>30 min</option><option value="45" ${(data?.defDur||60)==45?'selected':''}>45 min</option><option value="60" ${(data?.defDur||60)==60?'selected':''}>60 min</option><option value="90" ${(data?.defDur||60)==90?'selected':''}>90 min</option></select></div><div><label class="fi-label" style="font-size:10px">Buffer default</label><select class="fi-select it-mini-input" style="padding:4px 24px 4px 8px" id="itday-${n}-defbuf" onchange="recalcDayTimes(${n})"><option value="0" ${(data?.defBuf||15)==0?'selected':''}>0 min</option><option value="10" ${(data?.defBuf||15)==10?'selected':''}>10 min</option><option value="15" ${(data?.defBuf||15)==15?'selected':''}>15 min</option><option value="30" ${(data?.defBuf||15)==30?'selected':''}>30 min</option></select></div></div><div style="margin-bottom:12px"><label class="fi-label" style="font-size:11px">Actividades</label><div id="itday-${n}-acts"></div><div style="display:flex;gap:8px;align-items:center"><button type="button" onclick="addItActivity(${n})" class="btn-link" style="font-size:11px"><span class="text-lg leading-none">+</span> Agregar actividad</button><button type="button" onclick="recalcDayTimes(${n})" class="btn-link" style="font-size:11px;color:#3b82f6">⟳ Recalcular</button><button type="button" onclick="undoDayTimes(${n})" class="btn-link" style="font-size:11px;color:#999">↩ Deshacer</button></div><div id="itday-${n}-warning"></div></div><div style="margin-bottom:8px"><label class="fi-label" style="font-size:11px">💡 Tips</label><div id="itday-${n}-tips"></div><button type="button" onclick="addItTip(${n})" class="btn-link" style="font-size:11px"><span class="text-lg leading-none">+</span> Agregar tip</button></div><div style="display:flex;justify-content:space-between;padding-top:8px;border-top:1px solid #f0ebe5"><button type="button" onclick="duplicateItDay(${n})" class="btn-link" style="color:#3b82f6;font-size:11px">📋 Duplicar día</button><button type="button" onclick="document.getElementById('itday-${n}').remove();renumberDays()" class="btn-link" style="color:#999;font-size:11px">🗑 Eliminar este día</button></div></div>`;
   c.appendChild(div);
-  const actsC=document.getElementById('itday-'+n+'-acts');
-  const tipsC=document.getElementById('itday-'+n+'-tips');
-  if(data?.acts){data.acts.forEach(a=>addItActivity(n,a.t,a.d))}
+  if(data?.acts){data.acts.forEach(a=>addItActivity(n,a.t,a.d,a.duration,a.buffer))}
   if(data?.tips){data.tips.forEach(t=>addItTip(n,t))}
+  // Init SortableJS on activities
+  const actsEl=document.getElementById('itday-'+n+'-acts');
+  if(typeof Sortable!=='undefined'){
+    new Sortable(actsEl,{handle:'.it-drag-handle',ghostClass:'sortable-ghost',animation:150,onEnd:function(){recalcDayTimes(n)}});
+  }
+  if(data?.acts&&data.acts.length>0)setTimeout(()=>recalcDayTimes(n),0);
 }
 
 let actCount=0;
-function addItActivity(dayN,time,desc){
+function addItActivity(dayN,time,desc,duration,buffer){
   actCount++;
   const id='ita-'+actCount;
   const c=document.getElementById('itday-'+dayN+'-acts');
   const div=document.createElement('div');
   div.className='it-act-row';
   div.id=id;
-  div.innerHTML=`<input type="text" value="${time||''}" placeholder="9:00 AM" class="fi-input it-mini-input" style="width:70px;flex-shrink:0;text-align:center" id="${id}-t"><input type="text" value="${(desc||'').replace(/"/g,'&quot;')}" placeholder="Descripción de la actividad" class="fi-input it-mini-input" style="flex:1" id="${id}-d"><button type="button" onclick="document.getElementById('${id}').remove()" class="it-remove-btn">×</button>`;
+  div.dataset.dayN=dayN;
+  const dur=duration||'';
+  const buf=buffer!==undefined&&buffer!==null?buffer:'';
+  div.innerHTML=`<span class="it-drag-handle">⋮⋮</span><span class="it-time-badge" id="${id}-tb">—</span><input type="text" value="${(desc||'').replace(/"/g,'&quot;')}" placeholder="Descripción de la actividad" class="fi-input it-mini-input" style="flex:1" id="${id}-d"><select class="fi-select it-mini-input" style="width:70px;padding:4px 20px 4px 6px;flex-shrink:0" id="${id}-dur" onchange="recalcDayTimes(${dayN})" title="Duración"><option value="15" ${dur==15?'selected':''}>15m</option><option value="30" ${dur==30?'selected':''}>30m</option><option value="45" ${dur==45?'selected':''}>45m</option><option value="60" ${dur==60||!dur?'selected':''}>60m</option><option value="90" ${dur==90?'selected':''}>90m</option><option value="120" ${dur==120?'selected':''}>2h</option><option value="150" ${dur==150?'selected':''}>2.5h</option><option value="180" ${dur==180?'selected':''}>3h</option></select><input type="number" value="${buf}" placeholder="buf" min="0" class="fi-input it-mini-input" style="width:50px;padding:4px 6px;flex-shrink:0;text-align:center" id="${id}-buf" onchange="recalcDayTimes(${dayN})" title="Buffer (min)"><button type="button" onclick="removeItActivity('${id}',${dayN})" class="it-remove-btn">×</button>`;
   c.appendChild(div);
 }
+function removeItActivity(id,dayN){document.getElementById(id).remove();recalcDayTimes(dayN)}
 
 let tipCount=0;
 function addItTip(dayN,text){
@@ -2675,6 +2866,154 @@ function addItTip(dayN,text){
   div.id=id;
   div.innerHTML=`<span style="font-size:14px;flex-shrink:0;padding-top:4px">💡</span><input type="text" value="${(text||'').replace(/"/g,'&quot;')}" placeholder="Tip para el cliente..." class="fi-input it-mini-input" style="flex:1" id="${id}-v"><button type="button" onclick="document.getElementById('${id}').remove()" class="it-remove-btn">×</button>`;
   c.appendChild(div);
+}
+
+// ── AUTO-SLIDE TIME CALCULATIONS ──
+function timeToMinutes(t){if(!t)return 0;const[h,m]=t.split(':').map(Number);return h*60+m}
+function minutesToTime(m){const h=Math.floor(m/60),mi=m%60;const ampm=h>=12?'PM':'AM';const h12=h===0?12:h>12?h-12:h;return`${h12}:${String(mi).padStart(2,'0')} ${ampm}`}
+const dayUndoStates={};
+function saveDayState(dayN){
+  const rows=document.querySelectorAll(`#itday-${dayN}-acts .it-act-row`);
+  const state=[];
+  rows.forEach(r=>{const id=r.id;state.push({id,dur:document.getElementById(id+'-dur')?.value,buf:document.getElementById(id+'-buf')?.value})});
+  dayUndoStates[dayN]=state;
+}
+function recalcDayTimes(dayN){
+  saveDayState(dayN);
+  const dsEl=document.getElementById(`itday-${dayN}-daystart`);
+  const deEl=document.getElementById(`itday-${dayN}-dayend`);
+  const ddEl=document.getElementById(`itday-${dayN}-defdur`);
+  const dbEl=document.getElementById(`itday-${dayN}-defbuf`);
+  const dayStart=timeToMinutes(dsEl?.value||'08:00');
+  const dayEnd=timeToMinutes(deEl?.value||'22:00');
+  const defDur=parseInt(ddEl?.value||'60');
+  const defBuf=parseInt(dbEl?.value||'15');
+  const rows=document.querySelectorAll(`#itday-${dayN}-acts .it-act-row`);
+  let cursor=dayStart;
+  let overflow=false;
+  rows.forEach(r=>{
+    const id=r.id;
+    const durSel=document.getElementById(id+'-dur');
+    const bufInp=document.getElementById(id+'-buf');
+    const badge=document.getElementById(id+'-tb');
+    const dur=parseInt(durSel?.value||defDur);
+    const buf=bufInp?.value!==''?parseInt(bufInp.value):defBuf;
+    const start=cursor;
+    const end=start+dur;
+    if(badge)badge.textContent=`${minutesToTime(start)} - ${minutesToTime(end)}`;
+    cursor=end+buf;
+    if(end>dayEnd)overflow=true;
+  });
+  const warnEl=document.getElementById(`itday-${dayN}-warning`);
+  if(warnEl){
+    if(overflow)warnEl.innerHTML=`<div class="it-time-warning">⚠️ Actividades exceden la hora de fin del día (${minutesToTime(dayEnd)})</div>`;
+    else warnEl.innerHTML='';
+  }
+}
+function undoDayTimes(dayN){
+  const state=dayUndoStates[dayN];
+  if(!state)return;
+  state.forEach(s=>{
+    const durEl=document.getElementById(s.id+'-dur');
+    const bufEl=document.getElementById(s.id+'-buf');
+    if(durEl&&s.dur)durEl.value=s.dur;
+    if(bufEl)bufEl.value=s.buf||'';
+  });
+  // Recalc without saving (to avoid overwriting undo state)
+  const dsEl=document.getElementById(`itday-${dayN}-daystart`);
+  const deEl=document.getElementById(`itday-${dayN}-dayend`);
+  const ddEl=document.getElementById(`itday-${dayN}-defdur`);
+  const dbEl=document.getElementById(`itday-${dayN}-defbuf`);
+  const dayStart=timeToMinutes(dsEl?.value||'08:00');
+  const dayEnd=timeToMinutes(deEl?.value||'22:00');
+  const defDur=parseInt(ddEl?.value||'60');
+  const defBuf=parseInt(dbEl?.value||'15');
+  const rows=document.querySelectorAll(`#itday-${dayN}-acts .it-act-row`);
+  let cursor=dayStart;let overflow=false;
+  rows.forEach(r=>{
+    const id=r.id;const dur=parseInt(document.getElementById(id+'-dur')?.value||defDur);
+    const buf=document.getElementById(id+'-buf')?.value!==''?parseInt(document.getElementById(id+'-buf').value):defBuf;
+    const badge=document.getElementById(id+'-tb');
+    if(badge)badge.textContent=`${minutesToTime(cursor)} - ${minutesToTime(cursor+dur)}`;
+    cursor+=dur+buf;if(cursor-buf>dayEnd)overflow=true;
+  });
+  const warnEl=document.getElementById(`itday-${dayN}-warning`);
+  if(warnEl)warnEl.innerHTML=overflow?`<div class="it-time-warning">⚠️ Actividades exceden la hora de fin del día</div>`:'';
+}
+function onDayTypeChange(dayN){
+  const typeEl=document.getElementById(`itday-${dayN}-type`);
+  const parkEl=document.getElementById(`itday-${dayN}-park`);
+  const numEl=document.querySelector(`#itday-${dayN} .it-day-num`);
+  if(parkEl)parkEl.style.display=typeEl.value==='park'?'':'none';
+  if(numEl){numEl.className='it-day-num';if(typeEl.value)numEl.classList.add(typeEl.value)}
+}
+
+function duplicateItDay(dayN){
+  const orig=document.getElementById('itday-'+dayN);
+  if(!orig)return;
+  const title=document.getElementById(`itday-${dayN}-title`)?.value||'Nuevo día';
+  const icon=document.getElementById(`itday-${dayN}-icon`)?.value||'📍';
+  const type=document.getElementById(`itday-${dayN}-type`)?.value||'travel';
+  const park=document.getElementById(`itday-${dayN}-park`)?.value||'';
+  const dayStart=document.getElementById(`itday-${dayN}-daystart`)?.value||'08:00';
+  const dayEnd=document.getElementById(`itday-${dayN}-dayend`)?.value||'22:00';
+  const defDur=document.getElementById(`itday-${dayN}-defdur`)?.value||'60';
+  const defBuf=document.getElementById(`itday-${dayN}-defbuf`)?.value||'15';
+  const acts=[];
+  document.querySelectorAll(`#itday-${dayN}-acts .it-act-row`).forEach(r=>{
+    const id=r.id;
+    const d=document.getElementById(id+'-d')?.value||'';
+    const duration=document.getElementById(id+'-dur')?.value||'60';
+    const buffer=document.getElementById(id+'-buf')?.value||'';
+    acts.push({d,duration:parseInt(duration),buffer:buffer!==''?parseInt(buffer):undefined});
+  });
+  const tips=[];
+  document.querySelectorAll(`#itday-${dayN}-tips .it-tip-row`).forEach(r=>{
+    const inp=r.querySelector('input[type="text"]');
+    if(inp&&inp.value)tips.push(inp.value);
+  });
+  addItDay({title,icon,type,park,dayStart,dayEnd,defDur:parseInt(defDur),defBuf:parseInt(defBuf),acts,tips});
+  const newCard=document.getElementById('itday-'+itDayCount);
+  if(newCard&&orig)orig.after(newCard);
+  renumberDays();
+  if(newCard)newCard.classList.add('open');
+}
+
+function onParkChange(dayN){
+  const parkEl=document.getElementById(`itday-${dayN}-park`);
+  const parkKey=parkEl?.value;
+  if(!parkKey||!PARK_DEFAULT_ACTIVITIES[parkKey])return;
+  const parkData=PARK_DEFAULT_ACTIVITIES[parkKey];
+  const actsContainer=document.getElementById(`itday-${dayN}-acts`);
+  const hasActs=actsContainer&&actsContainer.children.length>0;
+  if(hasActs){
+    if(!confirm(`¿Reemplazar actividades con las default de ${parkData.title}?`))return;
+  }
+  actsContainer.innerHTML='';
+  parkData.acts.forEach(a=>addItActivity(dayN,'',a.d,a.duration));
+  document.getElementById(`itday-${dayN}-title`).value=parkData.title;
+  document.getElementById(`itday-${dayN}-icon`).value=parkData.icon;
+  const tipsContainer=document.getElementById(`itday-${dayN}-tips`);
+  if(tipsContainer&&tipsContainer.children.length===0&&parkData.tips){
+    parkData.tips.forEach(t=>addItTip(dayN,t));
+  }
+  recalcDayTimes(dayN);
+}
+
+function renumberDays(){
+  const days=document.querySelectorAll('#it-days-container .it-day-card');
+  days.forEach((card,idx)=>{
+    const num=idx+1;
+    const numEl=card.querySelector('.it-day-num');
+    if(numEl)numEl.innerHTML=`<span style="font-size:10px">DÍA</span><br>${num}`;
+  });
+  updateItDates();
+}
+function initDaySortable(){
+  const container=document.getElementById('it-days-container');
+  if(container&&typeof Sortable!=='undefined'){
+    new Sortable(container,{handle:'.it-day-drag-handle',ghostClass:'sortable-ghost',animation:150,onEnd:function(){renumberDays()}});
+  }
 }
 
 function updateItDates(){
@@ -2727,12 +3066,20 @@ function collectItData(){
     const title=document.getElementById(dayId+'-title')?.value||'Día '+(idx+1);
     const icon=document.getElementById(dayId+'-icon')?.value||'📍';
     const type=document.getElementById(dayId+'-type')?.value||'travel';
+    const dayStart=document.getElementById(dayId+'-daystart')?.value||'08:00';
+    const dayEnd=document.getElementById(dayId+'-dayend')?.value||'22:00';
+    const defDur=parseInt(document.getElementById(dayId+'-defdur')?.value||'60');
+    const defBuf=parseInt(document.getElementById(dayId+'-defbuf')?.value||'15');
+    const park=document.getElementById(dayId+'-park')?.value||'';
     const acts=[];
     card.querySelectorAll('#'+dayId+'-acts .it-act-row').forEach(ar=>{
       const aid=ar.id;
-      const t=document.getElementById(aid+'-t')?.value||'';
+      const tb=document.getElementById(aid+'-tb')?.textContent||'';
       const d=document.getElementById(aid+'-d')?.value||'';
-      if(d)acts.push({t,d});
+      const duration=parseInt(document.getElementById(aid+'-dur')?.value||defDur);
+      const bufVal=document.getElementById(aid+'-buf')?.value;
+      const buffer=bufVal!==''?parseInt(bufVal):undefined;
+      if(d)acts.push({t:tb,d,duration,buffer});
     });
     const tips=[];
     card.querySelectorAll('#'+dayId+'-tips .it-tip-row').forEach(tr=>{
@@ -2740,7 +3087,7 @@ function collectItData(){
       const val=document.getElementById(tid+'-v')?.value||'';
       if(val)tips.push(val);
     });
-    data.days.push({title,icon,type,acts,tips});
+    data.days.push({title,icon,type,acts,tips,dayStart,dayEnd,defDur,defBuf,park});
   });
   return data;
 }
@@ -2907,7 +3254,7 @@ function loadSavedIt(index){
   document.getElementById('it-docs-container').innerHTML='';
   if(d.docs)d.docs.forEach(doc=>addItDoc(doc.icon,doc.title,doc.desc));
   if(d.days)d.days.forEach(day=>{
-    addItDay({title:day.title,icon:day.icon||'📍',type:day.type||'free',acts:day.acts||[],tips:day.tips||[]});
+    addItDay({title:day.title,icon:day.icon||'📍',type:day.type||'free',acts:day.acts||[],tips:day.tips||[],dayStart:day.dayStart,dayEnd:day.dayEnd,defDur:day.defDur,defBuf:day.defBuf,park:day.park});
   });
   document.getElementById('it-form').scrollIntoView({behavior:'smooth',block:'start'});
   showToast('Itinerario cargado ✅');
@@ -3024,7 +3371,7 @@ const TIMELINE_CONFIG={
     {id:'seguro',label:'Seguro de viaje',icon:'🛡',offsetDays:-60,description:'Contrata tu seguro de viaje',category:'common'},
     {id:'pago-final',label:'Pago final del paquete',icon:'💳',offsetDays:-30,description:'Liquidar saldo pendiente',category:'payment'},
     {id:'park-res',label:'Park Reservations',icon:'🎟',offsetDays:-30,description:'Obligatorias además del boleto — reserva en My Disney Experience',category:'reservation'},
-    {id:'estrategia',label:'Llamada de estrategia con agente',icon:'📞',offsetDays:-14,description:'Repaso de planes, tips y últimos detalles',category:'planning'},
+    {id:'estrategia',label:'Sesión de asesoría / Q&A',icon:'📞',offsetDays:-14,description:'Repaso de planes, tips y últimos detalles',category:'planning'},
     {id:'checkin',label:'Check-in online en My Disney Experience',icon:'📱',offsetDays:-10,description:'Completa el check-in para agilizar tu llegada',category:'logistics'},
     {id:'magicband',label:'Configurar MagicBand+ / descargar app',icon:'⌚',offsetDays:-7,description:'My Disney Experience — configura tu MagicBand y vincula boletos',category:'logistics'},
     {id:'lightning',label:'Lightning Lane Multi Pass',icon:'⚡',offsetDays:-7,description:'Se activa 7 días antes para huéspedes Disney, 3 días para demás',category:'purchase',condition:'disneyResort'},
@@ -3038,7 +3385,7 @@ const TIMELINE_CONFIG={
     {id:'seguro',label:'Seguro de viaje',icon:'🛡',offsetDays:-60,description:'Contrata tu seguro de viaje',category:'common'},
     {id:'special-events',label:'Boletos de eventos especiales',icon:'🎃',offsetDays:-60,description:'Tu agente te confirmará fechas exactas de venta',category:'purchase',condition:'specialEvents'},
     {id:'pago-final',label:'Pago final del paquete',icon:'💳',offsetDays:-30,description:'Liquidar saldo pendiente',category:'payment'},
-    {id:'estrategia',label:'Llamada de estrategia',icon:'📞',offsetDays:-14,description:'Repaso de planes, tips y últimos detalles',category:'planning'},
+    {id:'estrategia',label:'Sesión de asesoría / Q&A',icon:'📞',offsetDays:-14,description:'Repaso de planes, tips y últimos detalles',category:'planning'},
     {id:'lightning',label:'Lightning Lane Premier Pass',icon:'⚡',offsetDays:-7,description:'Compra anticipada disponible',category:'purchase'},
     {id:'transporte',label:'Confirmar transporte',icon:'🚐',offsetDays:-7,description:'Verifica horarios y reservaciones de traslados',category:'logistics'},
     {id:'viaje',label:'Inicio del viaje ✈️',icon:'✈️',offsetDays:0,description:'¡Buen viaje!',category:'trip'}
@@ -3047,7 +3394,7 @@ const TIMELINE_CONFIG={
     {id:'docs',label:'Documentos de viaje',icon:'📄',offsetDays:-90,description:'Verifica que pasaportes y visas estén vigentes',category:'common'},
     {id:'seguro',label:'Seguro de viaje',icon:'🛡',offsetDays:-60,description:'Contrata tu seguro de viaje',category:'common'},
     {id:'pago-final',label:'Pago final del paquete',icon:'💳',offsetDays:-45,description:'Liquidar saldo pendiente',category:'payment'},
-    {id:'estrategia',label:'Llamada de estrategia / revisar Express Pass',icon:'📞',offsetDays:-14,description:'Repaso de planes y opciones de Express Pass',category:'planning'},
+    {id:'estrategia',label:'Sesión de asesoría / Q&A / revisar Express Pass',icon:'📞',offsetDays:-14,description:'Repaso de planes y opciones de Express Pass',category:'planning'},
     {id:'transporte',label:'Confirmar transporte',icon:'🚐',offsetDays:-7,description:'Verifica horarios y reservaciones de traslados',category:'logistics'},
     {id:'viaje',label:'Inicio del viaje ✈️',icon:'✈️',offsetDays:0,description:'¡Buen viaje!',category:'trip'}
   ],
@@ -3059,7 +3406,7 @@ const TIMELINE_CONFIG={
     {id:'docs',label:'Documentos de viaje (pasaporte)',icon:'📄',offsetDays:-60,description:'Verifica que pasaportes estén vigentes',category:'common'},
     {id:'seguro',label:'Seguro de viaje',icon:'🛡',offsetDays:-60,description:'Contrata tu seguro de viaje',category:'common'},
     {id:'checkin',label:'Check-in online',icon:'📱',offsetDays:-30,description:'Completa el check-in online del crucero',category:'logistics'},
-    {id:'estrategia',label:'Llamada de estrategia',icon:'📞',offsetDays:-14,description:'Repaso de planes, tips y últimos detalles',category:'planning'},
+    {id:'estrategia',label:'Sesión de asesoría / Q&A',icon:'📞',offsetDays:-14,description:'Repaso de planes, tips y últimos detalles',category:'planning'},
     {id:'equipaje',label:'Preparar equipaje',icon:'🧳',offsetDays:-5,description:'Ropa formal, bloqueador, medicamento para mareo',category:'logistics'},
     {id:'viaje',label:'Día de embarque 🚢',icon:'🚢',offsetDays:0,description:'¡Bon voyage!',category:'trip'}
   ],
@@ -3069,7 +3416,7 @@ const TIMELINE_CONFIG={
     {id:'seguro',label:'Seguro de viaje',icon:'🛡',offsetDays:-60,description:'Contrata tu seguro de viaje',category:'common'},
     {id:'planner',label:'Cruise Planner abre',icon:'🗓',offsetDays:-60,description:'Reserva excursiones, restaurantes y paquete de bebidas',category:'reservation'},
     {id:'checkin',label:'Check-in online / e-documents',icon:'📱',offsetDays:-45,description:'Completa el check-in y descarga documentos',category:'logistics'},
-    {id:'estrategia',label:'Llamada de estrategia',icon:'📞',offsetDays:-14,description:'Repaso de planes y últimos detalles',category:'planning'},
+    {id:'estrategia',label:'Sesión de asesoría / Q&A',icon:'📞',offsetDays:-14,description:'Repaso de planes y últimos detalles',category:'planning'},
     {id:'equipaje',label:'Preparar equipaje',icon:'🧳',offsetDays:-5,description:'Ropa formal, bloqueador, medicamento para mareo',category:'logistics'},
     {id:'viaje',label:'Día de embarque 🚢',icon:'🚢',offsetDays:0,description:'¡Bon voyage!',category:'trip'}
   ],
@@ -3079,7 +3426,7 @@ const TIMELINE_CONFIG={
     {id:'docs',label:'Documentos de viaje',icon:'📄',offsetDays:-60,description:'Verifica que pasaportes estén vigentes',category:'common'},
     {id:'seguro',label:'Seguro de viaje',icon:'🛡',offsetDays:-60,description:'Contrata tu seguro de viaje',category:'common'},
     {id:'checkin',label:'Check-in online',icon:'📱',offsetDays:-30,description:'Completa el check-in online',category:'logistics'},
-    {id:'estrategia',label:'Llamada de estrategia',icon:'📞',offsetDays:-14,description:'Repaso de planes y últimos detalles',category:'planning'},
+    {id:'estrategia',label:'Sesión de asesoría / Q&A',icon:'📞',offsetDays:-14,description:'Repaso de planes y últimos detalles',category:'planning'},
     {id:'equipaje',label:'Preparar equipaje',icon:'🧳',offsetDays:-5,description:'Ropa formal, bloqueador, medicamento para mareo',category:'logistics'},
     {id:'viaje',label:'Día de embarque 🚢',icon:'🚢',offsetDays:0,description:'¡Bon voyage!',category:'trip'}
   ],
@@ -3089,7 +3436,7 @@ const TIMELINE_CONFIG={
     {id:'seguro',label:'Seguro de viaje',icon:'🛡',offsetDays:-60,description:'Contrata tu seguro de viaje',category:'common'},
     {id:'actividades',label:'Reserva actividades / excursiones',icon:'🎭',offsetDays:-60,description:'Reserva actividades y excursiones en puertos',category:'reservation'},
     {id:'checkin',label:'Check-in online',icon:'📱',offsetDays:-30,description:'Completa el check-in online',category:'logistics'},
-    {id:'estrategia',label:'Llamada de estrategia',icon:'📞',offsetDays:-14,description:'Repaso de planes y últimos detalles',category:'planning'},
+    {id:'estrategia',label:'Sesión de asesoría / Q&A',icon:'📞',offsetDays:-14,description:'Repaso de planes y últimos detalles',category:'planning'},
     {id:'equipaje',label:'Preparar equipaje',icon:'🧳',offsetDays:-5,description:'Ropa formal, bloqueador, medicamento para mareo',category:'logistics'},
     {id:'viaje',label:'Día de embarque 🚢',icon:'🚢',offsetDays:0,description:'¡Bon voyage!',category:'trip'}
   ],
@@ -3099,7 +3446,7 @@ const TIMELINE_CONFIG={
     {id:'seguro',label:'Seguro de viaje',icon:'🛡',offsetDays:-60,description:'Contrata tu seguro de viaje',category:'common'},
     {id:'actividades',label:'Reserva actividades / excursiones',icon:'🎭',offsetDays:-60,description:'Reserva actividades y excursiones en puertos',category:'reservation'},
     {id:'checkin',label:'Check-in online',icon:'📱',offsetDays:-30,description:'Completa el check-in online',category:'logistics'},
-    {id:'estrategia',label:'Llamada de estrategia',icon:'📞',offsetDays:-14,description:'Repaso de planes y últimos detalles',category:'planning'},
+    {id:'estrategia',label:'Sesión de asesoría / Q&A',icon:'📞',offsetDays:-14,description:'Repaso de planes y últimos detalles',category:'planning'},
     {id:'equipaje',label:'Preparar equipaje',icon:'🧳',offsetDays:-5,description:'Ropa formal, bloqueador, medicamento para mareo',category:'logistics'},
     {id:'viaje',label:'Día de embarque 🚢',icon:'🚢',offsetDays:0,description:'¡Bon voyage!',category:'trip'}
   ],
@@ -3107,7 +3454,7 @@ const TIMELINE_CONFIG={
     {id:'docs',label:'Documentos de viaje',icon:'📄',offsetDays:-90,description:'Verifica que pasaportes y visas estén vigentes',category:'common'},
     {id:'seguro',label:'Seguro de viaje',icon:'🛡',offsetDays:-60,description:'Contrata tu seguro de viaje',category:'common'},
     {id:'pago-final',label:'Pago final del paquete',icon:'💳',offsetDays:-30,description:'Liquidar saldo pendiente',category:'payment'},
-    {id:'estrategia',label:'Llamada de estrategia',icon:'📞',offsetDays:-14,description:'Repaso de planes y últimos detalles',category:'planning'},
+    {id:'estrategia',label:'Sesión de asesoría / Q&A',icon:'📞',offsetDays:-14,description:'Repaso de planes y últimos detalles',category:'planning'},
     {id:'transporte',label:'Confirmar transporte',icon:'🚐',offsetDays:-7,description:'Verifica horarios y reservaciones de traslados',category:'logistics'},
     {id:'viaje',label:'Inicio del viaje ✈️',icon:'✈️',offsetDays:0,description:'¡Buen viaje!',category:'trip'}
   ]
@@ -3380,7 +3727,7 @@ function deleteSavedTL(index){
 }
 
 // Initialize saved list on load
-document.addEventListener('DOMContentLoaded',async ()=>{document.documentElement.style.setProperty('--brand-pattern','url('+BRAND_PATTERN_B64+')');await loadCotizacionData();renderSavedList();renderTLSavedList();});
+document.addEventListener('DOMContentLoaded',async ()=>{document.documentElement.style.setProperty('--brand-pattern','url('+BRAND_PATTERN_B64+')');await loadCotizacionData();renderSavedList();renderTLSavedList();initDaySortable();});
 </script>
 </body>
 </html>
